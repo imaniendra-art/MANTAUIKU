@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { LogIn, User, Lock, ArrowRight } from "lucide-react";
+import { AlertCircle, Lock, User } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -33,88 +33,105 @@ export default function LoginForm() {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="relative w-full max-w-md p-8 rounded-3xl backdrop-blur-2xl bg-white/10 border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] overflow-hidden"
-    >
-      {/* Decorative gradient blob inside the card */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/30 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col items-center mb-8">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-400 to-blue-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-4">
-          <LogIn className="w-8 h-8 text-white" />
-        </div>
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-100 to-white">
-          MANTAU IKU
-        </h1>
-        <p className="text-emerald-100/70 text-sm mt-2 font-medium tracking-wide">
-          Sistem Manajemen Indikator Kinerja Utama
-        </p>
+    <div className="w-full bg-white/60 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(15,59,119,0.15)] rounded-[2rem] p-10 border border-white/50 relative overflow-hidden">
+      
+      {/* Subtle decorative glow inside the card */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 rounded-[2rem]">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/60 rounded-full blur-2xl"></div>
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
       </div>
 
-      <form onSubmit={handleSubmit} className="relative z-10 space-y-5">
+      <div className="flex flex-col items-center">
+        <div className="flex items-center justify-center gap-6 mb-2">
+          <Image 
+            src="/logo_stimi.png" 
+            alt="Logo STIMI" 
+            width={65} 
+            height={65}
+            className="object-contain drop-shadow-md"
+          />
+          <div className="w-px h-12 bg-gray-400 hidden sm:block"></div>
+          {/* IKU Placeholder Icon until custom logo */}
+          <div className="flex items-center justify-center w-[65px] h-[65px] bg-gradient-to-tr from-emerald-600 to-emerald-500 rounded-2xl shadow-lg shadow-emerald-500/20">
+            <span className="text-white font-black text-2xl tracking-tighter">IKU</span>
+          </div>
+        </div>
+        <h2 className="mt-6 text-center text-2xl font-extrabold tracking-tight text-gray-900 drop-shadow-sm">
+          Masuk ke MANTAU IKU
+        </h2>
+        <p className="mt-2 text-center text-sm font-medium text-gray-700">
+          Sistem Manajemen Indikator Kinerja Utama <br/> STIMI YAPMI Makassar
+        </p>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-100 text-sm p-3 rounded-xl backdrop-blur-md">
-            {error}
+          <div className="rounded-2xl bg-red-50/90 p-4 border border-red-200 flex items-center gap-3 backdrop-blur-sm">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+            <p className="text-sm font-medium text-red-800">{error}</p>
           </div>
         )}
 
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-white/80 ml-1">Email / ID Pengguna</label>
+        <div className="space-y-4">
           <div className="relative group">
+            <label htmlFor="email" className="sr-only">Email / ID Pengguna</label>
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <User className="w-5 h-5 text-white/50 group-focus-within:text-emerald-400 transition-colors" />
+              <User className="h-5 w-5 text-gray-500 group-focus-within:text-emerald-600 transition-colors" />
             </div>
             <input
+              id="email"
+              name="email"
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 bg-black/20 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent transition-all backdrop-blur-md"
-              placeholder="admin@stimi-yapmi.ac.id"
               required
+              className="block w-full rounded-2xl border-0 py-3.5 pl-11 pr-4 text-gray-900 bg-white/70 ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-emerald-600 focus:bg-white transition-all sm:text-sm sm:leading-6 backdrop-blur-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"
+              placeholder="Email / ID Pengguna"
             />
           </div>
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-white/80 ml-1">Kata Sandi</label>
+          
           <div className="relative group">
+            <label htmlFor="password" className="sr-only">Kata Sandi</label>
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Lock className="w-5 h-5 text-white/50 group-focus-within:text-emerald-400 transition-colors" />
+              <Lock className="h-5 w-5 text-gray-500 group-focus-within:text-emerald-600 transition-colors" />
             </div>
             <input
+              id="password"
+              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 bg-black/20 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent transition-all backdrop-blur-md"
-              placeholder="••••••••"
               required
+              className="block w-full rounded-2xl border-0 py-3.5 pl-11 pr-4 text-gray-900 bg-white/70 ring-1 ring-inset ring-gray-300 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-emerald-600 focus:bg-white transition-all sm:text-sm sm:leading-6 backdrop-blur-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"
+              placeholder="Kata Sandi"
             />
           </div>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="relative w-full group overflow-hidden rounded-xl p-[1px] mt-4"
-        >
-          <span className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-blue-500 opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="relative flex items-center justify-center gap-2 bg-black/20 backdrop-blur-sm px-4 py-3.5 rounded-xl transition-all duration-300 group-hover:bg-transparent">
-            <span className="font-semibold text-white tracking-wide">
-              {loading ? "Memverifikasi..." : "Masuk Sistem"}
-            </span>
-            {!loading && <ArrowRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />}
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center">
+            <input
+              id="remember-me"
+              name="remember-me"
+              type="checkbox"
+              className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-600"
+            />
+            <label htmlFor="remember-me" className="ml-2 block text-sm font-medium text-gray-800 cursor-pointer">
+              Ingat saya
+            </label>
           </div>
-        </button>
-      </form>
+        </div>
 
-      <div className="relative z-10 mt-8 text-center text-xs text-white/50">
-        <p>© 2026 STIMI YAPMI Makassar.</p>
-        <p>Akses terbatas hanya untuk entitas internal kampus.</p>
-      </div>
-    </motion.div>
+        <div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="group relative flex w-full justify-center rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-bold text-white hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 transition-all shadow-[0_4px_14px_0_rgba(5,150,105,0.39)] hover:shadow-[0_6px_20px_rgba(5,150,105,0.23)] hover:-translate-y-[1px] disabled:opacity-70 disabled:hover:translate-y-0"
+          >
+            {loading ? "Sedang memverifikasi..." : "Masuk ke Dashboard"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
