@@ -14,13 +14,17 @@ export async function createUserAction(formData: FormData) {
   await connectDB();
 
   const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
+  const email = (formData.get("email") as string).toLowerCase().trim();
   const unitName = formData.get("unitName") as string;
+  const unitCode = (formData.get("unitCode") as string) || "UNIT";
   const phone = formData.get("phone") as string;
   const password = formData.get("password") as string;
+  const role = (formData.get("role") as string) || "UNIT_KERJA";
+  const assignedIKUCodesRaw = formData.get("assignedIKUCodes") as string;
+  const assignedIKUCodes = assignedIKUCodesRaw ? assignedIKUCodesRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
 
   const existingUser = await User.findOne({ email });
-  if (existingUser) throw new Error("Email already exists");
+  if (existingUser) throw new Error("Email sudah terdaftar");
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -28,8 +32,10 @@ export async function createUserAction(formData: FormData) {
     name,
     email,
     password: hashedPassword,
-    role: "Unit Kerja",
+    role: role === "PIMPINAN" ? "PIMPINAN" : "UNIT_KERJA",
+    unitCode,
     unitName,
+    assignedIKUCodes,
     phone
   });
 

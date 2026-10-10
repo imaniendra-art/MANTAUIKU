@@ -19,8 +19,19 @@ export default async function UsersPage() {
 
   await connectDB();
   
+  interface UserDoc {
+    _id: { toString(): string };
+    name: string;
+    email: string;
+    role: string;
+    unitCode?: string;
+    unitName?: string;
+    assignedIKUCodes?: string[];
+  }
+
   const usersRaw = await User.find({}).sort({ role: 1, name: 1 }).lean();
-  const users = usersRaw.map((u: any) => ({
+
+  const users = (usersRaw as unknown as UserDoc[]).map((u) => ({
     ...u,
     _id: u._id.toString(),
     // Exclude password

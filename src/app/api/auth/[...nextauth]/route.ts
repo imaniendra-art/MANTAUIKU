@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
 
         await connectToDatabase();
 
-        const user = await User.findOne({ email: credentials.email });
+        const user = await User.findOne({ email: credentials.email.toLowerCase() });
 
         if (!user) {
           throw new Error("Email tidak terdaftar");
@@ -36,7 +36,9 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           email: user.email,
           role: user.role,
+          unitCode: user.unitCode,
           unitName: user.unitName,
+          assignedIKUCodes: user.assignedIKUCodes || [],
         };
       }
     })
@@ -46,7 +48,9 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.unitCode = user.unitCode;
         token.unitName = user.unitName;
+        token.assignedIKUCodes = user.assignedIKUCodes;
       }
       return token;
     },
@@ -54,7 +58,9 @@ export const authOptions: NextAuthOptions = {
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as string;
+        session.user.unitCode = token.unitCode as string;
         session.user.unitName = token.unitName as string;
+        session.user.assignedIKUCodes = (token.assignedIKUCodes as string[]) || [];
       }
       return session;
     }

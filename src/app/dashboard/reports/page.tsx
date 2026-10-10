@@ -1,18 +1,18 @@
 "use client";
 
-import { Download, FolderArchive, ArrowLeft } from "lucide-react";
+import { Download, FolderArchive } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ReportsPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 bg-white rounded-2xl border border-gray-200 flex items-center justify-center shadow-sm">
-          <FolderArchive className="w-6 h-6 text-emerald-600" />
+        <div className="w-12 h-12 bg-white rounded-2xl border border-slate-200 flex items-center justify-center shadow-xs">
+          <FolderArchive className="w-6 h-6 text-sky-600" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Arsip Laporan Kinerja</h2>
-          <p className="text-gray-500 mt-0.5">Riwayat pelaporan capaian kinerja triwulan dan dokumentasi bukti dukung.</p>
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Arsip Laporan Kinerja</h2>
+          <p className="text-xs md:text-sm text-slate-500 mt-0.5">Riwayat pelaporan capaian kinerja triwulan dan dokumentasi bukti dukung.</p>
         </div>
       </div>
 
@@ -22,18 +22,18 @@ export default function ReportsPage() {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden"
+          className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden"
         >
-          <h3 className="font-bold text-gray-800 text-lg mb-2">Archival Integrity Info</h3>
-          <p className="text-sm text-gray-600 mb-6">
-            Setiap arsip berisi Ringkasan Capaian (CSV) dan seluruh File Bukti Dukung digital yang telah dibundel menjadi satu paket ZIP.
+          <h3 className="font-bold text-slate-900 text-base mb-2">Integritas Dokumen Arsip</h3>
+          <p className="text-xs text-slate-600 mb-6 leading-relaxed">
+            Setiap arsip berisi Ringkasan Capaian (CSV/Excel) dan tautan bukti dukung digital yang divalidasi oleh Lembaga Penjaminan Mutu (LPM).
           </p>
-          <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex flex-col items-center text-center">
-            <Download className="w-6 h-6 text-emerald-600 mb-2" />
-            <span className="font-semibold text-emerald-800 text-sm">Rekap Target Tahunan</span>
-            <p className="text-xs text-emerald-600/80 mt-1 mb-3">Unduh rekapitulasi target beserta justifikasi.</p>
-            <button className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-2 rounded-xl text-sm font-semibold transition-colors">
-              Target 2026
+          <div className="bg-sky-50/70 border border-sky-100 p-5 rounded-2xl flex flex-col items-center text-center">
+            <Download className="w-6 h-6 text-sky-600 mb-2" />
+            <span className="font-bold text-sky-900 text-sm">Rekapitulasi Target & IKU</span>
+            <p className="text-xs text-sky-700/80 mt-1 mb-3">Unduh data target tahunan beserta narasi justifikasi.</p>
+            <button className="bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm shadow-sky-600/20">
+              Unduh Target Tahun 2026
             </button>
           </div>
         </motion.div>
@@ -42,36 +42,36 @@ export default function ReportsPage() {
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm"
+          className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs"
         >
-          <h3 className="font-bold text-gray-800 text-lg mb-4">Reports Log</h3>
+          <h3 className="font-bold text-slate-900 text-base mb-4">Log Pelaporan Kinerja Triwulan</h3>
           
-          <div className="space-y-4">
-            <div className="border border-gray-200 rounded-2xl p-4 hover:border-emerald-300 transition-colors cursor-pointer group">
-              <div className="flex justify-between items-center mb-3">
-                <h4 className="font-bold text-gray-800">Triwulan 01</h4>
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-lg">Synchronized</span>
+          <div className="space-y-3.5">
+            <div className="border border-slate-200 rounded-2xl p-4 hover:border-sky-300 transition-colors cursor-pointer group bg-slate-50/30">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-bold text-slate-900 text-sm">Triwulan 01 (TW 1)</h4>
+                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold rounded-full">Tervalidasi</span>
               </div>
-              <div className="flex justify-between items-center text-sm text-gray-500">
-                <span>17 IKU</span>
-                <span>29 Mar 2026</span>
+              <div className="flex justify-between items-center text-xs text-slate-500">
+                <span>12 Indikator Kinerja</span>
+                <span>Maret 2026</span>
               </div>
-              <button className="mt-4 w-full bg-gray-100 group-hover:bg-emerald-50 text-gray-700 group-hover:text-emerald-700 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
-                <FolderArchive className="w-4 h-4" /> ZIP (PDF + Bukti)
+              <button className="mt-3 w-full bg-white border border-slate-200 group-hover:border-sky-300 group-hover:bg-sky-50 text-slate-700 group-hover:text-sky-700 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs">
+                <FolderArchive className="w-3.5 h-3.5" /> Ekspor Rekapitulasi (PDF / Excel)
               </button>
             </div>
             
-            <div className="border border-gray-200 rounded-2xl p-4 hover:border-emerald-300 transition-colors cursor-pointer group">
-              <div className="flex justify-between items-center mb-3">
-                <h4 className="font-bold text-gray-800">Triwulan 02</h4>
-                <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-lg">Submitted</span>
+            <div className="border border-slate-200 rounded-2xl p-4 hover:border-sky-300 transition-colors cursor-pointer group bg-slate-50/30">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-bold text-slate-900 text-sm">Triwulan 02 (TW 2)</h4>
+                <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold rounded-full">Proses Input</span>
               </div>
-              <div className="flex justify-between items-center text-sm text-gray-500">
-                <span>17 IKU</span>
-                <span>29 Jul 2026</span>
+              <div className="flex justify-between items-center text-xs text-slate-500">
+                <span>12 Indikator Kinerja</span>
+                <span>Juli 2026</span>
               </div>
-              <button className="mt-4 w-full bg-gray-100 group-hover:bg-emerald-50 text-gray-700 group-hover:text-emerald-700 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2">
-                <FolderArchive className="w-4 h-4" /> ZIP (PDF + Bukti)
+              <button className="mt-3 w-full bg-white border border-slate-200 group-hover:border-sky-300 group-hover:bg-sky-50 text-slate-700 group-hover:text-sky-700 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs">
+                <FolderArchive className="w-3.5 h-3.5" /> Ekspor Rekapitulasi (PDF / Excel)
               </button>
             </div>
           </div>

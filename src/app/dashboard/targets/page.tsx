@@ -23,9 +23,24 @@ export default async function TargetsPage() {
     .populate({ path: 'ikuId', model: IKUMetadata })
     .lean();
 
+  interface PopulatedTarget {
+    _id: { toString(): string };
+    year: number;
+    baseline: number;
+    target: number;
+    status?: string;
+    justificationNarrative?: string;
+    ikuId: {
+      _id: { toString(): string };
+      code: string;
+      name: string;
+      unit: string;
+    };
+  }
+
   // Map to clean JSON-serializable array and sort by IKU code
-  const targets = targetsRaw
-    .map((t: any) => ({
+  const targets = (targetsRaw as unknown as PopulatedTarget[])
+    .map((t) => ({
       ...t,
       _id: t._id.toString(),
       ikuId: t.ikuId._id.toString(),

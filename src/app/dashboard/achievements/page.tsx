@@ -1,112 +1,475 @@
 "use client";
 
-import { CheckCircle, Clock, FileText, Lock, PlusCircle } from "lucide-react";
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
+import { 
+  CheckCircle, 
+  Clock, 
+  FileText, 
+  ExternalLink, 
+  Edit3, 
+  X, 
+  TrendingUp,
+  Search
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface IKUItem {
+  _id: string;
+  code: string;
+  name: string;
+  category: string;
+  cluster: string;
+  unit: string;
+  type: string;
+  target: number;
+  baseline: number;
+  achievement: {
+    _id: string;
+    value: number;
+    documentUrl: string;
+    status: string;
+    submittedBy?: {
+      name: string;
+      unitName?: string;
+    };
+    updatedAt?: string;
+  } | null;
+}
 
 export default function AchievementsPage() {
-  const [activeTab, setActiveTab] = useState("tw1");
+  const { data: session } = useSession();
+  const [activeQuarter, setActiveQuarter] = useState<number>(1);
+  const [items, setItems] = useState<IKUItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedIKU, setSelectedIKU] = useState<IKUItem | null>(null);
+  const [formValue, setFormValue] = useState<string>("");
+  const [formDocUrl, setFormDocUrl] = useState<string>("");
+  const [submitting, setSubmitting] = useState(false);
+  const [formMessage, setFormMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const userRole = session?.user?.role;
+  const isLPM = userRole === "LPM";
+
+  const fetchAchievements = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/achievements?quarter=${activeQuarter}`);
+      const data = await res.json();
+      if (data.success && data.data) {
+        setItems(data.data);
+      }
+    } catch (e) {
+      console.error("Error fetching achievements:", e);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeQuarter]);
+
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      try {
+        const res = await fetch(`/api/achievements?quarter=${activeQuarter}`);
+        const data = await res.json();
+        if (!ignore && data.success && data.data) {
+          setItems(data.data);
+        }
+      } catch (e) {
+        console.error("Error fetching achievements:", e);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      ignore = true;
+    };
+  }, [activeQuarter]);
+
+  const handleOpenModal = (item: IKUItem) => {
+    setSelectedIKU(item);
+    setFormValue(item.achievement ? String(item.achievement.value) : "");
+    setFormDocUrl(item.achievement?.documentUrl || "");
+    setFormMessage(null);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveAchievement = async (status: "Draf" | "pendingDiajukan") => {
+    if (!selectedIKU) return;
+    setSubmitting(true);
+    setFormMessage(null);
+
+    try {
+      const res = await fetch("/api/achievements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ikuId: selectedIKU._id,
+          year: 2026,
+          quarter: activeQuarter,
+          value: parseFloat(formValue) || 0,
+          documentUrl: formDocUrl,
+          status,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFormMessage({ type: "success", text: "Capaian berhasil disimpan!" });
+        setTimeout(() => {
+          setIsModalOpen(false);
+          fetchAchievements();
+        }, 1000);
+      } else {
+        setFormMessage({ type: "error", text: data.error || "Gagal menyimpan capaian" });
+      }
+    } catch (err: unknown) {
+      const e = err as Error;
+      setFormMessage({ type: "error", text: e.message || "Terjadi kesalahan sistem" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleValidateStatus = async (achievementId: string, status: string) => {
+    try {
+      const res = await fetch("/api/achievements/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ achievementId, status }),
+      });
+      if (res.ok) {
+        fetchAchievements();
+      }
+    } catch (e) {
+      console.error("Failed to validate:", e);
+    }
+  };
+
+  const filteredItems = items.filter((item) => 
+    item.code.toLowerCase().includes(search.toLowerCase()) ||
+    item.name.toLowerCase().includes(search.toLowerCase()) ||
+    item.cluster.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalReported = items.filter((i) => i.achievement !== null).length;
+  const totalApproved = items.filter((i) => i.achievement?.status === "Disetujui").length;
+  const totalPending = items.filter((i) => i.achievement?.status === "pendingDiajukan").length;
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-end">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Pelaporan Capaian Kinerja</h2>
-          <p className="text-gray-500 mt-1">Pantau dan lengkapi pelaporan realisasi IKU secara bertahap.</p>
+          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            Pelaporan Capaian Kinerja (Triwulan {activeQuarter})
+          </h2>
+          <p className="text-xs md:text-sm text-slate-500 mt-1">
+            {isLPM 
+              ? "Evaluasi dan validasi dokumen capaian 12 IKU yang dilaporkan unit kerja."
+              : `Input realisasi capaian dan lampirkan tautan bukti dukung untuk indikator Anda.`}
+          </p>
+        </div>
+
+        {/* Quarter Selectors */}
+        <div className="inline-flex rounded-2xl bg-white p-1.5 border border-slate-200/80 shadow-xs">
+          {[1, 2, 3, 4].map((tw) => (
+            <button
+              key={tw}
+              onClick={() => setActiveQuarter(tw)}
+              className={`px-4 py-2 rounded-xl font-bold text-xs transition-all ${
+                activeQuarter === tw 
+                  ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white shadow-sm" 
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+              }`}
+            >
+              Triwulan {tw}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Metric Badges */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-500 font-medium">Total IKU</span>
-            <FileText className="w-5 h-5 text-blue-500" />
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs font-semibold text-slate-400 uppercase">Tanggung Jawab IKU</span>
+            <FileText className="w-5 h-5 text-sky-600" />
           </div>
-          <span className="text-2xl font-bold text-gray-800">17</span>
+          <span className="text-2xl font-black text-slate-900">{items.length}</span>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-500 font-medium">Dilaporkan</span>
-            <CheckCircle className="w-5 h-5 text-emerald-500" />
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs font-semibold text-slate-400 uppercase">Sudah Diisi</span>
+            <TrendingUp className="w-5 h-5 text-cyan-600" />
           </div>
-          <span className="text-2xl font-bold text-gray-800">17</span>
+          <span className="text-2xl font-black text-slate-900">{totalReported}</span>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-500 font-medium">Diajukan</span>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs font-semibold text-slate-400 uppercase">Menunggu Validasi</span>
             <Clock className="w-5 h-5 text-amber-500" />
           </div>
-          <span className="text-2xl font-bold text-gray-800">1</span>
+          <span className="text-2xl font-black text-amber-600">{totalPending}</span>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-500 font-medium">Valid</span>
-            <CheckCircle className="w-5 h-5 text-indigo-500" />
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs font-semibold text-slate-400 uppercase">Tervalidasi LPM</span>
+            <CheckCircle className="w-5 h-5 text-emerald-600" />
           </div>
-          <span className="text-2xl font-bold text-gray-800">0</span>
+          <span className="text-2xl font-black text-emerald-600">{totalApproved}</span>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex space-x-2 bg-gray-200/50 p-1 rounded-xl w-fit">
-        {["tw1", "tw2", "tw3", "tw4"].map((tw) => (
-          <button
-            key={tw}
-            onClick={() => setActiveTab(tw)}
-            className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
-              activeTab === tw 
-                ? "bg-white text-emerald-700 shadow-sm" 
-                : "text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            Triwulan {tw.replace("tw", "")}
-          </button>
-        ))}
+      {/* Main Table Card */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+        {/* Table Toolbar */}
+        <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-3 bg-slate-50/50">
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input 
+              type="text"
+              placeholder="Cari kode atau nama IKU..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+            />
+          </div>
+
+          <span className="text-xs font-semibold text-slate-500">
+            Menampilkan {filteredItems.length} indikator kerja
+          </span>
+        </div>
+
+        {/* Table Content */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200/80">
+              <tr>
+                <th className="py-3.5 px-5">KODE & INDIKATOR</th>
+                <th className="py-3.5 px-4">KLASTER</th>
+                <th className="py-3.5 px-4 text-center">TARGET 2026</th>
+                <th className="py-3.5 px-4 text-center">REALISASI TW {activeQuarter}</th>
+                <th className="py-3.5 px-4">BUKTI DUKUNG</th>
+                <th className="py-3.5 px-4 text-center">STATUS</th>
+                <th className="py-3.5 px-5 text-right">AKSI</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-slate-400">
+                    Memuat data indikator capaian...
+                  </td>
+                </tr>
+              ) : filteredItems.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-slate-400">
+                    Tidak ada indikator yang cocok dengan pencarian atau akun Anda.
+                  </td>
+                </tr>
+              ) : (
+                filteredItems.map((item) => {
+                  const ach = item.achievement;
+                  const isDone = ach?.status === "Disetujui";
+                  const isPending = ach?.status === "pendingDiajukan";
+
+                  return (
+                    <tr key={item._id} className="hover:bg-sky-50/30 transition-colors">
+                      <td className="py-4 px-5 max-w-sm">
+                        <span className="inline-block px-2 py-0.5 rounded text-[11px] font-extrabold bg-sky-100 text-sky-800 mb-1">
+                          {item.code}
+                        </span>
+                        <p className="font-semibold text-slate-900 leading-snug line-clamp-2">
+                          {item.name}
+                        </p>
+                      </td>
+
+                      <td className="py-4 px-4 whitespace-nowrap text-slate-500">
+                        {item.cluster}
+                      </td>
+
+                      <td className="py-4 px-4 text-center whitespace-nowrap font-bold text-slate-700">
+                        {item.target} {item.unit}
+                      </td>
+
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
+                        {ach ? (
+                          <span className="font-black text-sky-700 text-sm">
+                            {ach.value} {item.unit}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 italic font-normal">Belum diisi</span>
+                        )}
+                      </td>
+
+                      <td className="py-4 px-4 max-w-[160px] truncate">
+                        {ach?.documentUrl ? (
+                          <a
+                            href={ach.documentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-800 font-bold hover:underline"
+                          >
+                            <span>Lihat Bukti</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        ) : (
+                          <span className="text-slate-300 italic">Tanpa dokumen</span>
+                        )}
+                      </td>
+
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
+                        {ach ? (
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+                            isDone ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                            isPending ? "bg-amber-50 text-amber-700 border-amber-200" :
+                            "bg-slate-100 text-slate-600 border-slate-200"
+                          }`}>
+                            {isDone ? "Disetujui" : isPending ? "Diajukan" : "Draf"}
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400">
+                            Kosong
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-4 px-5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-2">
+                          {/* Unit Kerja Edit Button */}
+                          <button
+                            onClick={() => handleOpenModal(item)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 font-bold transition-colors"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>{ach ? "Ubah" : "Isi"}</span>
+                          </button>
+
+                          {/* LPM Approve/Reject Buttons */}
+                          {isLPM && ach && (
+                            <button
+                              onClick={() => handleValidateStatus(ach._id, "Disetujui")}
+                              title="Setujui Capaian"
+                              className="p-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Content Area */}
-      <motion.div 
-        key={activeTab}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8"
-      >
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-6 mb-6 gap-4">
-          <div>
-            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              Triwulan {activeTab.replace("tw", "")} 
-              {activeTab === "tw1" && <span className="px-2 py-0.5 bg-gray-100 border border-gray-200 text-gray-600 text-xs rounded-md flex items-center gap-1"><Lock className="w-3 h-3"/> Dikunci</span>}
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">Periode pelaporan capaian kuartal ini.</p>
-          </div>
-          
-          <div className="flex gap-3">
-            <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 flex items-center gap-3">
-              <div className="w-full bg-gray-200 rounded-full h-2 w-24">
-                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: "0%" }}></div>
+      {/* Input / Edit Modal */}
+      <AnimatePresence>
+        {isModalOpen && selectedIKU && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 relative overflow-hidden"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-sky-100 text-sky-800">
+                    {selectedIKU.code} • Triwulan {activeQuarter}
+                  </span>
+                  <h3 className="text-base font-bold text-slate-900 mt-1">
+                    Input Realisasi Capaian
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <span className="text-xs font-semibold text-gray-600">0%</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Empty State / Table */}
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-            <FileText className="w-8 h-8 text-gray-400" />
-          </div>
-          <h4 className="text-gray-800 font-bold text-lg">Belum Ada Data Dukung Terkumpul</h4>
-          <p className="text-gray-500 text-sm mt-2 max-w-md">
-            Unit kerja belum mengunggah dokumen capaian untuk Triwulan ini.
-          </p>
-          <button className="mt-6 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors shadow-sm shadow-emerald-600/30">
-            <PlusCircle className="w-5 h-5" />
-            Input Realisasi Baru
-          </button>
-        </div>
+              <p className="text-xs text-slate-500 mb-5 line-clamp-2">
+                {selectedIKU.name}
+              </p>
 
-      </motion.div>
+              {formMessage && (
+                <div className={`p-3 rounded-xl mb-4 text-xs font-semibold ${
+                  formMessage.type === "success" 
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200" 
+                    : "bg-rose-50 text-rose-800 border border-rose-200"
+                }`}>
+                  {formMessage.text}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Nilai Realisasi ({selectedIKU.unit})
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={formValue}
+                    onChange={(e) => setFormValue(e.target.value)}
+                    placeholder={`Contoh: 85 (${selectedIKU.unit})`}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-semibold"
+                  />
+                  <span className="text-[11px] text-slate-400 mt-1 block">
+                    Target Tahunan: {selectedIKU.target} {selectedIKU.unit}
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Tautan Bukti Dukung (Google Drive / SK / Surat)
+                  </label>
+                  <input
+                    type="url"
+                    value={formDocUrl}
+                    onChange={(e) => setFormDocUrl(e.target.value)}
+                    placeholder="https://drive.google.com/..."
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => handleSaveAchievement("Draf")}
+                  className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                >
+                  Simpan Draf
+                </button>
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => handleSaveAchievement("pendingDiajukan")}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white text-xs font-bold shadow-md shadow-sky-600/25 transition-all"
+                >
+                  {submitting ? "Menyimpan..." : "Ajukan ke LPM"}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

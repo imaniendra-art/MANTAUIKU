@@ -19,7 +19,7 @@ export default async function ProfilePage() {
 
   await connectDB();
   
-  let profileRaw = await Profile.findOne().lean();
+  const profileRaw = await Profile.findOne().lean();
   let profile = null;
   
   if (profileRaw) {
