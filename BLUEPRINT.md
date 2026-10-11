@@ -87,7 +87,9 @@ Sistem menyaring 12 Indikator Kinerja Utama ke dalam 4 Klaster Tematik:
    - Metrik otomatis: Total Indikator, Capaian Dilaporkan, Menunggu Validasi, Tervalidasi.
    - Perhitungan progres klaster riil dan antrean aktivitas validasi terbaru.
    - Bar interaktif perbandingan target vs realisasi dengan hover tooltip rinci.
-4. **Fase 4 (Berikutnya)**: Pengayaan Visualisasi Multi-Chart Lanjutan & Generator Ekspor Laporan:
-   - Visualisasi komparatif multi-indikator.
-   - Ekspor rekapitulasi capaian dan target kinerja ke format Excel (.xlsx / .csv) dan cetak laporan di `/dashboard/reports`.
+4. **Fase 4 (Selesai)**: Pengayaan Visualisasi Multi-Chart Lanjutan & Generator Ekspor Laporan:
+   - Matriks Komparasi Capaian Sepanjang Tahun (TW 1 s/d TW 4 vs Target Tahunan) ala Dashboard UNJA.
+   - Endpoint `/api/reports/export` untuk unduh otomatis format Microsoft Excel (.CSV dengan UTF-8 BOM).
+   - Unduh Rekapitulasi Target & Narasi Justifikasi Tahun 2026.
+   - Modal Pratinjau Dokumen Cetak / PDF resmi berkop surat STIMI YAPMI Makassar lengkap dengan lembar pengesahan tanda tangan Ketua LPM dan Pimpinan Institusi.
 
