@@ -20,6 +20,8 @@ import {
   AlertCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
+import PPEPPSycle from "@/components/public/PPEPPSycle";
+import EarlyWarningSystem from "@/components/public/EarlyWarningSystem";
 
 export default function HomePage() {
   return (
@@ -55,11 +57,14 @@ export default function HomePage() {
             <Link href="#beranda" className="text-sky-700 hover:text-sky-800 transition-colors">
               Beranda
             </Link>
-            <Link href="#iku" className="hover:text-sky-700 transition-colors">
-              12 Indikator Kinerja
-            </Link>
             <Link href="#ppepp" className="hover:text-sky-700 transition-colors">
               Siklus PPEPP SPMI
+            </Link>
+            <Link href="#deteksi" className="hover:text-sky-700 transition-colors">
+              Deteksi Dini (RAG)
+            </Link>
+            <Link href="#iku" className="hover:text-sky-700 transition-colors">
+              12 Indikator Kinerja
             </Link>
             <Link href="#dokumen" className="hover:text-sky-700 transition-colors">
               Dokumen Mutu
@@ -218,38 +223,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. Placeholder Section untuk Fase 2: Siklus PPEPP */}
-      <section id="ppepp" className="py-16 bg-white border-y border-slate-200/70">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
-          <div className="max-w-2xl mx-auto space-y-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-100">
-              Standar Permendiktisaintek No. 39/2025
+      {/* 4. Section Fase 2: Siklus PPEPP SPMI Interaktif */}
+      <section id="ppepp" className="py-20 bg-white border-y border-slate-200/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-100">
+              Permendiktisaintek No. 39/2025 jo. No. 10/2026 & SAN Dikti BAN-PT
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
               Siklus PPEPP Penjaminan Mutu Internal
             </h2>
-            <p className="text-xs text-slate-500">
-              Siklus berkesinambungan yang memastikan mutu pendidikan tinggi STIMI YAPMI Makassar terus meningkat secara berkelanjutan (*Continuous Quality Improvement*).
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Klik setiap tahapan di bawah untuk melihat rincian mekanisme penjaminan mutu, penanggung jawab, regulasi kementerian terkait, dan dokumen luaran autentik (*audit-ready*).
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-4">
-            {[
-              { step: "P", name: "Penetapan", desc: "Penetapan standar dan target tahunan 12 IKU oleh pimpinan institusi." },
-              { step: "P", name: "Pelaksanaan", desc: "Penyelenggaraan tridharma dan pengumpulan bukti dukung oleh unit kerja." },
-              { step: "E", name: "Evaluasi", desc: "Audit Mutu Internal (AMI) dan verifikasi bukti dukung oleh tim LPM." },
-              { step: "P", name: "Pengendalian", desc: "Rencana Tindak Lanjut (RTL) dan analisis deviasi terhadap indikator." },
-              { step: "P", name: "Peningkatan", desc: "Benchmarking dan peningkatan standar mutu untuk periode berikutnya." },
-            ].map((s, i) => (
-              <div key={i} className="p-5 rounded-3xl bg-slate-50 border border-slate-200/80 text-left space-y-2">
-                <span className="w-8 h-8 rounded-xl bg-sky-600 text-white font-black text-sm flex items-center justify-center">
-                  {s.step}
-                </span>
-                <h4 className="font-bold text-slate-900 text-sm">{s.name}</h4>
-                <p className="text-xs text-slate-500 leading-relaxed">{s.desc}</p>
-              </div>
-            ))}
+          <PPEPPSycle />
+        </div>
+      </section>
+
+      {/* 5. Section Fase 2: Early Warning System (Sistem Deteksi Dini Mutu) */}
+      <section id="deteksi" className="py-20 bg-slate-50/70 border-b border-slate-200/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+              Fitur Eksklusif • Tidak Ada di Dashboard UNJA
+            </span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+              Early Warning System Mutu (RAG Alert)
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Sistem lampu lalu lintas otomatis yang mendeteksi indikator berkinerja rendah sebelum kuartal berakhir, memicu Rencana Tindak Lanjut (RTL) pada Rapat Tinjauan Manajemen (RTM).
+            </p>
           </div>
+
+          <EarlyWarningSystem />
         </div>
       </section>
 
