@@ -1,5 +1,363 @@
-import { redirect } from "next/navigation";
+"use client";
 
-export default function Home() {
-  redirect("/login");
+import Link from "next/link";
+import Image from "next/image";
+import { 
+  ShieldCheck, 
+  TrendingUp, 
+  Award, 
+  BookOpen, 
+  ArrowRight, 
+  ExternalLink,
+  Target,
+  Users,
+  Building2,
+  FileText,
+  ChevronDown,
+  Sparkles,
+  Lock,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-cyan-500 selection:text-white flex flex-col">
+      {/* 1. Header / Navbar Publik Resmi */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          {/* Logo & Kampus Branding */}
+          <Link href="/" className="flex items-center gap-3.5 group">
+            <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-600 via-sky-500 to-cyan-400 p-0.5 shadow-md shadow-sky-500/20 shrink-0 flex items-center justify-center transition-transform group-hover:scale-105">
+              <Image 
+                src="/logo_stimi.png" 
+                alt="Logo STIMI YAPMI" 
+                width={36} 
+                height={36} 
+                className="drop-shadow-sm object-contain"
+                priority
+              />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="font-black text-slate-950 text-base tracking-tight">MANTAU IKU</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-sky-100 text-sky-700">PORTAL MUTU</span>
+              </div>
+              <span className="text-xs font-bold text-sky-700/90 tracking-tight">
+                STIMI YAPMI MAKASSAR
+              </span>
+            </div>
+          </Link>
+
+          {/* Navigasi Utama */}
+          <nav className="hidden md:flex items-center gap-7 text-xs font-bold text-slate-600">
+            <Link href="#beranda" className="text-sky-700 hover:text-sky-800 transition-colors">
+              Beranda
+            </Link>
+            <Link href="#iku" className="hover:text-sky-700 transition-colors">
+              12 Indikator Kinerja
+            </Link>
+            <Link href="#ppepp" className="hover:text-sky-700 transition-colors">
+              Siklus PPEPP SPMI
+            </Link>
+            <Link href="#dokumen" className="hover:text-sky-700 transition-colors">
+              Dokumen Mutu
+            </Link>
+          </nav>
+
+          {/* Tombol Masuk Internal PIC / LPM */}
+          <div className="flex items-center gap-3">
+            <Link 
+              href="/login"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 via-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-bold text-xs shadow-md shadow-sky-600/25 transition-all hover:scale-[1.02]"
+            >
+              <Lock className="w-3.5 h-3.5" />
+              <span>Masuk Sistem PIC / LPM</span>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* 2. Hero Section: Keterbukaan Informasi Mutu & IKU */}
+      <section id="beranda" className="relative pt-12 pb-20 overflow-hidden">
+        {/* Glow Effects */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-tr from-sky-400/15 to-cyan-300/15 rounded-full blur-3xl pointer-events-none -z-10" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          {/* Main Hero Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-sky-950 via-sky-900 to-cyan-950 text-white p-8 sm:p-12 lg:p-16 shadow-2xl border border-sky-700/30"
+          >
+            {/* Ambient inner glow */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-sky-500/20 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 max-w-3xl space-y-6">
+              {/* Regulatory Pill */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/20 border border-sky-400/30 text-cyan-200 text-xs font-semibold backdrop-blur-md">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+                <span>Permendiktisaintek No. 39/2025 jo. No. 10/2026 & SAN Dikti BAN-PT 2025</span>
+              </div>
+
+              {/* Headline */}
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
+                Sistem Penjaminan Mutu & Keterbukaan Kinerja Institusi
+              </h1>
+
+              {/* Description */}
+              <p className="text-sky-100/90 text-sm sm:text-base leading-relaxed">
+                Portal resmi pemantauan <span className="text-cyan-300 font-bold">12 Indikator Kinerja Utama (IKU)</span> dan akuntabilitas Sistem Penjaminan Mutu Internal (SPMI) STIMI YAPMI Makassar berbasis luaran nyata, relevansi kurikulum manajemen, dan kesiapan akreditasi LAMEMBA.
+              </p>
+
+              {/* Hero Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3.5 pt-2">
+                <Link 
+                  href="#iku"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-extrabold text-xs shadow-lg shadow-cyan-400/25 transition-all hover:scale-[1.02]"
+                >
+                  <TrendingUp className="w-4 h-4 text-slate-950" />
+                  <span>Eksplorasi Capaian 12 IKU</span>
+                </Link>
+
+                <Link 
+                  href="#ppepp"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-md border border-white/20 transition-all"
+                >
+                  <ShieldCheck className="w-4 h-4 text-cyan-300" />
+                  <span>Siklus Mutu PPEPP</span>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* 3. Makro Metrik Kinerja Kampus (UNJA-PLUS Insight) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-2"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+                <Target className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">
+                Total Indikator Terpantau
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                12 IKU
+              </h3>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Standar Nasional Dikti & LAMEMBA
+              </p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-2"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold">
+                <Users className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">
+                Klaster Penjaminan Mutu
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                4 Klaster
+              </h3>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Talenta, Inovasi, Riset, Tata Kelola
+              </p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-2"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">
+                Siklus SPMI Aktif
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                PPEPP 2026
+              </h3>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Audit Mutu Internal Terjadwal
+              </p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-2"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+                <Award className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wide block">
+                Akreditasi & Sertifikasi
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                BAN-PT / LAMEMBA
+              </h3>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Akuntabilitas Terverifikasi
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Placeholder Section untuk Fase 2: Siklus PPEPP */}
+      <section id="ppepp" className="py-16 bg-white border-y border-slate-200/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center">
+          <div className="max-w-2xl mx-auto space-y-2">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-100">
+              Standar Permendiktisaintek No. 39/2025
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+              Siklus PPEPP Penjaminan Mutu Internal
+            </h2>
+            <p className="text-xs text-slate-500">
+              Siklus berkesinambungan yang memastikan mutu pendidikan tinggi STIMI YAPMI Makassar terus meningkat secara berkelanjutan (*Continuous Quality Improvement*).
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-4">
+            {[
+              { step: "P", name: "Penetapan", desc: "Penetapan standar dan target tahunan 12 IKU oleh pimpinan institusi." },
+              { step: "P", name: "Pelaksanaan", desc: "Penyelenggaraan tridharma dan pengumpulan bukti dukung oleh unit kerja." },
+              { step: "E", name: "Evaluasi", desc: "Audit Mutu Internal (AMI) dan verifikasi bukti dukung oleh tim LPM." },
+              { step: "P", name: "Pengendalian", desc: "Rencana Tindak Lanjut (RTL) dan analisis deviasi terhadap indikator." },
+              { step: "P", name: "Peningkatan", desc: "Benchmarking dan peningkatan standar mutu untuk periode berikutnya." },
+            ].map((s, i) => (
+              <div key={i} className="p-5 rounded-3xl bg-slate-50 border border-slate-200/80 text-left space-y-2">
+                <span className="w-8 h-8 rounded-xl bg-sky-600 text-white font-black text-sm flex items-center justify-center">
+                  {s.step}
+                </span>
+                <h4 className="font-bold text-slate-900 text-sm">{s.name}</h4>
+                <p className="text-xs text-slate-500 leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Placeholder Section untuk Fase 3: Etalase 12 IKU */}
+      <section id="iku" className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 text-center">
+          <div className="max-w-2xl mx-auto space-y-2">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-cyan-50 text-cyan-700 border border-cyan-100">
+              Transparansi Kinerja 2026
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+              Etalase 12 Indikator Kinerja Utama
+            </h2>
+            <p className="text-xs text-slate-500">
+              Pantau capaian riil per indikator kinerja berdasarkan data yang telah diverifikasi oleh Lembaga Penjaminan Mutu.
+            </p>
+          </div>
+
+          <div className="p-8 bg-white rounded-3xl border border-slate-200/80 text-center max-w-xl mx-auto space-y-4">
+            <TrendingUp className="w-10 h-10 text-sky-600 mx-auto" />
+            <h4 className="font-extrabold text-slate-900 text-sm">
+              Modul Etalase 12 IKU Interaktif
+            </h4>
+            <p className="text-xs text-slate-500">
+              Data real-time dari database MongoDB akan diintegrasikan secara komprehensif pada Fase 3.
+            </p>
+            <Link 
+              href="/login"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold text-xs transition-colors"
+            >
+              <span>Masuk untuk melihat detail internal</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Placeholder Section untuk Fase 4: Dokumen Mutu */}
+      <section id="dokumen" className="py-16 bg-white border-t border-slate-200/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 text-center">
+          <div className="max-w-2xl mx-auto space-y-2">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+              Keterbukaan Informasi Publik
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+              Dokumen Kebijakan & Standar SPMI
+            </h2>
+            <p className="text-xs text-slate-500">
+              Dokumen kebijakan mutu, manual penjaminan mutu, dan sertifikat akreditasi yang dapat diakses publik.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto text-left">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+              <FileText className="w-5 h-5 text-sky-600 mb-2" />
+              <h5 className="font-bold text-slate-900 text-xs">Kebijakan SPMI 2026</h5>
+              <p className="text-[11px] text-slate-500">Pedoman umum sistem penjaminan mutu internal kampus.</p>
+            </div>
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+              <FileText className="w-5 h-5 text-sky-600 mb-2" />
+              <h5 className="font-bold text-slate-900 text-xs">Standar Mutu IKU PT</h5>
+              <p className="text-[11px] text-slate-500">Buku standar pengukuran 12 indikator kinerja institusi.</p>
+            </div>
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+              <FileText className="w-5 h-5 text-sky-600 mb-2" />
+              <h5 className="font-bold text-slate-900 text-xs">Sertifikat Akreditasi</h5>
+              <p className="text-[11px] text-slate-500">Legalitas akreditasi institusi dan prodi STIMI YAPMI.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Footer Resmi Institusi */}
+      <footer className="mt-auto bg-slate-950 text-slate-400 py-12 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <Image 
+                  src="/logo_stimi.png" 
+                  alt="Logo STIMI" 
+                  width={32} 
+                  height={32} 
+                  className="object-contain"
+                />
+                <span className="font-black text-white text-base">STIMI YAPMI MAKASSAR</span>
+              </div>
+              <p className="text-xs text-slate-400 max-w-md">
+                Lembaga Penjaminan Mutu (LPM) • Sistem Monitoring Indikator Kinerja Utama (MANTAU IKU) berbasis Permendiktisaintek Nomor 39 Tahun 2025 jo. Nomor 10 Tahun 2026.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6 text-xs font-semibold text-slate-300">
+              <Link href="#beranda" className="hover:text-white transition-colors">Beranda</Link>
+              <Link href="#iku" className="hover:text-white transition-colors">12 IKU</Link>
+              <Link href="#ppepp" className="hover:text-white transition-colors">Siklus PPEPP</Link>
+              <Link href="/login" className="text-cyan-400 hover:text-cyan-300 font-bold transition-colors">
+                Portal PIC / LPM →
+              </Link>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-slate-500">
+            <p>© 2026 STIMI YAPMI Makassar. Hak Cipta Dilindungi Undang-Undang.</p>
+            <p>Jl. Perintis Kemerdekaan KM. 9, Tamalanrea, Kota Makassar, Sulawesi Selatan</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 }
