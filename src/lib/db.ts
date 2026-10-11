@@ -33,6 +33,7 @@ async function connectToDatabase() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      dbName: process.env.MONGODB_DB || "mantauiku",
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {

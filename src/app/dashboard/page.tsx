@@ -10,24 +10,112 @@ import {
   BookOpen, 
   Building, 
   Users, 
-  ChevronRight,
-  Sparkles
+  ChevronRight, 
+  Sparkles,
+  RefreshCw,
+  Award,
+  AlertCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+
+interface SummaryData {
+  stats: {
+    totalIKU: number;
+    reportedCount: number;
+    pendingCount: number;
+    approvedCount: number;
+    overallAverage: number;
+  };
+  clusters: Array<{
+    id: string;
+    title: string;
+    ikurange: string;
+    pic: string;
+    progress: number;
+    status: string;
+    items: Array<{
+      code: string;
+      name: string;
+      realized: number;
+      target: number;
+      unit: string;
+      status: string;
+    }>;
+  }>;
+  chartData: Array<{
+    id: string;
+    code: string;
+    name: string;
+    cluster: string;
+    unit: string;
+    type: string;
+    baseline: number;
+    target: number;
+    realized: number;
+    percentage: number;
+    status: string;
+  }>;
+  recentActivities: Array<{
+    _id: string;
+    ikuCode: string;
+    ikuName: string;
+    unit: string;
+    status: string;
+    quarter: number;
+    value: number;
+    unitMeasurement: string;
+    updatedAt: string;
+  }>;
+}
 
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [selectedQuarter, setSelectedQuarter] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [data, setData] = useState<SummaryData | null>(null);
 
   const userRole = session?.user?.role;
   const assignedIKUs = session?.user?.assignedIKUCodes || [];
 
+  const fetchDashboardData = useCallback(async (quarter: number) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/dashboard/summary?year=2026&quarter=${quarter}`);
+      const json = await res.json();
+      if (json.success) {
+        setData(json);
+      }
+    } catch (err) {
+      console.error("Gagal memuat data ringkasan dashboard:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDashboardData(selectedQuarter);
+  }, [selectedQuarter, fetchDashboardData]);
+
+  const formatTimeAgo = (dateString?: string) => {
+    if (!dateString) return "Baru saja";
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (diffSec < 60) return "Baru saja";
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} menit lalu`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `${diffHours} jam lalu`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} hari lalu`;
+  };
+
   const stats = [
     { 
       title: "Total Indikator", 
-      value: "12 IKU", 
+      value: `${data?.stats?.totalIKU ?? 12} IKU`, 
       icon: Target, 
       color: "text-sky-600", 
       bg: "bg-sky-50",
@@ -36,16 +124,16 @@ export default function DashboardPage() {
     },
     { 
       title: "Telah Dilaporkan", 
-      value: "8 Capaian", 
+      value: `${data?.stats?.reportedCount ?? 0} Capaian`, 
       icon: FileText, 
       color: "text-cyan-600", 
       bg: "bg-cyan-50",
       border: "border-cyan-100",
-      desc: "Triwulan I 2026"
+      desc: `Triwulan ${selectedQuarter} 2026`
     },
     { 
       title: "Menunggu Validasi", 
-      value: "3 Pengajuan", 
+      value: `${data?.stats?.pendingCount ?? 0} Pengajuan`, 
       icon: Clock, 
       color: "text-amber-600", 
       bg: "bg-amber-50",
@@ -54,7 +142,7 @@ export default function DashboardPage() {
     },
     { 
       title: "Tervalidasi & Sesuai", 
-      value: "5 IKU", 
+      value: `${data?.stats?.approvedCount ?? 0} IKU`, 
       icon: CheckCircle, 
       color: "text-emerald-600", 
       bg: "bg-emerald-50",
@@ -63,50 +151,11 @@ export default function DashboardPage() {
     },
   ];
 
-  const clusters = [
-    {
-      id: "talenta",
-      title: "Klaster 1: Talenta & Mahasiswa",
-      ikurange: "IKU 1, IKU 2, IKU 3",
-      pic: "WK III (Kemahasiswaan & Alumni)",
-      icon: Users,
-      progress: 78,
-      status: "On Track",
-      items: [
-        "AEE Perguruan Tinggi",
-        "Lulusan Bekerja & Berwirausaha",
-        "Prestasi & MBKM Luar Kampus"
-      ]
-    },
-    {
-      id: "inovasi",
-      title: "Klaster 2: Inovasi & Riset",
-      ikurange: "IKU 4, IKU 5, IKU 6",
-      pic: "WK I & WK II (Kerjasama)",
-      icon: BookOpen,
-      progress: 64,
-      status: "Perlu Bukti",
-      items: [
-        "Dosen Rekognisi Internasional",
-        "Hilirisasi & Kerjasama Industri",
-        "Publikasi Bereputasi SINTA/Scopus"
-      ]
-    },
-    {
-      id: "tatakelola",
-      title: "Klaster 3: Tata Kelola & Finansial",
-      ikurange: "IKU 7 - IKU 12",
-      pic: "Tim Tata Pamong & Keuangan",
-      icon: Building,
-      progress: 85,
-      status: "Sesuai Target",
-      items: [
-        "SDGs & Partisipasi Kebijakan",
-        "Income Generating Non-UKT",
-        "Zona Integritas & SAKIP"
-      ]
-    }
-  ];
+  const clusterIcons: Record<string, typeof Users> = {
+    talenta: Users,
+    inovasi: BookOpen,
+    tatakelola: Building,
+  };
 
   return (
     <div className="space-y-8">
@@ -132,11 +181,11 @@ export default function DashboardPage() {
             </h1>
 
             <p className="text-sky-100/80 text-sm md:text-base leading-relaxed">
-              Selamat datang, <span className="font-semibold text-cyan-300">{session?.user?.name}</span>!
+              Selamat datang, <span className="font-semibold text-cyan-300">{session?.user?.name || "Pengguna"}</span>!
               {userRole === "UNIT_KERJA" && assignedIKUs.length > 0 ? (
                 <> Anda bertindak sebagai penanggung jawab untuk <span className="font-semibold text-white underline decoration-cyan-400">{assignedIKUs.join(", ")}</span>.</>
               ) : (
-                <> Pantau pencapaian 12 IKU institusi, verifikasi dokumen capaian, dan evaluasi target tahunan secara akurat.</>
+                <> Pantau pencapaian 12 IKU institusi, verifikasi dokumen capaian, dan evaluasi target tahunan secara real-time.</>
               )}
             </p>
           </div>
@@ -179,7 +228,11 @@ export default function DashboardPage() {
                   {stat.title}
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-                  {stat.value}
+                  {loading ? (
+                    <span className="inline-block w-16 h-8 bg-slate-100 animate-pulse rounded-md" />
+                  ) : (
+                    stat.value
+                  )}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium">
                   {stat.desc}
@@ -225,14 +278,18 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {clusters.map((cluster, idx) => {
-            const Icon = cluster.icon;
+          {(data?.clusters || [
+            { id: "talenta", title: "Klaster 1: Talenta & Mahasiswa", ikurange: "IKU 1, IKU 2, IKU 3", pic: "WK III (Kemahasiswaan & Alumni)", progress: 0, status: "Memuat...", items: [] },
+            { id: "inovasi", title: "Klaster 2: Inovasi & Riset", ikurange: "IKU 4, IKU 5, IKU 6", pic: "WK I & WK II (Kerjasama)", progress: 0, status: "Memuat...", items: [] },
+            { id: "tatakelola", title: "Klaster 3: Tata Kelola & Finansial", ikurange: "IKU 7 - IKU 12", pic: "Tim Tata Pamong & Keuangan", progress: 0, status: "Memuat...", items: [] }
+          ]).map((cluster, idx) => {
+            const Icon = clusterIcons[cluster.id] || Users;
             return (
               <motion.div
                 key={cluster.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + idx * 0.1 }}
+                transition={{ delay: 0.15 + idx * 0.1 }}
                 className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
               >
                 <div className="space-y-4">
@@ -262,18 +319,30 @@ export default function DashboardPage() {
                     <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
                       <div 
                         className="bg-gradient-to-r from-sky-500 to-cyan-500 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${cluster.progress}%` }}
+                        style={{ width: `${Math.min(100, cluster.progress)}%` }}
                       />
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-100 space-y-1.5">
-                    {cluster.items.map((item, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs text-slate-600">
-                        <div className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
-                        <span className="truncate">{item}</span>
-                      </div>
-                    ))}
+                  {/* List of Indicators in this cluster */}
+                  <div className="pt-2 border-t border-slate-100 space-y-2">
+                    {cluster.items && cluster.items.length > 0 ? (
+                      cluster.items.slice(0, 3).map((item, i) => (
+                        <div key={i} className="flex justify-between items-center text-xs text-slate-600">
+                          <div className="flex items-center gap-1.5 truncate max-w-[170px]">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-50 text-sky-700 shrink-0">
+                              {item.code}
+                            </span>
+                            <span className="truncate text-[11px]">{item.name}</span>
+                          </div>
+                          <span className="font-bold text-slate-800 text-[11px] shrink-0">
+                            {item.realized} / {item.target} {item.unit}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">Belum ada realisasi capaian</p>
+                    )}
                   </div>
                 </div>
 
@@ -294,11 +363,11 @@ export default function DashboardPage() {
 
       {/* Progress Chart & Verification Queue Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Progress Chart Placeholder */}
+        {/* Progress Chart (Real dynamic bars for IKU 1 - 12) */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           className="lg:col-span-2 bg-white rounded-3xl p-7 border border-slate-200/80 shadow-xs flex flex-col justify-between"
         >
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
@@ -307,7 +376,7 @@ export default function DashboardPage() {
                 Grafik Capaian Target vs Realisasi (2026)
               </h3>
               <p className="text-xs text-slate-400">
-                Perbandingan target baseline dan realisasi capaian yang divalidasi
+                Perbandingan target baseline dan realisasi capaian triwulanan
               </p>
             </div>
             
@@ -316,41 +385,84 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          {/* Visual Simulation Bars */}
+          {/* Dynamic Bars for IKU 1 - 12 */}
           <div className="h-64 flex flex-col justify-end p-4 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-3">
             <div className="grid grid-cols-6 sm:grid-cols-12 gap-2 h-44 items-end px-2">
-              {[85, 92, 70, 60, 95, 80, 75, 88, 65, 78, 90, 82].map((val, i) => (
-                <div key={i} className="flex flex-col items-center gap-1.5 h-full justify-end group">
-                  <div className="relative w-full flex justify-center">
-                    <span className="absolute -top-6 text-[10px] font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white px-1 rounded shadow-xs">
-                      {val}%
+              {(data?.chartData || Array.from({ length: 12 }, (_, i) => ({
+                id: String(i),
+                code: `IKU ${i + 1}`,
+                name: `Indikator ${i + 1}`,
+                target: 0,
+                realized: 0,
+                percentage: 0,
+                unit: "%",
+                status: "Belum",
+                cluster: "",
+                type: "",
+                baseline: 0
+              }))).map((item, i) => {
+                // Ensure small minimum height so bar anchor is visible
+                const barHeight = Math.max(item.percentage > 0 ? item.percentage : 4, 4);
+
+                return (
+                  <div key={item.code} className="flex flex-col items-center gap-1.5 h-full justify-end group relative">
+                    {/* Tooltip on Hover */}
+                    <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col p-2.5 bg-slate-900 text-white rounded-xl shadow-xl text-left pointer-events-none z-30 min-w-[150px] whitespace-normal">
+                      <span className="text-[11px] font-bold text-cyan-300">{item.code}</span>
+                      <span className="text-[10px] text-slate-200 line-clamp-2 mt-0.5">{item.name}</span>
+                      <div className="mt-1 pt-1 border-t border-slate-800 text-[10px] space-y-0.5">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Realisasi:</span>
+                          <span className="font-bold text-white">{item.realized} {item.unit}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Target:</span>
+                          <span className="text-slate-300">{item.target} {item.unit}</span>
+                        </div>
+                        <div className="flex justify-between text-cyan-400 font-bold">
+                          <span>Ketercapaian:</span>
+                          <span>{item.percentage}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="relative w-full flex justify-center">
+                      <div 
+                        className={`w-full max-w-[20px] rounded-t-lg transition-all shadow-sm ${
+                          item.percentage >= 80 
+                            ? "bg-gradient-to-t from-emerald-600 to-teal-400" 
+                            : item.percentage > 0 
+                            ? "bg-gradient-to-t from-sky-600 to-cyan-400 group-hover:from-sky-500 group-hover:to-cyan-300"
+                            : "bg-slate-200"
+                        }`}
+                        style={{ height: `${barHeight}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-semibold text-slate-500">
+                      I{i + 1}
                     </span>
-                    <div 
-                      className="w-full max-w-[20px] rounded-t-lg bg-gradient-to-t from-sky-600 to-cyan-400 group-hover:from-sky-500 group-hover:to-cyan-300 transition-all shadow-sm"
-                      style={{ height: `${val}%` }}
-                    />
                   </div>
-                  <span className="text-[10px] font-semibold text-slate-500">
-                    I{i + 1}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
+
             <div className="flex justify-between items-center text-xs text-slate-400 pt-2 border-t border-slate-200">
               <span className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-sky-600 to-cyan-400"></span>
+                <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-sky-600 to-cyan-400" />
                 <span>Tingkat Ketercapaian IKU 1 s/d 12</span>
               </span>
-              <span className="font-semibold text-slate-600">Rata-rata: 79.9%</span>
+              <span className="font-semibold text-slate-600">
+                Rata-rata: {data?.stats?.overallAverage ?? 0}%
+              </span>
             </div>
           </div>
         </motion.div>
 
-        {/* Verification Status & Activity */}
+        {/* Verification Status & Real Activity Queue */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.4 }}
           className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-xs flex flex-col justify-between"
         >
           <div>
@@ -363,57 +475,62 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="space-y-4">
-              {[
-                { 
-                  iku: "IKU 3", 
-                  title: "Laporan Prestasi Mahasiswa Nasional", 
-                  unit: "WK III Kemahasiswaan", 
-                  status: "Menunggu",
-                  time: "10 menit lalu",
-                  badge: "bg-amber-50 text-amber-700 border-amber-200"
-                },
-                { 
-                  iku: "IKU 5", 
-                  title: "Kerjasama Magang Industri & BUMN", 
-                  unit: "WK II Kerjasama", 
-                  status: "Tervalidasi",
-                  time: "1 jam lalu",
-                  badge: "bg-emerald-50 text-emerald-700 border-emerald-200"
-                },
-                { 
-                  iku: "IKU 6", 
-                  title: "Submit 4 Artikel Jurnal SINTA 2", 
-                  unit: "WK I Akademik/LPPM", 
-                  status: "Tervalidasi",
-                  time: "3 jam lalu",
-                  badge: "bg-emerald-50 text-emerald-700 border-emerald-200"
-                },
-              ].map((act, i) => (
-                <div key={i} className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-colors space-y-1.5">
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs font-bold text-sky-700">
-                      {act.iku} • {act.unit}
-                    </span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${act.badge}`}>
-                      {act.status}
-                    </span>
-                  </div>
-                  <p className="text-xs font-semibold text-slate-800 line-clamp-1">
-                    {act.title}
+            <div className="space-y-3.5">
+              {loading ? (
+                <div className="space-y-3 py-4">
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className="h-16 bg-slate-50 rounded-2xl animate-pulse" />
+                  ))}
+                </div>
+              ) : data?.recentActivities && data.recentActivities.length > 0 ? (
+                data.recentActivities.map((act) => {
+                  const isDone = act.status === "Disetujui";
+                  const isPending = act.status === "pendingDiajukan";
+
+                  return (
+                    <div 
+                      key={act._id} 
+                      className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-100 hover:border-slate-200 transition-colors space-y-1.5"
+                    >
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-bold text-sky-700 truncate max-w-[140px]">
+                          {act.ikuCode} • {act.unit}
+                        </span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          isDone ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                          isPending ? "bg-amber-50 text-amber-700 border-amber-200" :
+                          "bg-slate-100 text-slate-600 border-slate-200"
+                        }`}>
+                          {isDone ? "Disetujui" : isPending ? "Menunggu" : "Draf"}
+                        </span>
+                      </div>
+                      <p className="text-xs font-semibold text-slate-800 line-clamp-1">
+                        Capaian: {act.value} {act.unitMeasurement} (TW {act.quarter})
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        {formatTimeAgo(act.updatedAt)}
+                      </p>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-10 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-2">
+                  <AlertCircle className="w-6 h-6 text-slate-400 mx-auto" />
+                  <p className="text-xs font-semibold text-slate-600">
+                    Belum ada pelaporan capaian
                   </p>
                   <p className="text-[11px] text-slate-400">
-                    {act.time}
+                    Data pelaporan dari unit kerja akan otomatis muncul di sini.
                   </p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
           <div className="pt-4 mt-4 border-t border-slate-100">
             <Link 
               href="/dashboard/achievements" 
-              className="text-xs font-bold text-center block text-sky-600 hover:text-sky-700"
+              className="text-xs font-bold text-center block text-sky-600 hover:text-sky-700 transition-colors"
             >
               Lihat Seluruh Antrean Validasi →
             </Link>
