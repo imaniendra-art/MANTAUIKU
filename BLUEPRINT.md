@@ -77,9 +77,17 @@ Sistem menyaring 12 Indikator Kinerja Utama ke dalam 4 Klaster Tematik:
 
 ---
 
-## 5. Rencana Tahapan Eksekusi
+## 5. Rencana & Status Tahapan Eksekusi
 
-1. **Fase 1**: Refactor Shell Navigasi (Sidebar Collapsible + Icon-Only Tooltip + Topbar + Tema Sky-Cyan).
-2. **Fase 2**: Penyesuaian Model & Skrip Seeding Akun PIC Unit Kerja serta Pemetaan IKU.
-3. **Fase 3**: Pembaharuan Halaman Dashboard Utama & Halaman Pelaporan Capaian (Filter otomatis sesuai hak akses PIC).
-4. **Fase 4**: Pengayaan Visualisasi Multi-Chart (Grafik Capaian vs Target ala UNJA).
+1. **Fase 1 (Selesai)**: Refactor Shell Navigasi (Sidebar Collapsible + Icon-Only Tooltip + Topbar + Tema Sky-Cyan ala Dashboard UNJA).
+2. **Fase 2 (Selesai)**: Penyesuaian Model & Skrip Seeding Akun PIC Unit Kerja serta Pemetaan 12 IKU ke 4 Klaster.
+3. **Fase 3 (Selesai)**: Pembaharuan Halaman Dashboard Utama (`/dashboard`) dan Halaman Pelaporan Capaian (`/dashboard/achievements`):
+   - Endpoint real-time `/api/dashboard/summary` terhubung langsung ke MongoDB Atlas.
+   - Filter capaian triwulanan (TW 1 s/d TW 4).
+   - Metrik otomatis: Total Indikator, Capaian Dilaporkan, Menunggu Validasi, Tervalidasi.
+   - Perhitungan progres klaster riil dan antrean aktivitas validasi terbaru.
+   - Bar interaktif perbandingan target vs realisasi dengan hover tooltip rinci.
+4. **Fase 4 (Berikutnya)**: Pengayaan Visualisasi Multi-Chart Lanjutan & Generator Ekspor Laporan:
+   - Visualisasi komparatif multi-indikator.
+   - Ekspor rekapitulasi capaian dan target kinerja ke format Excel (.xlsx / .csv) dan cetak laporan di `/dashboard/reports`.
+
