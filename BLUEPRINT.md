@@ -93,3 +93,34 @@ Sistem menyaring 12 Indikator Kinerja Utama ke dalam 4 Klaster Tematik:
    - Unduh Rekapitulasi Target & Narasi Justifikasi Tahun 2026.
    - Modal Pratinjau Dokumen Cetak / PDF resmi berkop surat STIMI YAPMI Makassar lengkap dengan lembar pengesahan tanda tangan Ketua LPM dan Pimpinan Institusi.
 
+---
+
+## 6. Portal Mutu Publik STIMI YAPMI Makassar (`/`)
+
+Dibangun untuk memenuhi transparansi informasi publik LPM dan standar penjaminan mutu terkini:
+- **Landasan Regulasi**: **Permendiktisaintek No. 39 Tahun 2025 jo. No. 10 Tahun 2026** dan **Peraturan BAN-PT No. 20 Tahun 2025 (SAN Dikti)**, berorientasi akreditasi **LAMEMBA**.
+- **Komponen Utama**:
+  1. **Hero & Metrik Makro**: Statistik capaian IKU tervalidasi, akreditasi prodi, rasio dosen ber-NIDN, dan status audit SPMI.
+  2. **Siklus Mutu PPEPP Interaktif** (`src/components/public/PPEPPSycle.tsx`): Visualisasi tahapan Penetapan, Pelaksanaan, Evaluasi, Pengendalian, dan Peningkatan dengan rincian instrumen & dokumen kunci.
+  3. **Early Warning System / RAG Radar** (`src/components/public/EarlyWarningSystem.tsx`): Peringatan dini berstatus Red (Kritis), Amber (Waspada), Green (Aman) dilengkapi rekomendasi tindakan preventif/korektif LPM.
+  4. **Pintu Masuk Internal**: Tombol otentikasi aman menuju ruang kerja internal (`/login` & `/dashboard`).
+
+---
+
+## 7. Agenda Lanjutan di Kantor (Office Resumption Checklist)
+
+Saat melanjutkan pekerjaan di kantor dengan Antigravity:
+1. **Tarik Kode Terbaru**:
+   ```bash
+   git pull origin main
+   ```
+2. **Tugas Lanjutan 1 (Fase 3 Portal Publik)**:
+   - Bangun endpoint publik tersanitasi `GET /api/public/indicators` untuk menampilkan daftar 12 IKU beserta capaian tervalidasi dan tautan bukti dukung publik.
+   - Hubungkan tab `#iku` di `src/app/page.tsx` ke endpoint tersebut dengan filter klaster dan pencarian interaktif.
+3. **Tugas Lanjutan 2 (Fase 4 Portal Publik)**:
+   - Sediakan section unduh dokumen mutu (`#dokumen`) di `src/app/page.tsx` (Buku Kebijakan SPMI, Standar Mutu LAMEMBA, Manual PPEPP, dan Laporan AMI Tahunan).
+4. **Lingkungan & Database**:
+   - Cluster MongoDB Atlas: `mantauiku` (kredensial di `.env.local`).
+   - Server development: `npm run dev` di port 3000.
+
+
