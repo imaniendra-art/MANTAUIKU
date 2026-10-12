@@ -188,14 +188,36 @@ Mengintegrasikan seluruh siklus umpan balik *Continuous Quality Improvement (CQI
 
 ---
 
-## 10. Status Kesiapan & Roadmap Fase Selanjutnya
+---
+
+## 10. Fase 8 (Selesai): AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED) LAMEMBA 9 Kriteria
+
+Mengintegrasikan kecerdasan buatan penjaminan mutu yang terhubung langsung (*live-grounded*) ke data MongoDB Atlas STIMI YAPMI Makassar:
+1. **Generator Draf LED LAMEMBA 9 Kriteria**:
+   - Endpoint: [`/api/copilot/generate-led`](file:///c:/Users/imani/Documents/GitHub/MANTAUIKU/src/app/api/copilot/generate-led/route.ts).
+   - Menghasilkan bab narasi evaluasi diri formal untuk Kriteria C.1 s.d. C.9 (Latar Belakang, Indikator Kinerja Utama dengan suntikan angka riil, Analisis SWOT, dan Rencana Pengembangan Berkelanjutan CQI).
+   - Menyimpan dan memelihara versi draf pada koleksi `LedDraft` MongoDB Atlas.
+2. **AI Quality Advisor & Chatbot Konsultasi Mutu**:
+   - Endpoint: [`/api/copilot/chat`](file:///c:/Users/imani/Documents/GitHub/MANTAUIKU/src/app/api/copilot/chat/route.ts).
+   - Menjawab pertanyaan strategis asesor mutu secara real-time dengan melampirkan rujukan data (*citations*) dari temuan AMI, capaian IKU 2, skor EDO dosen, kepuasan layanan EKA, dan status PEPA LAMEMBA.
+3. **Workspace Eksekutif Copilot**:
+   - Halaman [`src/app/dashboard/copilot/page.tsx`](file:///c:/Users/imani/Documents/GitHub/MANTAUIKU/src/app/dashboard/copilot/page.tsx) dengan 3 tab:
+     - **Tab 1 (Generator LED)**: Selektor 9 Kriteria, target peringkat (Unggul/Baik Sekali), tombol generate live, salin teks, dan pratinjau cetak berkop resmi YAPMI format PDF.
+     - **Tab 2 (AI Quality Chat)**: Asisten interaktif dengan prompt chips inspiratif.
+     - **Tab 3 (Repositori Draf)**: Tabel arsip draf bab LED per kriteria lengkap dengan status verifikasi tim akreditasi.
+4. **Navigasi Sidebar**:
+   - Item menu **AI Quality Copilot** terpasang di [`src/components/layout/Sidebar.tsx`](file:///c:/Users/imani/Documents/GitHub/MANTAUIKU/src/components/layout/Sidebar.tsx).
+
+---
+
+## 11. Status Kesiapan Rilis Produksi (Production Readiness)
 
 1. **Fase 1 - 4 (Selesai)**: Portal Mutu Publik, Siklus PPEPP, Radar RAG Early Warning, Dashboard Internal Atlas, Ekspor CSV & Laporan PDF Resmi.
 2. **Fase 5 (Selesai)**: Modul AMI Digital & Manajemen Temuan KTS/OB 10 Unit STIMI YAPMI.
 3. **Fase 6 (Selesai)**: Matriks Akreditasi LAMEMBA 9 Kriteria, Countdown PEPA, & Pemantauan Tahunan Wajib Lampiran DL-05.
 4. **Fase 7 (Selesai)**: Pusat Evaluasi Terpadu EDO, EKA (SIAM Sync), Tracer Study (Auto-Supply IKU 2), dan Survei Pengguna Lulusan.
-5. **Roadmap Fase 8**:
-   - **Fase 8**: AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED) Akreditasi.
+5. **Fase 8 (Selesai)**: AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED) LAMEMBA 9 Kriteria.
+
 
 
 

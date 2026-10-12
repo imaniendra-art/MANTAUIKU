@@ -16,7 +16,8 @@ import {
   ChevronRight, 
   ShieldCheck,
   Award,
-  GraduationCap
+  GraduationCap,
+  Sparkles
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSidebar } from "./SidebarContext";
@@ -65,6 +66,12 @@ export default function Sidebar() {
       href: "/dashboard/evaluations", 
       icon: GraduationCap,
       description: "EDO, EKA & Tracer Study (IKU 2)"
+    },
+    { 
+      name: "AI Quality Copilot", 
+      href: "/dashboard/copilot", 
+      icon: Sparkles,
+      description: "Konsultasi Mutu & Draf LED"
     },
     { 
       name: "Arsip Laporan", 
