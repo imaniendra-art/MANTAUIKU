@@ -159,6 +159,7 @@ export default function EvaluationsDashboardPage() {
   const [activeTab, setActiveTab] = useState<"edo" | "eka" | "tracer" | "employer">("edo");
   const [loading, setLoading] = useState(true);
   const [syncingSiam, setSyncingSiam] = useState(false);
+  const [syncingTracer, setSyncingTracer] = useState(false);
   const [syncSuccessToast, setSyncSuccessToast] = useState<string | null>(null);
 
   // EDO Data
@@ -244,6 +245,26 @@ export default function EvaluationsDashboardPage() {
     }
   };
 
+  // Sync with Tracer Study Application action
+  const handleSyncTracer = async () => {
+    setSyncingTracer(true);
+    try {
+      const res = await fetch("/api/integrations/tracer/sync", { method: "POST" });
+      const json = await res.json();
+      if (json.success) {
+        setSyncSuccessToast(
+          `Sinkronisasi Aplikasi Tracer Berhasil! ${json.syncDetails.recordsUpserted} alumni terintegrasi. Capaian IKU 2 diperbarui: ${json.syncDetails.newAbsorptionRate}`
+        );
+        setTimeout(() => setSyncSuccessToast(null), 6000);
+        await loadData();
+      }
+    } catch (err) {
+      console.error("Tracer sync error:", err);
+    } finally {
+      setSyncingTracer(false);
+    }
+  };
+
   const filteredEdo = edoData.filter(
     (d) =>
       d.lecturerName.toLowerCase().includes(edoSearch.toLowerCase()) ||
@@ -280,9 +301,20 @@ export default function EvaluationsDashboardPage() {
               onClick={handleSyncSiam}
               disabled={syncingSiam}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-sky-600/30 transition-all hover:scale-105 disabled:opacity-50"
+              title="Sinkronkan data EDO & EKA dari portal akademik SIAM"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${syncingSiam ? "animate-spin" : ""}`} />
-              <span>{syncingSiam ? "Menyinkronkan SIAM..." : "Tarik Data dari SIAM"}</span>
+              <span>{syncingSiam ? "Menyinkronkan SIAM..." : "Tarik Data SIAM (EDO/EKA)"}</span>
+            </button>
+
+            <button
+              onClick={handleSyncTracer}
+              disabled={syncingTracer}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 disabled:opacity-50"
+              title="Sinkronkan data lulusan dari Aplikasi Tracer Study STIMI YAPMI (CDC Gateway)"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${syncingTracer ? "animate-spin" : ""}`} />
+              <span>{syncingTracer ? "Menyinkronkan Tracer..." : "Tarik Data Tracer App"}</span>
             </button>
 
             <a
@@ -815,13 +847,24 @@ export default function EvaluationsDashboardPage() {
                   </div>
                 </div>
 
-                <a
-                  href="/dashboard"
-                  className="px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-yellow-950 font-bold text-xs shadow-md shadow-yellow-500/20 shrink-0 flex items-center gap-1.5"
-                >
-                  <span>Cek Skor di Dashboard</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </a>
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                  <button
+                    onClick={handleSyncTracer}
+                    disabled={syncingTracer}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-700/20 flex items-center gap-1.5 transition-all hover:scale-105 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${syncingTracer ? "animate-spin" : ""}`} />
+                    <span>{syncingTracer ? "Menyinkronkan Tracer..." : "Tarik Data dari Aplikasi Tracer"}</span>
+                  </button>
+
+                  <a
+                    href="/dashboard"
+                    className="px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-yellow-950 font-bold text-xs shadow-md shadow-yellow-500/20 flex items-center gap-1.5"
+                  >
+                    <span>Cek Skor di Dashboard</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </div>
 
               {/* Summary Cards */}
