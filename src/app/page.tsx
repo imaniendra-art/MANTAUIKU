@@ -16,6 +16,7 @@ import PPEPPSycle from "@/components/public/PPEPPSycle";
 import EarlyWarningSystem from "@/components/public/EarlyWarningSystem";
 import PublicIndicatorsShowcase from "@/components/public/PublicIndicatorsShowcase";
 import QualityDocumentCenter from "@/components/public/QualityDocumentCenter";
+import AmiTransparencyWidget from "@/components/public/AmiTransparencyWidget";
 
 export default function HomePage() {
   return (
@@ -47,18 +48,21 @@ export default function HomePage() {
           </Link>
 
           {/* Navigasi Utama */}
-          <nav className="hidden md:flex items-center gap-7 text-xs font-bold text-slate-600">
+          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
             <Link href="#beranda" className="text-sky-700 hover:text-sky-800 transition-colors">
               Beranda
             </Link>
             <Link href="#ppepp" className="hover:text-sky-700 transition-colors">
-              Siklus PPEPP SPMI
+              Siklus PPEPP
             </Link>
             <Link href="#deteksi" className="hover:text-sky-700 transition-colors">
               Deteksi Dini (RAG)
             </Link>
+            <Link href="#ami" className="hover:text-sky-700 transition-colors">
+              Audit Mutu (AMI)
+            </Link>
             <Link href="#iku" className="hover:text-sky-700 transition-colors">
-              12 Indikator Kinerja
+              12 IKU
             </Link>
             <Link href="#dokumen" className="hover:text-sky-700 transition-colors">
               Dokumen Mutu
@@ -255,7 +259,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. Section Fase 3: Etalase 12 IKU Publik Interaktif */}
+      {/* 5. Section Fase 5: Transparansi Audit Mutu Internal (AMI) & KTS/OB */}
+      <section id="ami" className="py-20 bg-white border-b border-slate-200/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-100">
+              Audit Mutu Internal (AMI) • Standar LAMEMBA C.9 & SAN Dikti
+            </span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+              Kepatuhan & Pengendalian Temuan Audit (KTS/OB)
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Transparansi pelaksanaan visitasi auditor mutu independen terhadap 10 unit organisasi kampus, pemenuhan Formulir Tindak Lanjut (PTK/RTL), dan persentase temuan yang telah diverifikasi tuntas (Closed) menuju Rapat Tinjauan Manajemen.
+            </p>
+          </div>
+
+          <AmiTransparencyWidget />
+        </div>
+      </section>
+
+      {/* 6. Section Fase 3: Etalase 12 IKU Publik Interaktif */}
       <section id="iku" className="py-20 bg-slate-50/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
@@ -315,8 +338,10 @@ export default function HomePage() {
 
             <div className="flex flex-wrap items-center gap-6 text-xs font-semibold text-slate-300">
               <Link href="#beranda" className="hover:text-white transition-colors">Beranda</Link>
-              <Link href="#iku" className="hover:text-white transition-colors">12 IKU</Link>
               <Link href="#ppepp" className="hover:text-white transition-colors">Siklus PPEPP</Link>
+              <Link href="#ami" className="hover:text-white transition-colors">Audit Mutu (AMI)</Link>
+              <Link href="#iku" className="hover:text-white transition-colors">12 IKU</Link>
+              <Link href="#dokumen" className="hover:text-white transition-colors">Dokumen Mutu</Link>
               <Link href="/login" className="text-cyan-400 hover:text-cyan-300 font-bold transition-colors">
                 Portal PIC / LPM →
               </Link>

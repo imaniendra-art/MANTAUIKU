@@ -47,6 +47,12 @@ export default function Sidebar() {
       description: "Input realisasi & upload bukti"
     },
     { 
+      name: "Audit Mutu (AMI)", 
+      href: "/dashboard/ami", 
+      icon: ShieldCheck,
+      description: "Siklus AMI & Temuan KTS/OB"
+    },
+    { 
       name: "Arsip Laporan", 
       href: "/dashboard/reports", 
       icon: Archive,

@@ -107,19 +107,44 @@ Dibangun untuk memenuhi transparansi informasi publik LPM dan standar penjaminan
 
 ---
 
-## 7. Status Kesiapan Rilis Produksi (Production Readiness)
+---
 
-1. **Portal Mutu Publik STIMI YAPMI Makassar (`/`)**:
-   - **Fase 1 (Selesai)**: Hero & Macro metrics dengan identitas visual Sky Blue & Cyan (`sky-600` & `cyan-500`).
-   - **Fase 2 (Selesai)**: Siklus Mutu PPEPP Interaktif (`PPEPPSycle.tsx`) & RAG Early Warning System Radar (`EarlyWarningSystem.tsx`).
-   - **Fase 3 (Selesai)**: Etalase 12 IKU Publik Real-Time (`PublicIndicatorsShowcase.tsx`) terhubung ke endpoint tersanitasi `GET /api/public/indicators`.
-   - **Fase 4 (Selesai)**: Pusat Unduh Dokumen Kebijakan & Standar SPMI (`QualityDocumentCenter.tsx`) ber-barcode validasi digital LPM.
-2. **Dashboard Internal & RBAC (`/dashboard`)**:
-   - Seluruh 4 Fase Internal (Navigasi hybrid, Seeding RBAC PIC, Dashboard Realtime, Ekspor CSV & Cetak PDF resmi ber-kop) telah beroperasi penuh.
-3. **Kode & Linter**:
-   - `npm run lint`: 0 Errors, 0 Warnings (Zero Technical Debt).
-   - `npm run build`: Berhasil 100% tanpa error TypeScript (semua 16 routes App Router terkompilasi).
-4. **Protokol Sinkronisasi Git Otomatis**:
-   - Perintah `push` atau `pull` dari pengguna akan langsung dieksekusi seketika ke `origin/main` tanpa konfirmasi manual.
+## 7. Fase 5 (Selesai): Modul Audit Mutu Internal (AMI) & Manajemen Temuan KTS/OB
+
+Mengakomodasi struktur organisasi resmi STIMI YAPMI Makassar dan standar akreditasi **LAMEMBA Kriteria C.9** serta **Permendiktisaintek No. 39/2025 jo. No. 10/2026**:
+1. **Pemetaan 10 Auditee Resmi**:
+   - `Program Studi` (Kurikulum, RPS OBE, CPL, Dosen)
+   - `UPT. LPPM` (Riset Dosen, PkM, Publikasi SINTA)
+   - `UPT. BAAK` (Administrasi Akademik, Ijazah, Transkrip)
+   - `UPT. Pusdatin` (Sinkronisasi PDDIKTI, Sistem Informasi)
+   - `UPT. Perpustakaan` (Koleksi Buku, E-Journal Internasional)
+   - `UPT. Lab. Komputer` (Perangkat Keras & Lunak Praktikum)
+   - `UPT. Keuangan Rutin Pegawai` (Akuntabilitas Anggaran Operasional)
+   - `UPT. Umum dan Kerjasama` (Sarana Prasarana Gedung, PKS/MoA Industri)
+   - `UPT. Kemahasiswaan & Alumni` (Prestasi, Beasiswa, Tracer Study)
+   - `UPT. Humas` (Keterbukaan Informasi Publik, Citra Kampus)
+2. **Klasifikasi Temuan Baku**:
+   - 🔴 **KTS Mayor**: Deviasi berat terhadap standar nasional/kementerian.
+   - 🟡 **KTS Minor**: Deviasi terhadap SOP internal kampus.
+   - 🔵 **OB (Observasi)**: Peluang peningkatan mutu sebelum menjadi KTS.
+3. **Instrumen Pengendalian Digital**:
+   - Formulir **PTK (Permintaan Tindakan Koreksi)** & Analisis Akar Masalah 5-Why.
+   - Formulir **RTL (Rencana Tindak Lanjut)** dengan target tanggal selesai dan tautan bukti perbaikan.
+   - Verifikasi **Closing (Tuntas)** oleh Auditor LPM.
+   - Pratinjau Cetak Berita Acara AMI & Formulir PTK berkop surat resmi kampus.
+4. **Widget Transparansi Publik**:
+   - Komponen `src/components/public/AmiTransparencyWidget.tsx` terpasang di beranda (`#ami`) terhubung ke endpoint `/api/public/ami`.
+
+---
+
+## 8. Status Kesiapan & Roadmap Fase Selanjutnya
+
+1. **Fase 1 - 4 (Selesai)**: Portal Mutu Publik, Siklus PPEPP, Radar RAG Early Warning, Dashboard Internal, Ekspor CSV & Laporan PDF Resmi.
+2. **Fase 5 (Selesai)**: Modul AMI Digital & Manajemen Temuan KTS/OB 10 Unit STIMI YAPMI.
+3. **Roadmap Fase 6 s/d 8**:
+   - **Fase 6**: Matriks Akreditasi Institusi & Program Studi (LAMEMBA 9 Kriteria & Countdown Masa Berlaku).
+   - **Fase 7**: Modul Survei Kepuasan Stakeholder & Tracer Study Terintegrasi (Auto-supply IKU 2).
+   - **Fase 8**: AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED).
+
 
 
