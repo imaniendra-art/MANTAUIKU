@@ -15,7 +15,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   ShieldCheck,
-  Award
+  Award,
+  GraduationCap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSidebar } from "./SidebarContext";
@@ -58,6 +59,12 @@ export default function Sidebar() {
       href: "/dashboard/accreditation", 
       icon: Award,
       description: "LAMEMBA & Pemantauan DL-05"
+    },
+    { 
+      name: "Evaluasi & Tracer", 
+      href: "/dashboard/evaluations", 
+      icon: GraduationCap,
+      description: "EDO, EKA & Tracer Study (IKU 2)"
     },
     { 
       name: "Arsip Laporan", 

@@ -18,6 +18,7 @@ import PublicIndicatorsShowcase from "@/components/public/PublicIndicatorsShowca
 import QualityDocumentCenter from "@/components/public/QualityDocumentCenter";
 import AmiTransparencyWidget from "@/components/public/AmiTransparencyWidget";
 import AccreditationWidget from "@/components/public/AccreditationWidget";
+import EvaluationsWidget from "@/components/public/EvaluationsWidget";
 
 export default function HomePage() {
   return (
@@ -64,6 +65,9 @@ export default function HomePage() {
             </Link>
             <Link href="#ami" className="hover:text-sky-700 transition-colors">
               Audit (AMI)
+            </Link>
+            <Link href="#survei" className="hover:text-sky-700 transition-colors">
+              Survei & Tracer
             </Link>
             <Link href="#iku" className="hover:text-sky-700 transition-colors">
               12 IKU
@@ -301,8 +305,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. Section Fase 3: Etalase 12 IKU Publik Interaktif */}
-      <section id="iku" className="py-20 bg-slate-50/60">
+      {/* 6. Section Fase 7: Pusat Survei Mutu (EDO/EKA) & Tracer Study Alumni */}
+      <section id="survei" className="py-20 bg-slate-50/70 border-t border-slate-200/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <EvaluationsWidget />
+        </div>
+      </section>
+
+      {/* 7. Section Fase 3: Etalase 12 IKU Publik Interaktif */}
+      <section id="iku" className="py-20 bg-white border-t border-slate-200/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-cyan-50 text-cyan-700 border border-cyan-100">
@@ -320,8 +331,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. Section Fase 4: Dokumen Kebijakan & Standar SPMI */}
-      <section id="dokumen" className="py-20 bg-white border-t border-slate-200/70">
+      {/* 8. Section Fase 4: Dokumen Kebijakan & Standar SPMI */}
+      <section id="dokumen" className="py-20 bg-slate-50/60 border-t border-slate-200/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
@@ -339,7 +350,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. Footer Resmi Institusi */}
+      {/* 9. Footer Resmi Institusi */}
       <footer className="mt-auto bg-slate-950 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -364,6 +375,7 @@ export default function HomePage() {
               <Link href="#akreditasi" className="hover:text-white transition-colors">Akreditasi</Link>
               <Link href="#ppepp" className="hover:text-white transition-colors">Siklus PPEPP</Link>
               <Link href="#ami" className="hover:text-white transition-colors">Audit Mutu (AMI)</Link>
+              <Link href="#survei" className="hover:text-white transition-colors">Survei & Tracer</Link>
               <Link href="#iku" className="hover:text-white transition-colors">12 IKU</Link>
               <Link href="#dokumen" className="hover:text-white transition-colors">Dokumen Mutu</Link>
               <Link href="/login" className="text-cyan-400 hover:text-cyan-300 font-bold transition-colors">

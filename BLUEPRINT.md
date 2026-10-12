@@ -162,14 +162,39 @@ Mengakomodasi standar akreditasi **LAMEMBA** (Lembaga Akreditasi Mandiri Ekonomi
 
 ---
 
-## 9. Status Kesiapan & Roadmap Fase Selanjutnya
+## 9. Fase 7 (Selesai): Pusat Evaluasi Terpadu (EDO, EKA via SIAM Sync, Tracer Study & Survei Pengguna)
+
+Mengintegrasikan seluruh siklus umpan balik *Continuous Quality Improvement (CQI)* pemangku kepentingan:
+1. **EDO (Evaluasi Dosen oleh Mahasiswa - SIAM Sync)**:
+   - Data primer dikumpulkan langsung di portal SIAM sebelum mahasiswa mengisi KRS/melihat KHS.
+   - Endpoint jembatan (`/api/integrations/siam/sync`) dan analitik (`/api/evaluations/edo`).
+   - Rata-rata IKD institusi: **3.66 / 4.00** (Predikat Sangat Baik) mencakup 4 dimensi: Pedagogik (3.63), Profesional (3.69), Kepribadian (3.67), dan Sosial (3.65).
+2. **EKA (Evaluasi Layanan Akademik 10 UPT - SIAM Sync)**:
+   - Penilaian kepuasan mahasiswa terhadap 10 unit organisasi kampus (`/api/evaluations/eka`).
+   - Rata-rata kepuasan layanan: **88.5% (3.54 / 4.00)**.
+   - Deteksi dini penjaminan mutu otomatis: memberikan peringatan dini (*warning trigger*) pada unit dengan skor di bawah ambang batas 85% untuk penerbitan Formulir PTK.
+3. **Tracer Study Alumni & Auto-Supply IKU 2**:
+   - Formulir responsif publik (`/api/public/tracer-study`) untuk alumni S1 Manajemen.
+   - **Fitur Kunci**: Setiap kali alumni mengirim data pelacakan, sistem secara atomik menghitung ulang rasio kelulusan yang terserap (*Bekerja + Wirausaha + Studi Lanjut*) dan **langsung meng-update capaian IKU 2** di koleksi `Achievement` database MongoDB Atlas!
+   - Tingkat serapan kerja saat ini: **87.5%** (Target IKU 2: 80% - Terlampaui), rata-rata waktu tunggu: **2.8 Bulan**.
+4. **Survei Kepuasan Pengguna Lulusan (Mitra Industri & BUMN)**:
+   - Evaluasi langsung oleh atasan alumni di instansi mitra (`/api/public/employer-survey`).
+   - Rata-rata indeks kepuasan: **93.5% (3.74 / 4.00)** pada 7 kompetensi: Etika & Integritas, Keahlian Manajemen, Bahasa Asing, TI & Digital, Komunikasi, Kerjasama Tim, dan Pengembangan Diri.
+5. **Dashboard Internal & Widget Publik**:
+   - Dashboard eksekutif 4-tab: [`src/app/dashboard/evaluations/page.tsx`](file:///c:/Users/imani/Documents/GitHub/MANTAUIKU/src/app/dashboard/evaluations/page.tsx) dengan tombol live *Tarik Data dari SIAM*.
+   - Navigasi sidebar terpadu: item *Evaluasi & Tracer* ([`src/components/layout/Sidebar.tsx`](file:///c:/Users/imani/Documents/GitHub/MANTAUIKU/src/components/layout/Sidebar.tsx)).
+   - Widget publik interaktif: [`src/components/public/EvaluationsWidget.tsx`](file:///c:/Users/imani/Documents/GitHub/MANTAUIKU/src/components/public/EvaluationsWidget.tsx) terpasang di beranda ([`src/app/page.tsx`](file:///c:/Users/imani/Documents/GitHub/MANTAUIKU/src/app/page.tsx) `#survei`).
+
+---
+
+## 10. Status Kesiapan & Roadmap Fase Selanjutnya
 
 1. **Fase 1 - 4 (Selesai)**: Portal Mutu Publik, Siklus PPEPP, Radar RAG Early Warning, Dashboard Internal Atlas, Ekspor CSV & Laporan PDF Resmi.
 2. **Fase 5 (Selesai)**: Modul AMI Digital & Manajemen Temuan KTS/OB 10 Unit STIMI YAPMI.
 3. **Fase 6 (Selesai)**: Matriks Akreditasi LAMEMBA 9 Kriteria, Countdown PEPA, & Pemantauan Tahunan Wajib Lampiran DL-05.
-4. **Roadmap Fase 7 & 8**:
-   - **Fase 7**: Modul Survei Kepuasan Stakeholder & Tracer Study Terintegrasi (Auto-supply IKU 2).
-   - **Fase 8**: AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED).
+4. **Fase 7 (Selesai)**: Pusat Evaluasi Terpadu EDO, EKA (SIAM Sync), Tracer Study (Auto-Supply IKU 2), dan Survei Pengguna Lulusan.
+5. **Roadmap Fase 8**:
+   - **Fase 8**: AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED) Akreditasi.
 
 
 
