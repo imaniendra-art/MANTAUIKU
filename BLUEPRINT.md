@@ -137,14 +137,40 @@ Mengakomodasi struktur organisasi resmi STIMI YAPMI Makassar dan standar akredit
 
 ---
 
-## 8. Status Kesiapan & Roadmap Fase Selanjutnya
+---
 
-1. **Fase 1 - 4 (Selesai)**: Portal Mutu Publik, Siklus PPEPP, Radar RAG Early Warning, Dashboard Internal, Ekspor CSV & Laporan PDF Resmi.
+## 8. Fase 6 (Selesai): Matriks Akreditasi LAMEMBA 9 Kriteria & Pemantauan Tahunan Wajib DL-05
+
+Mengakomodasi standar akreditasi **LAMEMBA** (Lembaga Akreditasi Mandiri Ekonomi Manajemen Bisnis dan Akuntansi) dan **BAN-PT SAN Dikti 2025**:
+1. **Profil Akreditasi & Countdown PEPA**:
+   - Institusi: STIMI YAPMI Makassar (BAN-PT, "Baik Sekali", SK No. 488/SK/BAN-PT/Ak/PT/VIII/2023, s.d. 2028).
+   - Program Studi: S1 Manajemen (LAMEMBA, "Baik Sekali", SK No. 128/DE/A.1/AR.8/VII/2023, s.d. 2028).
+   - Countdown otomatis sisa masa berlaku (Hari & Bulan) dengan status PEPA: Aman (>12 bulan), Waspada (6-12 bulan), Kritis (<6 bulan).
+2. **Matriks Evaluasi 9 Kriteria LAMEMBA**:
+   - Simulasi skor kesiapan terbobot: 85.3 / 100 (Threshold Kategori Peringkat **UNGGUL**).
+   - Evaluasi rinci Kriteria C.1 s.d. C.9 dengan bobot persentase, kekuatan utama, dan rekomendasi peningkatan.
+3. **Instrumen Pemantauan & Evaluasi Tahunan Wajib (Lampiran DL-05 LAMEMBA)**:
+   - **Bagian 1**: Tindak Lanjut Rekomendasi Asesmen Lapangan Terakhir (Status Selesai / Sedang Berjalan + Bukti Dukung).
+   - **Bagian 2**: Kemajuan Implementasi Renstra & Continuous Quality Improvement (CQI).
+   - **Bagian 3**: Evaluasi Kinerja Tiga Pilar Kunci:
+     - *Jaminan Pembelajaran (AoL)*: Ketercapaian CPL 88%, RPS OBE 94%.
+     - *Kecukupan Dosen Tetap*: 18 Dosen Tetap, Doktor S3 33%, Lektor/Lektor Kepala 61%, Rasio 1:24.
+     - *Luaran Tridharma*: IPK 3.42, Waktu Tunggu 3.2 Bulan, Tracer Study Response Rate 78%.
+   - Pratinjau Dokumen Cetak / PDF Resmi format baku Lampiran DL-05 LAMEMBA dengan lembar pengesahan tanda tangan Kaprodi, Ketua LPM, dan Ketua STIMI YAPMI.
+4. **Widget Transparansi Publik (`#akreditasi`)**:
+   - Terintegrasi di halaman depan ([`src/components/public/AccreditationWidget.tsx`](file:///c:/Users/imani/Documents/GitHub/MANTAUIKU/src/components/public/AccreditationWidget.tsx)) terhubung ke `/api/public/accreditation`.
+
+---
+
+## 9. Status Kesiapan & Roadmap Fase Selanjutnya
+
+1. **Fase 1 - 4 (Selesai)**: Portal Mutu Publik, Siklus PPEPP, Radar RAG Early Warning, Dashboard Internal Atlas, Ekspor CSV & Laporan PDF Resmi.
 2. **Fase 5 (Selesai)**: Modul AMI Digital & Manajemen Temuan KTS/OB 10 Unit STIMI YAPMI.
-3. **Roadmap Fase 6 s/d 8**:
-   - **Fase 6**: Matriks Akreditasi Institusi & Program Studi (LAMEMBA 9 Kriteria & Countdown Masa Berlaku).
+3. **Fase 6 (Selesai)**: Matriks Akreditasi LAMEMBA 9 Kriteria, Countdown PEPA, & Pemantauan Tahunan Wajib Lampiran DL-05.
+4. **Roadmap Fase 7 & 8**:
    - **Fase 7**: Modul Survei Kepuasan Stakeholder & Tracer Study Terintegrasi (Auto-supply IKU 2).
    - **Fase 8**: AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED).
+
 
 
 

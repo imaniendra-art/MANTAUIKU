@@ -17,6 +17,7 @@ import EarlyWarningSystem from "@/components/public/EarlyWarningSystem";
 import PublicIndicatorsShowcase from "@/components/public/PublicIndicatorsShowcase";
 import QualityDocumentCenter from "@/components/public/QualityDocumentCenter";
 import AmiTransparencyWidget from "@/components/public/AmiTransparencyWidget";
+import AccreditationWidget from "@/components/public/AccreditationWidget";
 
 export default function HomePage() {
   return (
@@ -48,18 +49,21 @@ export default function HomePage() {
           </Link>
 
           {/* Navigasi Utama */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
+          <nav className="hidden md:flex items-center gap-5 text-xs font-bold text-slate-600">
             <Link href="#beranda" className="text-sky-700 hover:text-sky-800 transition-colors">
               Beranda
+            </Link>
+            <Link href="#akreditasi" className="hover:text-sky-700 transition-colors">
+              Akreditasi
             </Link>
             <Link href="#ppepp" className="hover:text-sky-700 transition-colors">
               Siklus PPEPP
             </Link>
             <Link href="#deteksi" className="hover:text-sky-700 transition-colors">
-              Deteksi Dini (RAG)
+              Deteksi Dini
             </Link>
             <Link href="#ami" className="hover:text-sky-700 transition-colors">
-              Audit Mutu (AMI)
+              Audit (AMI)
             </Link>
             <Link href="#iku" className="hover:text-sky-700 transition-colors">
               12 IKU
@@ -221,6 +225,25 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 3. Section Fase 6: Status Akreditasi BAN-PT & LAMEMBA S1 Manajemen */}
+      <section id="akreditasi" className="py-20 bg-slate-50/80 border-b border-slate-200/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-cyan-50 text-cyan-800 border border-cyan-200">
+              Legalitas Formal • BAN-PT & LAMEMBA Edisi Terkini
+            </span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+              Status Akreditasi & Pemantauan Tahunan DL-05
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Transparansi status peringkat akreditasi institusi dan program studi, simulasi pemenuhan 9 Kriteria LAMEMBA, serta pelaporan evaluasi berkala tahunan sesuai format resmi Lampiran DL-05 LAMEMBA.
+            </p>
+          </div>
+
+          <AccreditationWidget />
+        </div>
+      </section>
+
       {/* 4. Section Fase 2: Siklus PPEPP SPMI Interaktif */}
       <section id="ppepp" className="py-20 bg-white border-y border-slate-200/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -338,6 +361,7 @@ export default function HomePage() {
 
             <div className="flex flex-wrap items-center gap-6 text-xs font-semibold text-slate-300">
               <Link href="#beranda" className="hover:text-white transition-colors">Beranda</Link>
+              <Link href="#akreditasi" className="hover:text-white transition-colors">Akreditasi</Link>
               <Link href="#ppepp" className="hover:text-white transition-colors">Siklus PPEPP</Link>
               <Link href="#ami" className="hover:text-white transition-colors">Audit Mutu (AMI)</Link>
               <Link href="#iku" className="hover:text-white transition-colors">12 IKU</Link>

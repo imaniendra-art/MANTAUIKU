@@ -10,11 +10,12 @@ import {
   TrendingUp, 
   Archive, 
   Users, 
-  Building2,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  ShieldCheck
+  Building2, 
+  LogOut, 
+  ChevronLeft, 
+  ChevronRight, 
+  ShieldCheck,
+  Award
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSidebar } from "./SidebarContext";
@@ -51,6 +52,12 @@ export default function Sidebar() {
       href: "/dashboard/ami", 
       icon: ShieldCheck,
       description: "Siklus AMI & Temuan KTS/OB"
+    },
+    { 
+      name: "Akreditasi & DL-05", 
+      href: "/dashboard/accreditation", 
+      icon: Award,
+      description: "LAMEMBA & Pemantauan DL-05"
     },
     { 
       name: "Arsip Laporan", 
