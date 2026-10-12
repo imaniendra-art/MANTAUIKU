@@ -6,22 +6,16 @@ import {
   ShieldCheck, 
   TrendingUp, 
   Award, 
-  BookOpen, 
-  ArrowRight, 
-  ExternalLink,
   Target,
   Users,
-  Building2,
-  FileText,
-  ChevronDown,
   Sparkles,
-  Lock,
-  CheckCircle2,
-  AlertCircle
+  Lock
 } from "lucide-react";
 import { motion } from "framer-motion";
 import PPEPPSycle from "@/components/public/PPEPPSycle";
 import EarlyWarningSystem from "@/components/public/EarlyWarningSystem";
+import PublicIndicatorsShowcase from "@/components/public/PublicIndicatorsShowcase";
+import QualityDocumentCenter from "@/components/public/QualityDocumentCenter";
 
 export default function HomePage() {
   return (
@@ -261,72 +255,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. Placeholder Section untuk Fase 3: Etalase 12 IKU */}
-      <section id="iku" className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 text-center">
-          <div className="max-w-2xl mx-auto space-y-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-cyan-50 text-cyan-700 border border-cyan-100">
-              Transparansi Kinerja 2026
+      {/* 5. Section Fase 3: Etalase 12 IKU Publik Interaktif */}
+      <section id="iku" className="py-20 bg-slate-50/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-cyan-50 text-cyan-700 border border-cyan-100">
+              Transparansi Kinerja 2026 • Terverifikasi LPM
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
               Etalase 12 Indikator Kinerja Utama
             </h2>
-            <p className="text-xs text-slate-500">
-              Pantau capaian riil per indikator kinerja berdasarkan data yang telah diverifikasi oleh Lembaga Penjaminan Mutu.
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Pantau realisasi capaian triwulanan terhadap target tahunan 2026 yang telah diverifikasi oleh Lembaga Penjaminan Mutu, lengkap dengan riwayat triwulan dan dokumen bukti dukung publik.
             </p>
           </div>
 
-          <div className="p-8 bg-white rounded-3xl border border-slate-200/80 text-center max-w-xl mx-auto space-y-4">
-            <TrendingUp className="w-10 h-10 text-sky-600 mx-auto" />
-            <h4 className="font-extrabold text-slate-900 text-sm">
-              Modul Etalase 12 IKU Interaktif
-            </h4>
-            <p className="text-xs text-slate-500">
-              Data real-time dari database MongoDB akan diintegrasikan secara komprehensif pada Fase 3.
-            </p>
-            <Link 
-              href="/login"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold text-xs transition-colors"
-            >
-              <span>Masuk untuk melihat detail internal</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+          <PublicIndicatorsShowcase />
         </div>
       </section>
 
-      {/* 6. Placeholder Section untuk Fase 4: Dokumen Mutu */}
-      <section id="dokumen" className="py-16 bg-white border-t border-slate-200/70">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 text-center">
-          <div className="max-w-2xl mx-auto space-y-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-              Keterbukaan Informasi Publik
+      {/* 6. Section Fase 4: Dokumen Kebijakan & Standar SPMI */}
+      <section id="dokumen" className="py-20 bg-white border-t border-slate-200/70">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+              Keterbukaan Informasi Publik & Akuntabilitas SPMI
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
-              Dokumen Kebijakan & Standar SPMI
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+              Pusat Dokumen Kebijakan & Standar Mutu
             </h2>
-            <p className="text-xs text-slate-500">
-              Dokumen kebijakan mutu, manual penjaminan mutu, dan sertifikat akreditasi yang dapat diakses publik.
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Akses instrumen kebijakan SPMI, buku standar IKU, manual PPEPP, dan ringkasan eksekutif laporan Audit Mutu Internal (AMI) sesuai standar Permendiktisaintek No. 39/2025 jo. No. 10/2026 dan LAMEMBA.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto text-left">
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-              <FileText className="w-5 h-5 text-sky-600 mb-2" />
-              <h5 className="font-bold text-slate-900 text-xs">Kebijakan SPMI 2026</h5>
-              <p className="text-[11px] text-slate-500">Pedoman umum sistem penjaminan mutu internal kampus.</p>
-            </div>
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-              <FileText className="w-5 h-5 text-sky-600 mb-2" />
-              <h5 className="font-bold text-slate-900 text-xs">Standar Mutu IKU PT</h5>
-              <p className="text-[11px] text-slate-500">Buku standar pengukuran 12 indikator kinerja institusi.</p>
-            </div>
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-              <FileText className="w-5 h-5 text-sky-600 mb-2" />
-              <h5 className="font-bold text-slate-900 text-xs">Sertifikat Akreditasi</h5>
-              <p className="text-[11px] text-slate-500">Legalitas akreditasi institusi dan prodi STIMI YAPMI.</p>
-            </div>
-          </div>
+          <QualityDocumentCenter />
         </div>
       </section>
 

@@ -5,9 +5,25 @@ import connectToDatabase from "@/lib/db";
 import IKUMetadata from "@/models/IKUMetadata";
 import Target from "@/models/Target";
 import Achievement from "@/models/Achievement";
-import User from "@/models/User";
 
 export const dynamic = "force-dynamic";
+
+interface AchievementDoc {
+  _id: { toString(): string };
+  ikuId: string | { _id: { toString(): string }; code?: string; name?: string; cluster?: string; unit?: string };
+  year: number;
+  quarter: number;
+  value?: number;
+  documentUrl?: string;
+  status: string;
+  submittedBy?: {
+    name?: string;
+    email?: string;
+    unitCode?: string;
+    unitName?: string;
+  };
+  updatedAt?: Date;
+}
 
 export async function GET(req: Request) {
   try {
@@ -37,15 +53,18 @@ export async function GET(req: Request) {
     });
 
     // 3. Fetch Achievements for the year and quarter
-    const achievements = await Achievement.find({
+    const achievementsRaw = await Achievement.find({
       ikuId: { $in: ikuIds },
       year,
       quarter,
     }).populate("submittedBy", "name email unitCode unitName");
 
-    const achievementMap = new Map<string, any>();
+    const achievements = achievementsRaw as unknown as AchievementDoc[];
+
+    const achievementMap = new Map<string, AchievementDoc>();
     achievements.forEach((a) => {
-      achievementMap.set(a.ikuId.toString(), a);
+      const idKey = typeof a.ikuId === "object" && a.ikuId !== null ? a.ikuId._id.toString() : String(a.ikuId);
+      achievementMap.set(idKey, a);
     });
 
     // 4. Calculate Stats
@@ -59,14 +78,13 @@ export async function GET(req: Request) {
       const tgt = targetMap.get(iku._id.toString())?.target || 0;
       const base = targetMap.get(iku._id.toString())?.baseline || 0;
       const ach = achievementMap.get(iku._id.toString());
-      const value = ach ? ach.value : 0;
-      const status = ach ? ach.status : "Belum";
+      const value = ach ? ach.value || 0 : 0;
+      const status = ach ? ach.status : "Belum Diisi";
 
+      // Calculate percentage against target
       let percentage = 0;
       if (tgt > 0) {
-        percentage = Math.min(100, Math.round((value / tgt) * 100));
-      } else if (value > 0) {
-        percentage = 100;
+        percentage = Math.min(Math.round((value / tgt) * 100), 100);
       }
 
       return {
@@ -81,33 +99,36 @@ export async function GET(req: Request) {
         realized: value,
         percentage,
         status,
+        hasDocument: !!ach?.documentUrl,
         documentUrl: ach?.documentUrl || "",
-        updatedAt: ach?.updatedAt || null,
       };
     });
 
-    // Sort numerically by IKU code
-    chartData.sort((a, b) => {
-      const numA = parseInt(a.code.replace(/\D/g, "")) || 0;
-      const numB = parseInt(b.code.replace(/\D/g, "")) || 0;
-      return numA - numB;
-    });
-
-    // 6. Calculate Clusters Progress
-    const clusterDefinitions = [
+    // 6. Cluster Aggregation
+    const clusterConfig = [
       {
         id: "talenta",
         title: "Klaster 1: Talenta & Mahasiswa",
         ikurange: "IKU 1, IKU 2, IKU 3",
         pic: "WK III (Kemahasiswaan & Alumni)",
         codes: ["IKU 1", "IKU 2", "IKU 3"],
+        items: [
+          "Angka Efisiensi Edukasi (AEE PT)",
+          "Lulusan Bekerja / Wirausaha / Lanjut Studi",
+          "Prestasi & MBKM di Luar Kampus",
+        ],
       },
       {
         id: "inovasi",
         title: "Klaster 2: Inovasi & Riset",
         ikurange: "IKU 4, IKU 5, IKU 6",
-        pic: "WK I & WK II (Kerjasama)",
+        pic: "WK I (Akademik) & WK II (Kerjasama)",
         codes: ["IKU 4", "IKU 5", "IKU 6"],
+        items: [
+          "Dosen Rekognisi Internasional & Diterapkan",
+          "Hilirisasi & Kerjasama Industri / Lembaga",
+          "Publikasi Bereputasi SINTA / Scopus",
+        ],
       },
       {
         id: "tatakelola",
@@ -115,36 +136,32 @@ export async function GET(req: Request) {
         ikurange: "IKU 7 - IKU 12",
         pic: "Tim Tata Pamong & Keuangan",
         codes: ["IKU 7", "IKU 8", "IKU 9", "IKU 10", "IKU 11", "IKU 12"],
+        items: [
+          "Keterlibatan SDGs & Perumusan Kebijakan",
+          "Pendapatan Non-UKT & Tata Kelola Keuangan",
+          "Zona Integritas (WBK/WBBM) & Kesejahteraan",
+        ],
       },
     ];
 
-    const clusters = clusterDefinitions.map((c) => {
-      const matchedItems = chartData.filter((item) => c.codes.includes(item.code));
-      const totalItems = matchedItems.length;
-      const totalProgress = matchedItems.reduce((acc, curr) => acc + curr.percentage, 0);
-      const avgProgress = totalItems > 0 ? Math.round(totalProgress / totalItems) : 0;
+    const clusters = clusterConfig.map((cfg) => {
+      const clusterItems = chartData.filter((i) => cfg.codes.includes(i.code));
+      const totalClusterPercentage = clusterItems.reduce((acc, curr) => acc + curr.percentage, 0);
+      const avgProgress = clusterItems.length > 0 ? Math.round(totalClusterPercentage / clusterItems.length) : 0;
 
-      let statusBadge = "Belum Ada Data";
-      if (avgProgress >= 80) statusBadge = "Sesuai Target";
-      else if (avgProgress >= 50) statusBadge = "On Track";
-      else if (matchedItems.some((m) => m.status === "pendingDiajukan")) statusBadge = "Perlu Validasi";
-      else if (avgProgress > 0) statusBadge = "Dalam Proses";
+      let statusBadge = "On Track";
+      if (avgProgress < 50) statusBadge = "Perlu Bukti";
+      else if (avgProgress >= 80) statusBadge = "Sesuai Target";
 
       return {
-        id: c.id,
-        title: c.title,
-        ikurange: c.ikurange,
-        pic: c.pic,
+        id: cfg.id,
+        title: cfg.title,
+        ikurange: cfg.ikurange,
+        pic: cfg.pic,
         progress: avgProgress,
         status: statusBadge,
-        items: matchedItems.map((m) => ({
-          code: m.code,
-          name: m.name,
-          realized: m.realized,
-          target: m.target,
-          unit: m.unit,
-          status: m.status,
-        })),
+        items: cfg.items,
+        codes: cfg.codes,
       };
     });
 
@@ -155,7 +172,26 @@ export async function GET(req: Request) {
       .populate("ikuId", "code name cluster unit")
       .populate("submittedBy", "name email unitCode unitName");
 
-    const recentActivities = recentActivitiesRaw.map((act: any) => ({
+    interface PopulatedActivity {
+      _id: { toString(): string };
+      ikuId?: {
+        code?: string;
+        name?: string;
+        cluster?: string;
+        unit?: string;
+      };
+      submittedBy?: {
+        name?: string;
+        unitCode?: string;
+        unitName?: string;
+      };
+      status: string;
+      quarter: number;
+      value: number;
+      updatedAt?: Date;
+    }
+
+    const recentActivities = (recentActivitiesRaw as unknown as PopulatedActivity[]).map((act) => ({
       _id: act._id.toString(),
       ikuCode: act.ikuId?.code || "IKU",
       ikuName: act.ikuId?.name || "Indikator",

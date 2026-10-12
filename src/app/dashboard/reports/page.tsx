@@ -1,18 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { 
   Download, 
   FolderArchive, 
   Printer, 
   FileSpreadsheet, 
-  CheckCircle2, 
-  Clock, 
-  AlertCircle,
-  X,
-  Building,
-  TrendingUp,
-  FileCheck
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -62,24 +56,28 @@ export default function ReportsPage() {
   const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [printQuarter, setPrintQuarter] = useState<number | null>(null);
 
-  const fetchReports = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/reports/summary?year=${selectedYear}`);
-      const json = await res.json();
-      if (json.success) {
-        setData(json);
-      }
-    } catch (err) {
-      console.error("Gagal memuat rekap laporan:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedYear]);
-
   useEffect(() => {
-    fetchReports();
-  }, [fetchReports]);
+    let isSubscribed = true;
+    async function loadReports() {
+      try {
+        const res = await fetch(`/api/reports/summary?year=${selectedYear}`);
+        const json = await res.json();
+        if (isSubscribed && json.success) {
+          setData(json);
+        }
+      } catch (err) {
+        console.error("Gagal memuat rekap laporan:", err);
+      } finally {
+        if (isSubscribed) {
+          setLoading(false);
+        }
+      }
+    }
+    loadReports();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [selectedYear]);
 
   const handleDownloadCSV = (quarter: number) => {
     const url = `/api/reports/export?type=achievements&year=${selectedYear}&quarter=${quarter}`;

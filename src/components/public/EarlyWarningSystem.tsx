@@ -5,11 +5,7 @@ import {
   AlertCircle, 
   CheckCircle2, 
   Clock, 
-  TrendingUp, 
-  ShieldAlert, 
   Filter,
-  ArrowUpRight,
-  Sparkles,
   Info
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -274,7 +270,6 @@ export default function EarlyWarningSystem() {
           {filtered.map((item) => {
             const isGreen = item.status === "HIJAU";
             const isAmber = item.status === "KUNING";
-            const isRed = item.status === "MERAH";
 
             return (
               <motion.div

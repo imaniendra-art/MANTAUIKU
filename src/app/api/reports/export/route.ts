@@ -5,7 +5,6 @@ import connectToDatabase from "@/lib/db";
 import IKUMetadata from "@/models/IKUMetadata";
 import Target from "@/models/Target";
 import Achievement from "@/models/Achievement";
-import User from "@/models/User";
 
 export const dynamic = "force-dynamic";
 

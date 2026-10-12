@@ -12,13 +12,11 @@ import {
   Users, 
   ChevronRight, 
   Sparkles,
-  RefreshCw,
-  Award,
   AlertCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 interface SummaryData {
   stats: {
@@ -79,24 +77,28 @@ export default function DashboardPage() {
   const userRole = session?.user?.role;
   const assignedIKUs = session?.user?.assignedIKUCodes || [];
 
-  const fetchDashboardData = useCallback(async (quarter: number) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/dashboard/summary?year=2026&quarter=${quarter}`);
-      const json = await res.json();
-      if (json.success) {
-        setData(json);
-      }
-    } catch (err) {
-      console.error("Gagal memuat data ringkasan dashboard:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchDashboardData(selectedQuarter);
-  }, [selectedQuarter, fetchDashboardData]);
+    let isSubscribed = true;
+    async function loadData() {
+      try {
+        const res = await fetch(`/api/dashboard/summary?year=2026&quarter=${selectedQuarter}`);
+        const json = await res.json();
+        if (isSubscribed && json.success) {
+          setData(json);
+        }
+      } catch (err) {
+        console.error("Gagal memuat data ringkasan dashboard:", err);
+      } finally {
+        if (isSubscribed) {
+          setLoading(false);
+        }
+      }
+    }
+    loadData();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [selectedQuarter]);
 
   const formatTimeAgo = (dateString?: string) => {
     if (!dateString) return "Baru saja";

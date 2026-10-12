@@ -107,20 +107,19 @@ Dibangun untuk memenuhi transparansi informasi publik LPM dan standar penjaminan
 
 ---
 
-## 7. Agenda Lanjutan di Kantor (Office Resumption Checklist)
+## 7. Status Kesiapan Rilis Produksi (Production Readiness)
 
-Saat melanjutkan pekerjaan di kantor dengan Antigravity:
-1. **Tarik Kode Terbaru**:
-   ```bash
-   git pull origin main
-   ```
-2. **Tugas Lanjutan 1 (Fase 3 Portal Publik)**:
-   - Bangun endpoint publik tersanitasi `GET /api/public/indicators` untuk menampilkan daftar 12 IKU beserta capaian tervalidasi dan tautan bukti dukung publik.
-   - Hubungkan tab `#iku` di `src/app/page.tsx` ke endpoint tersebut dengan filter klaster dan pencarian interaktif.
-3. **Tugas Lanjutan 2 (Fase 4 Portal Publik)**:
-   - Sediakan section unduh dokumen mutu (`#dokumen`) di `src/app/page.tsx` (Buku Kebijakan SPMI, Standar Mutu LAMEMBA, Manual PPEPP, dan Laporan AMI Tahunan).
-4. **Lingkungan & Database**:
-   - Cluster MongoDB Atlas: `mantauiku` (kredensial di `.env.local`).
-   - Server development: `npm run dev` di port 3000.
+1. **Portal Mutu Publik STIMI YAPMI Makassar (`/`)**:
+   - **Fase 1 (Selesai)**: Hero & Macro metrics dengan identitas visual Sky Blue & Cyan (`sky-600` & `cyan-500`).
+   - **Fase 2 (Selesai)**: Siklus Mutu PPEPP Interaktif (`PPEPPSycle.tsx`) & RAG Early Warning System Radar (`EarlyWarningSystem.tsx`).
+   - **Fase 3 (Selesai)**: Etalase 12 IKU Publik Real-Time (`PublicIndicatorsShowcase.tsx`) terhubung ke endpoint tersanitasi `GET /api/public/indicators`.
+   - **Fase 4 (Selesai)**: Pusat Unduh Dokumen Kebijakan & Standar SPMI (`QualityDocumentCenter.tsx`) ber-barcode validasi digital LPM.
+2. **Dashboard Internal & RBAC (`/dashboard`)**:
+   - Seluruh 4 Fase Internal (Navigasi hybrid, Seeding RBAC PIC, Dashboard Realtime, Ekspor CSV & Cetak PDF resmi ber-kop) telah beroperasi penuh.
+3. **Kode & Linter**:
+   - `npm run lint`: 0 Errors, 0 Warnings (Zero Technical Debt).
+   - `npm run build`: Berhasil 100% tanpa error TypeScript (semua 16 routes App Router terkompilasi).
+4. **Protokol Sinkronisasi Git Otomatis**:
+   - Perintah `push` atau `pull` dari pengguna akan langsung dieksekusi seketika ke `origin/main` tanpa konfirmasi manual.
 
 

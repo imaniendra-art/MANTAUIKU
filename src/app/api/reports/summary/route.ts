@@ -43,10 +43,19 @@ export async function GET(req: Request) {
       "name email unitCode unitName"
     );
 
+interface AchievementDoc {
+  _id: { toString(): string };
+  ikuId: string | { toString(): string };
+  quarter: number;
+  year: number;
+  value?: number;
+  status: string;
+}
+
     // Map achievements by ikuId and quarter
-    const achMatrix = new Map<string, Map<number, any>>();
-    achievements.forEach((a) => {
-      const key = a.ikuId.toString();
+    const achMatrix = new Map<string, Map<number, AchievementDoc>>();
+    (achievements as unknown as AchievementDoc[]).forEach((a) => {
+      const key = typeof a.ikuId === "object" && a.ikuId !== null ? a.ikuId.toString() : String(a.ikuId);
       if (!achMatrix.has(key)) {
         achMatrix.set(key, new Map());
       }
@@ -66,8 +75,8 @@ export async function GET(req: Request) {
       allIKUs.forEach((iku) => {
         const tgt = targetMap.get(iku._id.toString())?.target || 0;
         const ach = achMatrix.get(iku._id.toString())?.get(q);
-        if (tgt > 0 && ach) {
-          totalPct += Math.min(100, Math.round((ach.value / tgt) * 100));
+        if (tgt > 0 && ach && ach.value !== undefined) {
+          totalPct += Math.min(100, Math.round(((ach.value || 0) / tgt) * 100));
           validCount++;
         }
       });
@@ -113,7 +122,7 @@ export async function GET(req: Request) {
       const qValues: Record<number, { value: number; status: string; pct: number }> = {};
       for (let q = 1; q <= 4; q++) {
         const ach = achMatrix.get(iku._id.toString())?.get(q);
-        const val = ach ? ach.value : 0;
+        const val = typeof ach?.value === "number" ? ach.value : 0;
         let pct = 0;
         if (targetVal > 0) {
           pct = Math.round((val / targetVal) * 100);

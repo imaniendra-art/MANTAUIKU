@@ -9,10 +9,7 @@ import {
   TrendingUp, 
   CheckCircle,
   FileText,
-  Users,
-  Calendar,
-  Sparkles,
-  ChevronRight
+  Users
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
