@@ -9,10 +9,10 @@ export const dynamic = "force-dynamic";
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
 
-  if (session?.user?.role !== "LPM") {
+  if (!session?.user) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Anda tidak memiliki akses ke halaman ini.
+      <div className="flex items-center justify-center h-64 text-slate-500 font-medium">
+        Silakan masuk terlebih dahulu untuk mengakses profil Anda.
       </div>
     );
   }
@@ -29,5 +29,21 @@ export default async function ProfilePage() {
     };
   }
 
-  return <ProfileClient initialProfile={profile} />;
+  const currentUser = {
+    id: session.user.id,
+    name: session.user.name || "Pengguna",
+    email: session.user.email || "",
+    role: session.user.role || "UNIT_KERJA",
+    unitCode: session.user.unitCode || "-",
+    unitName: session.user.unitName || "-",
+    assignedIKUCodes: session.user.assignedIKUCodes || [],
+  };
+
+  return (
+    <ProfileClient 
+      currentUser={currentUser} 
+      initialProfile={profile} 
+      isLPM={session.user.role === "LPM"} 
+    />
+  );
 }

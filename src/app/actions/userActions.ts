@@ -53,3 +53,60 @@ export async function deleteUserAction(id: string) {
   revalidatePath("/dashboard/users");
   return true;
 }
+
+export async function changePasswordAction(formData: FormData) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) throw new Error("Anda harus login terlebih dahulu.");
+
+  const currentPassword = formData.get("currentPassword") as string;
+  const newPassword = formData.get("newPassword") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    throw new Error("Semua kolom kata sandi wajib diisi");
+  }
+
+  if (newPassword.length < 6) {
+    throw new Error("Kata sandi baru minimal 6 karakter");
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw new Error("Konfirmasi kata sandi baru tidak cocok");
+  }
+
+  await connectDB();
+
+  const user = await User.findById(session.user.id);
+  if (!user) throw new Error("Pengguna tidak ditemukan");
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) {
+    throw new Error("Kata sandi lama yang Anda masukkan salah.");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  user.password = hashedPassword;
+  await user.save();
+
+  return { success: true, message: "Kata sandi Anda berhasil diperbarui!" };
+}
+
+export async function resetUserPasswordAction(userId: string, newPasswordRaw?: string) {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== "LPM") throw new Error("Hanya LPM yang dapat mereset kata sandi akun lain");
+
+  const passwordToSet = newPasswordRaw || "password123";
+  if (passwordToSet.length < 6) throw new Error("Kata sandi minimal 6 karakter");
+
+  await connectDB();
+
+  const user = await User.findById(userId);
+  if (!user) throw new Error("Pengguna tidak ditemukan");
+
+  const hashedPassword = await bcrypt.hash(passwordToSet, 10);
+  user.password = hashedPassword;
+  await user.save();
+
+  revalidatePath("/dashboard/users");
+  return { success: true, message: `Kata sandi untuk ${user.name} berhasil direset!` };
+}

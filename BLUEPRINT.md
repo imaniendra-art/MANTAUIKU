@@ -223,9 +223,23 @@ Mengadopsi fitur analitik terbaik dari `dashboard.unja.ac.id` untuk transparansi
    - Halaman [`/dashboard/reports`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/app/dashboard/reports/page.tsx): Setiap sel TW 1 s/d TW 4 pada tabel komparasi dapat diklik untuk membuka modal audit.
    - Ekspor CSV [`/api/reports/export`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/app/api/reports/export/route.ts): Dilengkapi kolom Numerator, Denominator, dan Formula Perhitungan Audit.
 
+## 12. Fase 10 (Selesai): Keamanan Akun, Fitur Ubah Kata Sandi Mandiri & Reset Administratif LPM
+
+Memastikan sistem siap dipakai secara nyata dengan tata kelola keamanan akun mandiri:
+1. **Akses Universal Halaman Profil (`/dashboard/profile`)**:
+   - Terbuka untuk seluruh peran terotentikasi (LPM, UNIT_KERJA/PIC, dan PIMPINAN).
+   - Menampilkan kartu identitas akun, unit kerja, dan daftar tanggung jawab IKU yang diawasi.
+2. **Fitur Ubah Kata Sandi Mandiri (`changePasswordAction`)**:
+   - Memverifikasi kata sandi lama via bcrypt sebelum mengizinkan pembaruan kata sandi baru (minimal 6 karakter).
+   - Dilengkapi konfirmasi kata sandi dan toggle intip sandi (show/hide password).
+3. **Reset Administratif Khusus LPM (`/dashboard/users`)**:
+   - Ketua/Admin LPM dapat mereset kata sandi akun PIC yang lupa password dengan 1 klik ke kata sandi default `password123` atau kata sandi kustom.
+4. **Pemisahan Tab Profil Institusi**:
+   - Pengaturan data resmi institusi kampus (nama Ketua, email resmi, nomor telepon, logo) tetap dikunci eksklusif untuk LPM.
+
 ---
 
-## 12. Status Kesiapan Rilis Produksi (Production Readiness)
+## 13. Status Kesiapan Rilis Produksi (Production Readiness)
 
 1. **Fase 1 - 4 (Selesai)**: Portal Mutu Publik, Siklus PPEPP, Radar RAG Early Warning, Dashboard Internal Atlas, Ekspor CSV & Laporan PDF Resmi.
 2. **Fase 5 (Selesai)**: Modul AMI Digital & Manajemen Temuan KTS/OB 10 Unit STIMI YAPMI.
@@ -233,6 +247,8 @@ Mengadopsi fitur analitik terbaik dari `dashboard.unja.ac.id` untuk transparansi
 4. **Fase 7 (Selesai)**: Pusat Evaluasi Terpadu EDO, EKA (SIAM Sync), Tracer Study (Auto-Supply IKU 2), dan Survei Pengguna Lulusan.
 5. **Fase 8 (Selesai)**: AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED) LAMEMBA 9 Kriteria.
 6. **Fase 9 (Selesai)**: Drill-Down Numerator & Denominator Interaktif serta Formula Audit Mutu (100% Benchmark UNJA Equivalent).
+7. **Fase 10 (Selesai)**: Keamanan Akun, Fitur Ubah Kata Sandi Mandiri & Reset Administratif LPM.
+
 
 
 

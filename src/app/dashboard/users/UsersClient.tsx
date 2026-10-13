@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, X, ShieldCheck } from "lucide-react";
-import { createUserAction, deleteUserAction } from "@/app/actions/userActions";
+import { Plus, Trash2, X, ShieldCheck, KeyRound } from "lucide-react";
+import { createUserAction, deleteUserAction, resetUserPasswordAction } from "@/app/actions/userActions";
 
 const allIKUOptions = [
   "IKU 1", "IKU 2", "IKU 3", "IKU 4", "IKU 5", "IKU 6",
@@ -34,6 +34,21 @@ export default function UsersClient({ initialUsers }: { initialUsers: UserItem[]
       } catch {
         alert("Gagal menghapus user");
       }
+    }
+  };
+
+  const handleResetPassword = async (user: UserItem) => {
+    const newPass = prompt(
+      `Reset kata sandi untuk ${user.name} (${user.email}). Masukkan kata sandi baru (kosongkan untuk default 'password123'):`,
+      "password123"
+    );
+    if (newPass === null) return;
+    try {
+      const res = await resetUserPasswordAction(user._id, newPass || "password123");
+      alert(res.message);
+    } catch (err: unknown) {
+      const error = err as Error;
+      alert("Gagal mereset kata sandi: " + error.message);
     }
   };
 
@@ -153,14 +168,25 @@ export default function UsersClient({ initialUsers }: { initialUsers: UserItem[]
                   </td>
 
                   <td className="py-4 px-6 align-middle text-center">
-                    {!isAdmin && (
-                      <button 
-                        onClick={() => handleDelete(u._id)} 
-                        title="Hapus akun"
-                        className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    {!isAdmin ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => handleResetPassword(u)}
+                          title="Reset kata sandi pengguna"
+                          className="p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-xl transition-colors cursor-pointer"
+                        >
+                          <KeyRound className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(u._id)} 
+                          title="Hapus akun"
+                          className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-slate-400 font-bold italic">Akun Utama</span>
                     )}
                   </td>
                 </tr>
