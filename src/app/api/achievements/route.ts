@@ -58,12 +58,21 @@ export async function GET(req: Request) {
         cluster: iku.cluster || "Umum",
         unit: iku.unit,
         type: iku.type,
+        formula: iku.formula || "(Pembilang / Penyebut) × 100%",
+        numeratorLabel: iku.numeratorLabel || "Pembilang Capaian",
+        denominatorLabel: iku.denominatorLabel || "Penyebut Basis",
+        calculationMethod: iku.calculationMethod || "PERCENTAGE",
         target: targetObj ? targetObj.target : 0,
         baseline: targetObj ? targetObj.baseline : 0,
         achievement: achObj
           ? {
               _id: achObj._id,
               value: achObj.value,
+              numerator: achObj.numerator !== undefined && achObj.numerator !== null ? achObj.numerator : null,
+              denominator: achObj.denominator !== undefined && achObj.denominator !== null ? achObj.denominator : null,
+              formula: achObj.formula || iku.formula || "(Pembilang / Penyebut) × 100%",
+              numeratorLabel: achObj.numeratorLabel || iku.numeratorLabel || "Pembilang Capaian",
+              denominatorLabel: achObj.denominatorLabel || iku.denominatorLabel || "Penyebut Basis",
               documentUrl: achObj.documentUrl,
               status: achObj.status,
               submittedBy: achObj.submittedBy,
@@ -96,7 +105,19 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { ikuId, year, quarter, value, documentUrl, status } = body;
+    const { 
+      ikuId, 
+      year, 
+      quarter, 
+      value, 
+      numerator, 
+      denominator, 
+      formula,
+      numeratorLabel,
+      denominatorLabel,
+      documentUrl, 
+      status 
+    } = body;
 
     if (!ikuId || !year || !quarter) {
       return NextResponse.json({ error: "Parameter wajib tidak lengkap" }, { status: 400 });
@@ -120,6 +141,11 @@ export async function POST(req: Request) {
       { ikuId, year, quarter },
       {
         value: Number(value),
+        numerator: numerator !== undefined && numerator !== null ? Number(numerator) : undefined,
+        denominator: denominator !== undefined && denominator !== null ? Number(denominator) : undefined,
+        formula: formula || undefined,
+        numeratorLabel: numeratorLabel || undefined,
+        denominatorLabel: denominatorLabel || undefined,
         documentUrl: documentUrl || "",
         status: status || "pendingDiajukan",
         submittedBy: session.user.id,

@@ -10,9 +10,11 @@ import {
   Edit3, 
   X, 
   TrendingUp,
-  Search
+  Search,
+  Calculator
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import NumeratorDenominatorModal, { AuditDetails } from "@/components/dashboard/NumeratorDenominatorModal";
 
 interface IKUItem {
   _id: string;
@@ -22,11 +24,20 @@ interface IKUItem {
   cluster: string;
   unit: string;
   type: string;
+  formula?: string;
+  numeratorLabel?: string;
+  denominatorLabel?: string;
+  calculationMethod?: string;
   target: number;
   baseline: number;
   achievement: {
     _id: string;
     value: number;
+    numerator?: number | null;
+    denominator?: number | null;
+    formula?: string;
+    numeratorLabel?: string;
+    denominatorLabel?: string;
     documentUrl: string;
     status: string;
     submittedBy?: {
@@ -44,13 +55,19 @@ export default function AchievementsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // Modal State
+  // Input / Edit Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIKU, setSelectedIKU] = useState<IKUItem | null>(null);
   const [formValue, setFormValue] = useState<string>("");
+  const [formNumerator, setFormNumerator] = useState<string>("");
+  const [formDenominator, setFormDenominator] = useState<string>("");
   const [formDocUrl, setFormDocUrl] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Drill-down Numerator/Denominator Audit Modal State
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [auditModalData, setAuditModalData] = useState<AuditDetails | null>(null);
 
   const userRole = session?.user?.role;
   const isLPM = userRole === "LPM";
@@ -94,9 +111,29 @@ export default function AchievementsPage() {
   const handleOpenModal = (item: IKUItem) => {
     setSelectedIKU(item);
     setFormValue(item.achievement ? String(item.achievement.value) : "");
+    setFormNumerator(item.achievement?.numerator !== undefined && item.achievement?.numerator !== null ? String(item.achievement.numerator) : "");
+    setFormDenominator(item.achievement?.denominator !== undefined && item.achievement?.denominator !== null ? String(item.achievement.denominator) : "");
     setFormDocUrl(item.achievement?.documentUrl || "");
     setFormMessage(null);
     setIsModalOpen(true);
+  };
+
+  const handleNumeratorChange = (val: string) => {
+    setFormNumerator(val);
+    const num = parseFloat(val);
+    const den = parseFloat(formDenominator);
+    if (!isNaN(num) && !isNaN(den) && den > 0 && selectedIKU?.unit === "%") {
+      setFormValue(String(Math.round((num / den) * 1000) / 10));
+    }
+  };
+
+  const handleDenominatorChange = (val: string) => {
+    setFormDenominator(val);
+    const num = parseFloat(formNumerator);
+    const den = parseFloat(val);
+    if (!isNaN(num) && !isNaN(den) && den > 0 && selectedIKU?.unit === "%") {
+      setFormValue(String(Math.round((num / den) * 1000) / 10));
+    }
   };
 
   const handleSaveAchievement = async (status: "Draf" | "pendingDiajukan") => {
@@ -113,6 +150,11 @@ export default function AchievementsPage() {
           year: 2026,
           quarter: activeQuarter,
           value: parseFloat(formValue) || 0,
+          numerator: formNumerator ? parseFloat(formNumerator) : undefined,
+          denominator: formDenominator ? parseFloat(formDenominator) : undefined,
+          formula: selectedIKU.formula,
+          numeratorLabel: selectedIKU.numeratorLabel,
+          denominatorLabel: selectedIKU.denominatorLabel,
           documentUrl: formDocUrl,
           status,
         }),
@@ -303,9 +345,44 @@ export default function AchievementsPage() {
 
                       <td className="py-4 px-4 text-center whitespace-nowrap">
                         {ach ? (
-                          <span className="font-black text-sky-700 text-sm">
-                            {ach.value} {item.unit}
-                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuditModalData({
+                                code: item.code,
+                                name: item.name,
+                                cluster: item.cluster,
+                                unit: item.unit,
+                                quarter: activeQuarter,
+                                year: 2026,
+                                target: item.target,
+                                realization: ach.value,
+                                numerator: ach.numerator,
+                                denominator: ach.denominator,
+                                formula: ach.formula || item.formula,
+                                numeratorLabel: ach.numeratorLabel || item.numeratorLabel,
+                                denominatorLabel: ach.denominatorLabel || item.denominatorLabel,
+                                calculationMethod: item.calculationMethod,
+                                status: ach.status,
+                                documentUrl: ach.documentUrl,
+                                submittedBy: ach.submittedBy,
+                                updatedAt: ach.updatedAt,
+                              });
+                              setIsAuditModalOpen(true);
+                            }}
+                            className="group inline-flex flex-col items-center py-1 px-2.5 rounded-xl hover:bg-sky-100/70 border border-transparent hover:border-sky-200 transition-all cursor-pointer"
+                            title="Klik untuk melihat rincian Pembilang & Penyebut (Numerator/Denominator) Audit Mutu"
+                          >
+                            <span className="font-black text-sky-700 text-sm group-hover:text-sky-900 group-hover:scale-105 transition-all">
+                              {ach.value} {item.unit}
+                            </span>
+                            <span className="text-[10px] font-bold text-sky-600 bg-sky-50 group-hover:bg-white border border-sky-200/80 px-2 py-0.5 rounded-md mt-0.5 inline-flex items-center gap-1 shadow-2xs">
+                              <Calculator className="w-3 h-3 text-sky-600" />
+                              {ach.numerator !== null && ach.numerator !== undefined && ach.denominator !== null && ach.denominator !== undefined
+                                ? `${ach.numerator} / ${ach.denominator}`
+                                : "Rincian Formula 🔢"}
+                            </span>
+                          </button>
                         ) : (
                           <span className="text-slate-300 italic font-normal">Belum diisi</span>
                         )}
@@ -416,10 +493,57 @@ export default function AchievementsPage() {
                 </div>
               )}
 
+              {/* Formula Guidance Banner */}
+              <div className="p-3.5 bg-sky-50 border border-sky-100 rounded-2xl mb-4 space-y-1">
+                <div className="flex items-center gap-1.5 text-sky-900 font-bold text-xs">
+                  <Calculator className="w-3.5 h-3.5 text-sky-600" />
+                  <span>Formula Audit Mutu:</span>
+                </div>
+                <p className="text-[11px] font-mono font-bold text-sky-950 bg-white/70 px-2.5 py-1.5 rounded-lg border border-sky-200/60">
+                  {selectedIKU.formula || "(Pembilang / Penyebut) × 100%"}
+                </p>
+              </div>
+
               <div className="space-y-4">
+                {/* Numerator & Denominator Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1 truncate" title={selectedIKU.numeratorLabel || "Pembilang (Numerator)"}>
+                      {selectedIKU.numeratorLabel || "Pembilang (Numerator)"}
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={formNumerator}
+                      onChange={(e) => handleNumeratorChange(e.target.value)}
+                      placeholder="Contoh: 76"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1 truncate" title={selectedIKU.denominatorLabel || "Penyebut (Denominator)"}>
+                      {selectedIKU.denominatorLabel || "Penyebut (Denominator)"}
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={formDenominator}
+                      onChange={(e) => handleDenominatorChange(e.target.value)}
+                      placeholder="Contoh: 84"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/30"
+                    />
+                  </div>
+                  {selectedIKU.unit === "%" && (
+                    <span className="sm:col-span-2 text-[10px] text-slate-400 italic">
+                      * Nilai realisasi (%) akan otomatis dihitung saat pembilang & penyebut diisi.
+                    </span>
+                  )}
+                </div>
+
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Nilai Realisasi ({selectedIKU.unit})
+                    Nilai Realisasi Final ({selectedIKU.unit})
                   </label>
                   <input
                     type="number"
@@ -427,7 +551,7 @@ export default function AchievementsPage() {
                     value={formValue}
                     onChange={(e) => setFormValue(e.target.value)}
                     placeholder={`Contoh: 85 (${selectedIKU.unit})`}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-semibold"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-semibold text-slate-900"
                   />
                   <span className="text-[11px] text-slate-400 mt-1 block">
                     Target Tahunan: {selectedIKU.target} {selectedIKU.unit}
@@ -453,7 +577,7 @@ export default function AchievementsPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => handleSaveAchievement("Draf")}
-                  className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
                 >
                   Simpan Draf
                 </button>
@@ -461,7 +585,7 @@ export default function AchievementsPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => handleSaveAchievement("pendingDiajukan")}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white text-xs font-bold shadow-md shadow-sky-600/25 transition-all"
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white text-xs font-bold shadow-md shadow-sky-600/25 transition-all cursor-pointer"
                 >
                   {submitting ? "Menyimpan..." : "Ajukan ke LPM"}
                 </button>
@@ -470,6 +594,13 @@ export default function AchievementsPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Modal Drill-Down Numerator & Denominator Audit Mutu */}
+      <NumeratorDenominatorModal
+        isOpen={isAuditModalOpen}
+        onClose={() => setIsAuditModalOpen(false)}
+        data={auditModalData}
+      />
     </div>
   );
 }

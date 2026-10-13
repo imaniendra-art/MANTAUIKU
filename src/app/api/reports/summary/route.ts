@@ -49,6 +49,11 @@ interface AchievementDoc {
   quarter: number;
   year: number;
   value?: number;
+  numerator?: number;
+  denominator?: number;
+  formula?: string;
+  numeratorLabel?: string;
+  denominatorLabel?: string;
   status: string;
 }
 
@@ -119,7 +124,7 @@ interface AchievementDoc {
       const targetVal = tgt ? tgt.target : 0;
       const baselineVal = tgt ? tgt.baseline : 0;
 
-      const qValues: Record<number, { value: number; status: string; pct: number }> = {};
+      const qValues: Record<number, { value: number; numerator: number | null; denominator: number | null; formula?: string; numeratorLabel?: string; denominatorLabel?: string; status: string; pct: number }> = {};
       for (let q = 1; q <= 4; q++) {
         const ach = achMatrix.get(iku._id.toString())?.get(q);
         const val = typeof ach?.value === "number" ? ach.value : 0;
@@ -131,6 +136,11 @@ interface AchievementDoc {
         }
         qValues[q] = {
           value: val,
+          numerator: typeof ach?.numerator === "number" ? ach.numerator : null,
+          denominator: typeof ach?.denominator === "number" ? ach.denominator : null,
+          formula: ach?.formula || iku.formula || "(Pembilang / Penyebut) × 100%",
+          numeratorLabel: ach?.numeratorLabel || iku.numeratorLabel || "Pembilang Capaian",
+          denominatorLabel: ach?.denominatorLabel || iku.denominatorLabel || "Penyebut Basis",
           status: ach ? ach.status : "Belum",
           pct,
         };
@@ -142,6 +152,10 @@ interface AchievementDoc {
         name: iku.name,
         cluster: iku.cluster || "Umum",
         unit: iku.unit,
+        formula: iku.formula || "(Pembilang / Penyebut) × 100%",
+        numeratorLabel: iku.numeratorLabel || "Pembilang Capaian",
+        denominatorLabel: iku.denominatorLabel || "Penyebut Basis",
+        calculationMethod: iku.calculationMethod || "PERCENTAGE",
         baseline: baselineVal,
         target: targetVal,
         q1: qValues[1],

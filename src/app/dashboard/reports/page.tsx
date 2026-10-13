@@ -6,10 +6,12 @@ import {
   FolderArchive, 
   Printer, 
   FileSpreadsheet, 
-  X
+  X,
+  Calculator
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import NumeratorDenominatorModal, { AuditDetails } from "@/components/dashboard/NumeratorDenominatorModal";
 
 interface QuarterInfo {
   quarter: number;
@@ -24,18 +26,33 @@ interface QuarterInfo {
   statusBadge: string;
 }
 
+interface QuarterValue {
+  value: number;
+  numerator?: number | null;
+  denominator?: number | null;
+  formula?: string;
+  numeratorLabel?: string;
+  denominatorLabel?: string;
+  status: string;
+  pct: number;
+}
+
 interface ComparisonRow {
   id: string;
   code: string;
   name: string;
   cluster: string;
   unit: string;
+  formula?: string;
+  numeratorLabel?: string;
+  denominatorLabel?: string;
+  calculationMethod?: string;
   baseline: number;
   target: number;
-  q1: { value: number; status: string; pct: number };
-  q2: { value: number; status: string; pct: number };
-  q3: { value: number; status: string; pct: number };
-  q4: { value: number; status: string; pct: number };
+  q1: QuarterValue;
+  q2: QuarterValue;
+  q3: QuarterValue;
+  q4: QuarterValue;
 }
 
 interface ReportsData {
@@ -55,6 +72,10 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [printQuarter, setPrintQuarter] = useState<number | null>(null);
+
+  // Drill-down Audit Modal State
+  const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
+  const [auditModalData, setAuditModalData] = useState<AuditDetails | null>(null);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -87,6 +108,29 @@ export default function ReportsPage() {
   const handleDownloadTargetsCSV = () => {
     const url = `/api/reports/export?type=targets&year=${selectedYear}`;
     window.open(url, "_blank");
+  };
+
+  const handleCellClick = (row: ComparisonRow, qNum: number, qData: QuarterValue) => {
+    setAuditModalData({
+      code: row.code,
+      name: row.name,
+      cluster: row.cluster,
+      unit: row.unit,
+      quarter: qNum,
+      year: selectedYear,
+      target: row.target,
+      realization: qData.value,
+      numerator: qData.numerator,
+      denominator: qData.denominator,
+      formula: qData.formula || row.formula,
+      numeratorLabel: qData.numeratorLabel || row.numeratorLabel,
+      denominatorLabel: qData.denominatorLabel || row.denominatorLabel,
+      calculationMethod: row.calculationMethod,
+      status: qData.status,
+      documentUrl: "https://drive.google.com/drive/folders/stimiyapmi-spmi-bukti-dukung",
+      updatedAt: new Date().toISOString(),
+    });
+    setIsAuditModalOpen(true);
   };
 
   const activePrintQuarterInfo = data?.quarters.find((q) => q.quarter === printQuarter);
@@ -334,56 +378,88 @@ export default function ReportsPage() {
                     </td>
 
                     {/* TW 1 */}
-                    <td className="py-4 px-3 text-center whitespace-nowrap bg-sky-50/20">
+                    <td className="py-3 px-3 text-center whitespace-nowrap bg-sky-50/20">
                       {row.q1.value > 0 ? (
-                        <div>
-                          <span className="font-bold text-slate-900">{row.q1.value}</span>
-                          <span className={`block text-[10px] font-bold ${row.q1.pct >= 80 ? 'text-emerald-600' : 'text-sky-600'}`}>
+                        <button
+                          type="button"
+                          onClick={() => handleCellClick(row, 1, row.q1)}
+                          className="group inline-flex flex-col items-center py-1 px-2 rounded-lg hover:bg-sky-100/80 transition-all cursor-pointer"
+                          title="Klik untuk melihat rincian Pembilang & Penyebut (Numerator/Denominator) TW 1"
+                        >
+                          <span className="font-black text-slate-900 group-hover:text-sky-700 transition-colors">
+                            {row.q1.value}
+                          </span>
+                          <span className={`text-[10px] font-extrabold ${row.q1.pct >= 80 ? 'text-emerald-600' : 'text-sky-600'} inline-flex items-center gap-0.5`}>
+                            <Calculator className="w-2.5 h-2.5 text-sky-500 opacity-60 group-hover:opacity-100" />
                             {row.q1.pct}%
                           </span>
-                        </div>
+                        </button>
                       ) : (
                         <span className="text-slate-300">-</span>
                       )}
                     </td>
 
                     {/* TW 2 */}
-                    <td className="py-4 px-3 text-center whitespace-nowrap bg-sky-50/20">
+                    <td className="py-3 px-3 text-center whitespace-nowrap bg-sky-50/20">
                       {row.q2.value > 0 ? (
-                        <div>
-                          <span className="font-bold text-slate-900">{row.q2.value}</span>
-                          <span className={`block text-[10px] font-bold ${row.q2.pct >= 80 ? 'text-emerald-600' : 'text-sky-600'}`}>
+                        <button
+                          type="button"
+                          onClick={() => handleCellClick(row, 2, row.q2)}
+                          className="group inline-flex flex-col items-center py-1 px-2 rounded-lg hover:bg-sky-100/80 transition-all cursor-pointer"
+                          title="Klik untuk melihat rincian Pembilang & Penyebut (Numerator/Denominator) TW 2"
+                        >
+                          <span className="font-black text-slate-900 group-hover:text-sky-700 transition-colors">
+                            {row.q2.value}
+                          </span>
+                          <span className={`text-[10px] font-extrabold ${row.q2.pct >= 80 ? 'text-emerald-600' : 'text-sky-600'} inline-flex items-center gap-0.5`}>
+                            <Calculator className="w-2.5 h-2.5 text-sky-500 opacity-60 group-hover:opacity-100" />
                             {row.q2.pct}%
                           </span>
-                        </div>
+                        </button>
                       ) : (
                         <span className="text-slate-300">-</span>
                       )}
                     </td>
 
                     {/* TW 3 */}
-                    <td className="py-4 px-3 text-center whitespace-nowrap bg-sky-50/20">
+                    <td className="py-3 px-3 text-center whitespace-nowrap bg-sky-50/20">
                       {row.q3.value > 0 ? (
-                        <div>
-                          <span className="font-bold text-slate-900">{row.q3.value}</span>
-                          <span className={`block text-[10px] font-bold ${row.q3.pct >= 80 ? 'text-emerald-600' : 'text-sky-600'}`}>
+                        <button
+                          type="button"
+                          onClick={() => handleCellClick(row, 3, row.q3)}
+                          className="group inline-flex flex-col items-center py-1 px-2 rounded-lg hover:bg-sky-100/80 transition-all cursor-pointer"
+                          title="Klik untuk melihat rincian Pembilang & Penyebut (Numerator/Denominator) TW 3"
+                        >
+                          <span className="font-black text-slate-900 group-hover:text-sky-700 transition-colors">
+                            {row.q3.value}
+                          </span>
+                          <span className={`text-[10px] font-extrabold ${row.q3.pct >= 80 ? 'text-emerald-600' : 'text-sky-600'} inline-flex items-center gap-0.5`}>
+                            <Calculator className="w-2.5 h-2.5 text-sky-500 opacity-60 group-hover:opacity-100" />
                             {row.q3.pct}%
                           </span>
-                        </div>
+                        </button>
                       ) : (
                         <span className="text-slate-300">-</span>
                       )}
                     </td>
 
                     {/* TW 4 */}
-                    <td className="py-4 px-3 text-center whitespace-nowrap bg-sky-50/20">
+                    <td className="py-3 px-3 text-center whitespace-nowrap bg-sky-50/20">
                       {row.q4.value > 0 ? (
-                        <div>
-                          <span className="font-bold text-slate-900">{row.q4.value}</span>
-                          <span className={`block text-[10px] font-bold ${row.q4.pct >= 80 ? 'text-emerald-600' : 'text-sky-600'}`}>
+                        <button
+                          type="button"
+                          onClick={() => handleCellClick(row, 4, row.q4)}
+                          className="group inline-flex flex-col items-center py-1 px-2 rounded-lg hover:bg-sky-100/80 transition-all cursor-pointer"
+                          title="Klik untuk melihat rincian Pembilang & Penyebut (Numerator/Denominator) TW 4"
+                        >
+                          <span className="font-black text-slate-900 group-hover:text-sky-700 transition-colors">
+                            {row.q4.value}
+                          </span>
+                          <span className={`text-[10px] font-extrabold ${row.q4.pct >= 80 ? 'text-emerald-600' : 'text-sky-600'} inline-flex items-center gap-0.5`}>
+                            <Calculator className="w-2.5 h-2.5 text-sky-500 opacity-60 group-hover:opacity-100" />
                             {row.q4.pct}%
                           </span>
-                        </div>
+                        </button>
                       ) : (
                         <span className="text-slate-300">-</span>
                       )}
@@ -566,6 +642,13 @@ export default function ReportsPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Modal Drill-Down Numerator & Denominator Audit Mutu */}
+      <NumeratorDenominatorModal
+        isOpen={isAuditModalOpen}
+        onClose={() => setIsAuditModalOpen(false)}
+        data={auditModalData}
+      />
     </div>
   );
 }

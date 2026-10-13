@@ -210,13 +210,30 @@ Mengintegrasikan kecerdasan buatan penjaminan mutu yang terhubung langsung (*liv
 
 ---
 
-## 11. Status Kesiapan Rilis Produksi (Production Readiness)
+## 11. Fase 9 (Selesai): Drill-Down Pembilang & Penyebut (Numerator & Denominator) Interaktif & Formula Audit Mutu ala UNJA Benchmark
+
+Mengadopsi fitur analitik terbaik dari `dashboard.unja.ac.id` untuk transparansi audit mutu akreditasi:
+1. **Model & Metadata Formula**:
+   - `IKUMetadata` dan `Achievement` dilengkapi kolom: `formula`, `numeratorLabel`, `denominatorLabel`, `calculationMethod`, `numerator`, dan `denominator`.
+   - 12 IKU STIMI YAPMI memiliki formula resmi terstandarisasi Ditjen Diktiristek & LAMEMBA.
+2. **Komponen Visual Drill-Down**:
+   - Komponen [`NumeratorDenominatorModal.tsx`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/components/dashboard/NumeratorDenominatorModal.tsx) dengan visualisasi pecahan interaktif, formula box matematis, perbandingan realisasi vs target, dan tombol salin ringkasan audit.
+3. **Interaktivitas Halaman Dashboard**:
+   - Halaman [`/dashboard/achievements`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/app/dashboard/achievements/page.tsx): Sel realisasi dapat diklik untuk membuka modal audit. Modal input PIC menyediakan isian numerator & denominator dengan auto-compute realisasi (%).
+   - Halaman [`/dashboard/reports`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/app/dashboard/reports/page.tsx): Setiap sel TW 1 s/d TW 4 pada tabel komparasi dapat diklik untuk membuka modal audit.
+   - Ekspor CSV [`/api/reports/export`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/app/api/reports/export/route.ts): Dilengkapi kolom Numerator, Denominator, dan Formula Perhitungan Audit.
+
+---
+
+## 12. Status Kesiapan Rilis Produksi (Production Readiness)
 
 1. **Fase 1 - 4 (Selesai)**: Portal Mutu Publik, Siklus PPEPP, Radar RAG Early Warning, Dashboard Internal Atlas, Ekspor CSV & Laporan PDF Resmi.
 2. **Fase 5 (Selesai)**: Modul AMI Digital & Manajemen Temuan KTS/OB 10 Unit STIMI YAPMI.
 3. **Fase 6 (Selesai)**: Matriks Akreditasi LAMEMBA 9 Kriteria, Countdown PEPA, & Pemantauan Tahunan Wajib Lampiran DL-05.
 4. **Fase 7 (Selesai)**: Pusat Evaluasi Terpadu EDO, EKA (SIAM Sync), Tracer Study (Auto-Supply IKU 2), dan Survei Pengguna Lulusan.
 5. **Fase 8 (Selesai)**: AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED) LAMEMBA 9 Kriteria.
+6. **Fase 9 (Selesai)**: Drill-Down Numerator & Denominator Interaktif serta Formula Audit Mutu (100% Benchmark UNJA Equivalent).
+
 
 
 

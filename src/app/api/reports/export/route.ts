@@ -111,6 +111,9 @@ export async function GET(req: Request) {
       `Target Tahun ${year}`,
       `Realisasi TW ${quarter}`,
       "% Ketercapaian",
+      "Pembilang (Numerator)",
+      "Penyebut (Denominator)",
+      "Formula Perhitungan Audit",
       "Status Validasi LPM",
       "Tautan Bukti Dukung",
       "Penanggung Jawab (PIC)",
@@ -133,6 +136,10 @@ export async function GET(req: Request) {
       const picName = ach?.submittedBy?.unitName || ach?.submittedBy?.name || "-";
       const updatedAtStr = ach?.updatedAt ? new Date(ach.updatedAt).toLocaleDateString("id-ID") : "-";
 
+      const numVal = ach?.numerator !== undefined && ach?.numerator !== null ? ach.numerator : "-";
+      const denVal = ach?.denominator !== undefined && ach?.denominator !== null ? ach.denominator : "-";
+      const formulaVal = ach?.formula || iku.formula || "-";
+
       return [
         idx + 1,
         escapeCSV(iku.code),
@@ -142,6 +149,9 @@ export async function GET(req: Request) {
         targetVal,
         realVal,
         `${pct}%`,
+        numVal,
+        denVal,
+        escapeCSV(formulaVal),
         escapeCSV(ach ? ach.status : "Belum Diisi"),
         escapeCSV(ach?.documentUrl || "-"),
         escapeCSV(picName),
