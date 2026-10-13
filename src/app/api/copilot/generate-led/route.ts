@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import LedDraft from "@/models/LedDraft";
-import IKUMetadata from "@/models/IKUMetadata";
-import Achievement from "@/models/Achievement";
 import { AmiFinding } from "@/models/Ami";
 import {
   EdoLecturerEvaluation,
@@ -10,7 +8,6 @@ import {
   TracerStudyResponse,
   EmployerSurveyResponse,
 } from "@/models/Evaluation";
-import { LamembaCriteria, LamembaDl05 } from "@/models/Accreditation";
 
 export const dynamic = "force-dynamic";
 

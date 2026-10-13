@@ -103,8 +103,9 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: false, error: 'Aksi tidak valid.' }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
 
@@ -122,7 +123,8 @@ export async function DELETE(
     await connectToDatabase();
     await AmiFinding.findByIdAndDelete(id);
     return NextResponse.json({ success: true, message: 'Temuan audit berhasil dihapus.' });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

@@ -2,16 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { 
-  Award, 
   ShieldCheck, 
   Clock, 
-  CheckCircle2, 
   ExternalLink, 
-  Sparkles, 
-  BookOpen, 
-  GraduationCap, 
-  FileCheck2, 
-  Building2 
+  Sparkles 
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -72,6 +66,15 @@ export default function AccreditationWidget() {
     }
     loadData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="py-12 text-center text-slate-400">
+        <div className="w-6 h-6 border-2 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+        <p className="text-xs font-semibold">Memuat status akreditasi...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

@@ -2,16 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { 
-  ShieldCheck, 
-  CheckCircle2, 
-  AlertCircle, 
-  AlertTriangle, 
-  Info, 
-  Calendar, 
   Building, 
-  Users, 
-  ArrowUpRight,
-  TrendingUp,
   FileCheck
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -66,6 +57,15 @@ export default function AmiTransparencyWidget() {
     }
     loadData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="py-12 text-center text-slate-400">
+        <div className="w-6 h-6 border-2 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+        <p className="text-xs font-semibold">Memuat transparansi AMI...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

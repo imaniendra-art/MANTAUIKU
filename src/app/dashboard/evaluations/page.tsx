@@ -8,7 +8,6 @@ import {
   Briefcase,
   RefreshCw,
   Search,
-  ExternalLink,
   CheckCircle2,
   AlertTriangle,
   Award,
@@ -18,7 +17,6 @@ import {
   DollarSign,
   Building,
   Sparkles,
-  Layers,
   ArrowUpRight
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -182,7 +180,6 @@ export default function EvaluationsDashboardPage() {
 
   // Fetch all evaluation data
   const loadData = async () => {
-    setLoading(true);
     try {
       const [resEdo, resEka, resTracer, resEmployer] = await Promise.all([
         fetch("/api/evaluations/edo"),
@@ -222,7 +219,52 @@ export default function EvaluationsDashboardPage() {
   };
 
   useEffect(() => {
-    loadData();
+    let ignore = false;
+    async function init() {
+      try {
+        const [resEdo, resEka, resTracer, resEmployer] = await Promise.all([
+          fetch("/api/evaluations/edo"),
+          fetch("/api/evaluations/eka"),
+          fetch("/api/public/tracer-study"),
+          fetch("/api/public/employer-survey"),
+        ]);
+
+        const [jsonEdo, jsonEka, jsonTracer, jsonEmployer] = await Promise.all([
+          resEdo.json(),
+          resEka.json(),
+          resTracer.json(),
+          resEmployer.json(),
+        ]);
+
+        if (!ignore) {
+          if (jsonEdo.success) {
+            setEdoData(jsonEdo.data);
+            setEdoSummary(jsonEdo.summary);
+          }
+          if (jsonEka.success) {
+            setEkaData(jsonEka.data);
+            setEkaSummary(jsonEka.summary);
+          }
+          if (jsonTracer.success) {
+            setTracerData(jsonTracer.data);
+            setTracerSummary(jsonTracer.summary);
+          }
+          if (jsonEmployer.success) {
+            setEmployerData(jsonEmployer.data);
+            setEmployerSummary(jsonEmployer.summary);
+          }
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed loading evaluations data:", err);
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    init();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   // Sync with SIAM action
@@ -487,7 +529,7 @@ export default function EvaluationsDashboardPage() {
                     <span>Terhubung Otomatis</span>
                   </div>
                   <p className="text-[11px] text-slate-400">
-                    Update terakhir: {new Date(edoSummary?.lastSynced || Date.now()).toLocaleDateString("id-ID")}
+                    Update terakhir: {edoSummary?.lastSynced ? new Date(edoSummary.lastSynced).toLocaleDateString("id-ID") : "Hari ini"}
                   </p>
                 </div>
               </div>

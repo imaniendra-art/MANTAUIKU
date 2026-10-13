@@ -9,14 +9,8 @@ import {
   CheckCircle2,
   Send,
   Sparkles,
-  TrendingUp,
-  Clock,
-  Award,
-  ChevronRight,
-  ShieldCheck,
   AlertCircle
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface IPublicEvalSummary {
   edo: {
@@ -107,13 +101,31 @@ export default function EvaluationsWidget() {
       }
     } catch (e) {
       console.error("Failed fetching public evaluations:", e);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSummary();
+    let ignore = false;
+    async function init() {
+      try {
+        const res = await fetch("/api/public/evaluations");
+        const json = await res.json();
+        if (!ignore && json.success) {
+          setSummaryData(json);
+        }
+      } catch (e) {
+        console.error("Failed fetching public evaluations:", e);
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    init();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   // Handle Tracer Submit
@@ -203,6 +215,15 @@ export default function EvaluationsWidget() {
       setSubmittingEmployer(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="py-12 text-center text-slate-400">
+        <div className="w-6 h-6 border-2 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+        <p className="text-xs font-semibold">Memuat data evaluasi & survei...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-12">

@@ -1,27 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { 
   Award, 
   ShieldCheck, 
   Clock, 
-  Calendar, 
-  CheckCircle2, 
-  AlertTriangle, 
-  AlertCircle, 
-  FileText, 
   ExternalLink, 
   Printer, 
-  Download, 
   BookOpen, 
   GraduationCap, 
-  Users, 
   Building2, 
   TrendingUp, 
-  Briefcase, 
   Sparkles,
-  ChevronRight,
   X,
   FileCheck2,
   Info
@@ -99,7 +89,6 @@ interface IDl05 {
 }
 
 export default function AccreditationDashboardPage() {
-  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<"profiles" | "criteria" | "dl05">("profiles");
 
   // Data states
@@ -112,40 +101,44 @@ export default function AccreditationDashboardPage() {
 
   // Modals
   const [isPrintDl05ModalOpen, setIsPrintDl05ModalOpen] = useState(false);
-  const [selectedCriteria, setSelectedCriteria] = useState<ICriteria | null>(null);
-
-  const isLPM = session?.user?.role === "LPM";
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [profilesRes, criteriaRes, dl05Res] = await Promise.all([
-        fetch("/api/accreditation/profiles"),
-        fetch("/api/accreditation/criteria"),
-        fetch("/api/accreditation/dl05"),
-      ]);
-
-      const pData = await profilesRes.json();
-      const cData = await criteriaRes.json();
-      const dData = await dl05Res.json();
-
-      if (pData.success) setProfiles(pData.data);
-      if (cData.success) {
-        setCriteria(cData.data.criteria);
-        setOverallScore(cData.data.finalWeightedScore);
-        setPredictedGrade(cData.data.predictedGrade);
-      }
-      if (dData.success) setDl05(dData.data);
-    } catch (err) {
-      console.error("Failed to load accreditation data:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let ignore = false;
+    async function loadData() {
+      try {
+        const [profilesRes, criteriaRes, dl05Res] = await Promise.all([
+          fetch("/api/accreditation/profiles"),
+          fetch("/api/accreditation/criteria"),
+          fetch("/api/accreditation/dl05"),
+        ]);
+
+        const pData = await profilesRes.json();
+        const cData = await criteriaRes.json();
+        const dData = await dl05Res.json();
+
+        if (!ignore) {
+          if (pData.success) setProfiles(pData.data);
+          if (cData.success) {
+            setCriteria(cData.data.criteria);
+            setOverallScore(cData.data.finalWeightedScore);
+            setPredictedGrade(cData.data.predictedGrade);
+          }
+          if (dData.success) setDl05(dData.data);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed to load accreditation data:", err);
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadData();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <div className="space-y-8 pb-16">
@@ -214,8 +207,15 @@ export default function AccreditationDashboardPage() {
         </button>
       </div>
 
-      {/* TAB 1: STATUS & COUNTDOWN REAKREDITASI PEPA */}
-      {activeTab === "profiles" && (
+      {loading ? (
+        <div className="py-20 text-center">
+          <div className="w-8 h-8 border-4 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm font-semibold text-slate-500">Memuat data akreditasi...</p>
+        </div>
+      ) : (
+        <>
+          {/* TAB 1: STATUS & COUNTDOWN REAKREDITASI PEPA */}
+          {activeTab === "profiles" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {profiles.map((p) => {
@@ -631,6 +631,8 @@ export default function AccreditationDashboardPage() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
 
       {/* 4. MODAL PRATINJAU CETAK RESMI FORMAT LAMPIRAN DL-05 LAMEMBA */}

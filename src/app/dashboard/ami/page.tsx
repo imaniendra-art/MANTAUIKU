@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { 
   ShieldCheck, 
@@ -11,18 +11,13 @@ import {
   Clock, 
   Plus, 
   Search, 
-  Filter, 
   ExternalLink, 
   Printer, 
   FileText, 
-  ChevronRight,
   X,
   Calendar,
   Building,
-  UserCheck,
-  Send,
-  Sparkles,
-  ArrowRight
+  UserCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -59,6 +54,23 @@ interface IAmiFinding {
   createdAt: string;
 }
 
+interface IAmiSummary {
+  period?: IAmiPeriod;
+  totalFindings: number;
+  categories: { mayor: number; minor: number; ob: number };
+  statuses: { open: number; inProgress: number; underReview: number; closed: number };
+  closingRate: number;
+  byAuditee: Array<{
+    key: string;
+    name: string;
+    total: number;
+    mayor: number;
+    minor: number;
+    ob: number;
+    closed: number;
+  }>;
+}
+
 const AUDITEES = [
   { key: "all", name: "Semua Unit (10)" },
   { key: "prodi", name: "Program Studi Manajemen" },
@@ -78,8 +90,9 @@ export default function AmiDashboardPage() {
   const [periods, setPeriods] = useState<IAmiPeriod[]>([]);
   const [activePeriod, setActivePeriod] = useState<IAmiPeriod | null>(null);
   const [findings, setFindings] = useState<IAmiFinding[]>([]);
-  const [summary, setSummary] = useState<any>(null);
+  const [summary, setSummary] = useState<IAmiSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Filters
   const [selectedAuditee, setSelectedAuditee] = useState<string>("all");
@@ -123,63 +136,72 @@ export default function AmiDashboardPage() {
 
   const isLPM = session?.user?.role === "LPM";
 
-  // 1. Fetch Periods & Summary
-  const fetchInitialData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [periodsRes, summaryRes] = await Promise.all([
-        fetch("/api/ami/periods"),
-        fetch("/api/ami/summary"),
-      ]);
+  // 1. Fetch Periods & Summary on mount
+  useEffect(() => {
+    let ignore = false;
+    async function init() {
+      try {
+        const [periodsRes, summaryRes] = await Promise.all([
+          fetch("/api/ami/periods"),
+          fetch("/api/ami/summary"),
+        ]);
 
-      const periodsData = await periodsRes.json();
-      const summaryData = await summaryRes.json();
+        const periodsData = await periodsRes.json();
+        const summaryData = await summaryRes.json();
 
-      if (periodsData.success && periodsData.data.length > 0) {
-        setPeriods(periodsData.data);
-        setActivePeriod(periodsData.data[0]);
+        if (!ignore) {
+          if (periodsData.success && periodsData.data.length > 0) {
+            setPeriods(periodsData.data);
+            setActivePeriod(periodsData.data[0]);
+          }
+          if (summaryData.success) {
+            setSummary(summaryData.data);
+          }
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Failed to load AMI initial data:", err);
+        if (!ignore) setLoading(false);
       }
-      if (summaryData.success) {
-        setSummary(summaryData.data);
-      }
-    } catch (err) {
-      console.error("Failed to load AMI initial data:", err);
-    } finally {
-      setLoading(false);
     }
+
+    init();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
-  // 2. Fetch Findings
-  const fetchFindings = useCallback(async () => {
+  // 2. Fetch Findings whenever activePeriod, filters, or refreshTrigger changes
+  useEffect(() => {
     if (!activePeriod) return;
-    try {
-      const params = new URLSearchParams({
-        periodId: activePeriod._id,
-        auditeeKey: selectedAuditee,
-        category: selectedCategory,
-        status: selectedStatus,
-        search,
-      });
+    const currentPeriodId = activePeriod._id;
+    let ignore = false;
 
-      const res = await fetch(`/api/ami/findings?${params.toString()}`);
-      const data = await res.json();
-      if (data.success) {
-        setFindings(data.data);
+    async function loadFindings() {
+      try {
+        const params = new URLSearchParams({
+          periodId: currentPeriodId,
+          auditeeKey: selectedAuditee,
+          category: selectedCategory,
+          status: selectedStatus,
+          search,
+        });
+
+        const res = await fetch(`/api/ami/findings?${params.toString()}`);
+        const data = await res.json();
+        if (!ignore && data.success) {
+          setFindings(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch findings:", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch findings:", err);
     }
-  }, [activePeriod, selectedAuditee, selectedCategory, selectedStatus, search]);
 
-  useEffect(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
-
-  useEffect(() => {
-    if (activePeriod) {
-      fetchFindings();
-    }
-  }, [activePeriod, fetchFindings]);
+    loadFindings();
+    return () => {
+      ignore = true;
+    };
+  }, [activePeriod, selectedAuditee, selectedCategory, selectedStatus, search, refreshTrigger]);
 
   // Open RTL Form Modal
   const openRtlModal = (finding: IAmiFinding) => {
@@ -213,7 +235,7 @@ export default function AmiDashboardPage() {
       const data = await res.json();
       if (data.success) {
         setIsRtlModalOpen(false);
-        fetchFindings();
+        setRefreshTrigger((t) => t + 1);
         // Refresh summary
         const summaryRes = await fetch(`/api/ami/summary?periodId=${activePeriod?._id}`);
         const summaryData = await summaryRes.json();
@@ -222,6 +244,7 @@ export default function AmiDashboardPage() {
         alert(data.error || "Gagal menyimpan formulir PTK.");
       }
     } catch (err) {
+      console.error("Error submitting RTL:", err);
       alert("Terjadi kesalahan jaringan.");
     } finally {
       setSubmitting(false);
@@ -253,7 +276,7 @@ export default function AmiDashboardPage() {
       const data = await res.json();
       if (data.success) {
         setIsVerifyModalOpen(false);
-        fetchFindings();
+        setRefreshTrigger((t) => t + 1);
         const summaryRes = await fetch(`/api/ami/summary?periodId=${activePeriod?._id}`);
         const summaryData = await summaryRes.json();
         if (summaryData.success) setSummary(summaryData.data);
@@ -261,6 +284,7 @@ export default function AmiDashboardPage() {
         alert(data.error || "Gagal memverifikasi temuan.");
       }
     } catch (err) {
+      console.error("Error verifying finding:", err);
       alert("Terjadi kesalahan jaringan.");
     } finally {
       setSubmitting(false);
@@ -293,7 +317,7 @@ export default function AmiDashboardPage() {
           auditorName: "Tim Auditor LPM",
           dueDate: "",
         });
-        fetchFindings();
+        setRefreshTrigger((t) => t + 1);
         const summaryRes = await fetch(`/api/ami/summary?periodId=${activePeriod._id}`);
         const summaryData = await summaryRes.json();
         if (summaryData.success) setSummary(summaryData.data);
@@ -301,6 +325,7 @@ export default function AmiDashboardPage() {
         alert(data.error || "Gagal mencatat temuan.");
       }
     } catch (err) {
+      console.error("Error creating finding:", err);
       alert("Terjadi kesalahan jaringan.");
     } finally {
       setSubmitting(false);
@@ -325,6 +350,14 @@ export default function AmiDashboardPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          {/* Cycle selector / badge */}
+          {periods.length > 0 && (
+            <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-xs">
+              <Calendar className="w-3.5 h-3.5 text-cyan-300" />
+              <span>Siklus {activePeriod?.cycleNumber || 9} ({activePeriod?.academicYear || "2025/2026"})</span>
+            </div>
+          )}
+
           {/* Print Report Button */}
           <button
             onClick={() => setIsPrintModalOpen(true)}
@@ -347,8 +380,15 @@ export default function AmiDashboardPage() {
         </div>
       </div>
 
-      {/* 2. Top Metric Cards (5 Indikator Utama) */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      {loading ? (
+        <div className="py-20 text-center">
+          <div className="w-8 h-8 border-4 border-sky-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm font-semibold text-slate-500">Memuat data Audit Mutu Internal...</p>
+        </div>
+      ) : (
+        <>
+          {/* 2. Top Metric Cards (5 Indikator Utama) */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Card 1: Total Temuan */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
           <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider">
@@ -698,6 +738,8 @@ export default function AmiDashboardPage() {
           </div>
         )}
       </div>
+        </>
+      )}
 
       {/* 5. MODAL FORM PTK & RTL (Permintaan Tindakan Koreksi) */}
       <AnimatePresence>

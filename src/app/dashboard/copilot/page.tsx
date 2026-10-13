@@ -9,21 +9,11 @@ import {
   Send,
   Copy,
   Printer,
-  CheckCircle2,
   RefreshCw,
-  Award,
-  Layers,
-  ChevronRight,
-  BookOpen,
-  TrendingUp,
-  Download,
-  Building2,
-  Users,
   ShieldCheck,
   Check,
   X
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
 interface ILedDraftItem {
@@ -62,6 +52,14 @@ const CRITERIA_OPTIONS = [
   { key: "c9", num: 9, label: "Kriteria C.9", title: "Luaran Tridharma & Kepuasan Mitra" },
 ];
 
+function generateMessageId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+}
+
+function getCurrentTimeString(): string {
+  return new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+}
+
 export default function CopilotLedPage() {
   const [activeTab, setActiveTab] = useState<"generator" | "chat" | "repository">("generator");
 
@@ -80,7 +78,7 @@ export default function CopilotLedPage() {
       sender: "ai",
       text: `Halo Tim Penjaminan Mutu & Taskforce Akreditasi STIMI YAPMI Makassar! Saya adalah **AI Quality Copilot**, asisten mutu yang terhubung langsung ke basis data MongoDB Atlas institusi.\n\nSaya siap membantu Anda menyusun narasi **Laporan Evaluasi Diri (LED) LAMEMBA 9 Kriteria**, menganalisis temuan AMI, serta memberikan rekomendasi perbaikan berbasis data riil. Silakan pilih kriteria untuk digenerate atau ajukan pertanyaan di bawah ini.`,
       citations: ["MongoDB Atlas Live Cluster", "Buku Standar IKU STIMI YAPMI 2026"],
-      timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+      timestamp: "10:00",
     },
   ]);
   const [chatInput, setChatInput] = useState<string>("");
@@ -88,31 +86,47 @@ export default function CopilotLedPage() {
 
   // Repository State
   const [savedDrafts, setSavedDrafts] = useState<ILedDraftItem[]>([]);
-  const [loadingDrafts, setLoadingDrafts] = useState<boolean>(false);
+  const [loadingDrafts, setLoadingDrafts] = useState<boolean>(true);
 
   // Load existing drafts
-  const fetchDrafts = async () => {
-    setLoadingDrafts(true);
+  const reloadDrafts = async () => {
     try {
       const res = await fetch("/api/copilot/drafts");
       const json = await res.json();
       if (json.success) {
         setSavedDrafts(json.data);
-        // Default current draft if available
-        const defaultDraft = json.data.find((d: ILedDraftItem) => d.criterionKey === selectedCriterion);
-        if (defaultDraft && !currentDraft) {
-          setCurrentDraft(defaultDraft);
-        }
       }
     } catch (e) {
-      console.error("Error fetching drafts:", e);
-    } finally {
-      setLoadingDrafts(false);
+      console.error("Error reloading drafts:", e);
     }
   };
 
   useEffect(() => {
-    fetchDrafts();
+    let ignore = false;
+    async function loadInitial() {
+      try {
+        const res = await fetch("/api/copilot/drafts");
+        const json = await res.json();
+        if (!ignore && json.success) {
+          setSavedDrafts(json.data);
+          const defaultDraft = json.data.find((d: ILedDraftItem) => d.criterionKey === "c3");
+          if (defaultDraft) {
+            setCurrentDraft(defaultDraft);
+          }
+        }
+      } catch (e) {
+        console.error("Error fetching drafts:", e);
+      } finally {
+        if (!ignore) {
+          setLoadingDrafts(false);
+        }
+      }
+    }
+
+    loadInitial();
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   // Handle Generate LED Draft
@@ -131,7 +145,7 @@ export default function CopilotLedPage() {
       const json = await res.json();
       if (json.success) {
         setCurrentDraft(json.draft);
-        await fetchDrafts();
+        await reloadDrafts();
       }
     } catch (e) {
       console.error("Error generating LED:", e);
@@ -155,10 +169,10 @@ export default function CopilotLedPage() {
     if (!textToSend.trim() || chatLoading) return;
 
     const userMsg: IChatMessage = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       sender: "user",
       text: textToSend,
-      timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+      timestamp: getCurrentTimeString(),
     };
 
     setChatMessages((prev) => [...prev, userMsg]);
@@ -175,11 +189,11 @@ export default function CopilotLedPage() {
 
       if (json.success) {
         const aiMsg: IChatMessage = {
-          id: (Date.now() + 1).toString(),
+          id: generateMessageId(),
           sender: "ai",
           text: json.answer,
           citations: json.citations,
-          timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+          timestamp: getCurrentTimeString(),
         };
         setChatMessages((prev) => [...prev, aiMsg]);
       }
@@ -556,7 +570,7 @@ export default function CopilotLedPage() {
               </p>
             </div>
             <button
-              onClick={fetchDrafts}
+              onClick={reloadDrafts}
               className="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs flex items-center gap-1.5 font-bold"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loadingDrafts ? "animate-spin" : ""}`} />

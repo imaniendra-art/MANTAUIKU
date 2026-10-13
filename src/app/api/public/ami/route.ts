@@ -63,7 +63,8 @@ export async function GET() {
         auditedUnitsCount: unitsSet.size || 10,
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

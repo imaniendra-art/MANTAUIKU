@@ -196,8 +196,9 @@ export async function POST() {
       message: 'Siklus AMI dan temuan awal berhasil di-seed!',
       periodId: period._id,
     });
-  } catch (error: any) {
-    console.error('Error seeding AMI data:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error seeding AMI data:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

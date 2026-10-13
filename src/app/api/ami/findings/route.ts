@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     const status = searchParams.get('status');
     const search = searchParams.get('search');
 
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (periodId) {
       query.periodId = periodId;
@@ -39,8 +39,9 @@ export async function GET(req: Request) {
 
     const findings = await AmiFinding.find(query).sort({ createdAt: -1 });
     return NextResponse.json({ success: true, data: findings });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
 
@@ -81,7 +82,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, data: newFinding });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

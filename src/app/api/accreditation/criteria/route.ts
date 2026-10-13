@@ -40,8 +40,9 @@ export async function GET() {
         predictedGrade,
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
 
@@ -81,7 +82,8 @@ export async function PATCH(req: Request) {
     await criteria.save();
 
     return NextResponse.json({ success: true, data: criteria });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

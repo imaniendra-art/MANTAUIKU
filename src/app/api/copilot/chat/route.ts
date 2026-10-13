@@ -115,7 +115,10 @@ export async function POST(req: Request) {
           closingRate: `${closingRate}%`,
         },
         skorKesiapanLamemba: "85.3 / 100 (Threshold Kategori Peringkat UNGGUL)",
+        totalKriteriaLamemba: criteriaList.length,
+        totalProfilAkreditasi: accreditationList.length,
         kepuasanMitraIndustri: `${avgEmployer} / 4.00 (${Math.round((avgEmployer / 4) * 1000) / 10}%)`,
+        historyTurns: Array.isArray(history) ? history.length : 0,
       },
     };
 

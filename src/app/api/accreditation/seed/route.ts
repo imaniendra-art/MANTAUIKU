@@ -216,8 +216,13 @@ export async function POST() {
       success: true,
       message: 'Data akreditasi, 9 Kriteria LAMEMBA, dan instrumen Lampiran DL-05 berhasil di-seed!',
     });
-  } catch (error: any) {
-    console.error('Error seeding accreditation data:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error('Error seeding accreditation data:', err);
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
+}
+
+export async function GET() {
+  return POST();
 }
