@@ -8,6 +8,7 @@ import {
   TracerStudyResponse,
   EmployerSurveyResponse,
 } from "@/models/Evaluation";
+import { getClientIp, checkRateLimit, createRateLimitExceededResponse } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -253,6 +254,16 @@ Luaran Tridharma merupakan cerminan akuntabilitas publik Program Studi S1 Manaje
 
 export async function POST(req: Request) {
   try {
+    // 0. Rate limiting protection (Max 10 requests per 60s per client IP)
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, "copilot_generate_led", 10, 60 * 1000);
+    if (!rateLimit.allowed) {
+      return createRateLimitExceededResponse(
+        rateLimit.retryAfterSeconds,
+        `Batas generate dokumen akreditasi tercapai. Silakan tunggu ${rateLimit.retryAfterSeconds} detik sebelum melakukan kompilasi kriteria berikutnya.`
+      );
+    }
+
     await connectToDatabase();
     const body = await req.json();
     const { criterionKey = "c1", prodi = "S1 Manajemen", targetRating = "Unggul" } = body;

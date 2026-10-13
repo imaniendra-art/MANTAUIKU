@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import { EmployerSurveyResponse } from "@/models/Evaluation";
+import { getClientIp, checkRateLimit, createRateLimitExceededResponse } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,16 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    // 0. Rate limiting protection (Max 15 submissions per 10 minutes per client IP)
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, "employer_survey_submit", 15, 10 * 60 * 1000);
+    if (!rateLimit.allowed) {
+      return createRateLimitExceededResponse(
+        rateLimit.retryAfterSeconds,
+        `Terlalu banyak pengisian survei dari perangkat Anda. Silakan tunggu ${rateLimit.retryAfterSeconds} detik sebelum mengirimkan penilaian berikutnya.`
+      );
+    }
+
     await connectToDatabase();
     const body = await req.json();
 

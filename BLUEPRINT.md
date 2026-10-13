@@ -248,6 +248,46 @@ Memastikan sistem siap dipakai secara nyata dengan tata kelola keamanan akun man
 5. **Fase 8 (Selesai)**: AI Quality Copilot & Generator Draf Laporan Evaluasi Diri (LED) LAMEMBA 9 Kriteria.
 6. **Fase 9 (Selesai)**: Drill-Down Numerator & Denominator Interaktif serta Formula Audit Mutu (100% Benchmark UNJA Equivalent).
 7. **Fase 10 (Selesai)**: Keamanan Akun, Fitur Ubah Kata Sandi Mandiri & Reset Administratif LPM.
+8. **Fase 11 (Selesai)**: Production Hardening 5 Pilar Keandalan & Keamanan Sistem.
+
+---
+
+## 14. Fase 11 (Selesai): Production Hardening 5 Pilar (Sovereign Quality Standard)
+
+Memperkuat seluruh pondasi sistem MANTAUIKU sebelum rilis ke server produksi perguruan tinggi:
+
+1. **Pilar 1: Rate Limiting & Abuse Prevention (`src/lib/rateLimit.ts`)**:
+   - Algoritma in-memory sliding window dengan pembersihan otomatis rekaman kedaluwarsa setiap 5 menit.
+   - Deteksi multi-proxy IP (`cf-connecting-ip`, `x-real-ip`, `x-forwarded-for`).
+   - Proteksi ketat pada titik mutasi & AI:
+     - `POST /api/copilot/chat`: Max 20 req/60s.
+     - `POST /api/copilot/generate-led`: Max 10 req/60s.
+     - `POST /api/public/tracer-study`: Max 15 submisi/10 menit.
+     - `POST /api/public/employer-survey`: Max 15 submisi/10 menit.
+   - Respons standar RFC 6585 HTTP 429 lengkap dengan header `Retry-After`, `X-RateLimit-Remaining`, dan `X-RateLimit-Reset`.
+
+2. **Pilar 2: HTTP Security Headers & Host Isolation (`next.config.ts`)**:
+   - `poweredByHeader: false` untuk mencegah finger-printing teknologi.
+   - `X-Frame-Options: SAMEORIGIN` untuk mencegah serangan clickjacking.
+   - `X-Content-Type-Options: nosniff` untuk mencegah serangan MIME sniffing.
+   - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` untuk memaksa koneksi terenkripsi HTTPS.
+   - `Referrer-Policy: strict-origin-when-cross-origin` & `Permissions-Policy` pembatasan hak akses perangkat (kamera, mikrofon, geolokasi).
+
+3. **Pilar 3: Error Resilience & Graceful Degradation**:
+   - `src/app/not-found.tsx`: Halaman 404 berbalut desain Sky-Cyan STIMI YAPMI dengan navigasi cepat ke dashboard & beranda publik.
+   - `src/app/error.tsx`: Root Client Error Boundary dengan penangkap insiden, tampilan kode digest, dan tombol *Coba Lagi (`reset()`)*.
+   - `src/app/dashboard/error.tsx`: Scoped Error Boundary khusus dashboard yang mempertahankan sidebar & topbar jika salah satu modul mengalami kegagalan.
+   - `src/app/global-error.tsx`: Catch-all fallback boundary jika terjadi kesalahan fatal pada level root layout.
+
+4. **Pilar 4: Observability & Health Monitoring (`src/app/api/healthz/route.ts`)**:
+   - Endpoint `/api/healthz` untuk probe uptime hosting platform & Docker readiness.
+   - Pengecekan aktif ping MongoDB Atlas (`db.admin().ping()`), pemantauan status readyState, latensi database (ms), uptime proses, dan alokasi memori RAM (RSS & Heap).
+
+5. **Pilar 5: Bot Shield, Crawler Rules & Metadata Hardening**:
+   - `src/app/robots.ts`: Mengizinkan crawler publik hanya ke halaman beranda dan kuesioner publik CDC, serta mengisolasi ketat direktori `/dashboard/`, `/api/`, dan `/login`.
+   - `src/app/sitemap.ts`: Peta situs XML terstandarisasi.
+   - `src/app/layout.tsx`: Standarisasi bahasa `lang="id"`, metadata OpenGraph lengkap, deskripsi institusi resmi LPM STIMI YAPMI, dan theme color Sky-Cyan.
+
 
 
 

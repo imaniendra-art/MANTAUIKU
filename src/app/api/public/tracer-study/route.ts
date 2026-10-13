@@ -3,6 +3,7 @@ import connectToDatabase from "@/lib/db";
 import { TracerStudyResponse } from "@/models/Evaluation";
 import IKUMetadata from "@/models/IKUMetadata";
 import Achievement from "@/models/Achievement";
+import { getClientIp, checkRateLimit, createRateLimitExceededResponse } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -98,6 +99,16 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    // 0. Rate limiting protection (Max 15 submissions per 10 minutes per client IP)
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, "tracer_study_submit", 15, 10 * 60 * 1000);
+    if (!rateLimit.allowed) {
+      return createRateLimitExceededResponse(
+        rateLimit.retryAfterSeconds,
+        `Terlalu banyak pengisian kuesioner dari perangkat Anda. Silakan tunggu ${rateLimit.retryAfterSeconds} detik sebelum mengirimkan kuesioner berikutnya.`
+      );
+    }
+
     await connectToDatabase();
     const body = await req.json();
 

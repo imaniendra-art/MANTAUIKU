@@ -12,10 +12,22 @@ import {
 } from "@/models/Evaluation";
 import { AccreditationProfile, LamembaCriteria } from "@/models/Accreditation";
 
+import { getClientIp, checkRateLimit, createRateLimitExceededResponse } from "@/lib/rateLimit";
+
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
+    // 0. Rate limiting protection (Max 20 requests per 60s per client IP)
+    const clientIp = getClientIp(req);
+    const rateLimit = checkRateLimit(clientIp, "copilot_chat", 20, 60 * 1000);
+    if (!rateLimit.allowed) {
+      return createRateLimitExceededResponse(
+        rateLimit.retryAfterSeconds,
+        `Batas konsultasi AI tercapai. Silakan tunggu ${rateLimit.retryAfterSeconds} detik demi menjaga performa server.`
+      );
+    }
+
     await connectToDatabase();
     const body = await req.json();
     const { message = "", history = [] } = body;
