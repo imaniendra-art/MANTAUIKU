@@ -11,9 +11,13 @@ last_completed:
   - "Fase 9: Drill-Down Pembilang & Penyebut (Numerator & Denominator) interaktif & Formula Audit Mutu ala UNJA Benchmark"
   - "Fase 10: Keamanan Akun, Ubah Kata Sandi Mandiri (/dashboard/profile) & Reset Administratif LPM (/dashboard/users)"
   - "Fase 11: Production Hardening 5 Pilar (Rate Limiting, Security Headers, Error Resilience UI, /api/healthz, Bot Shield & SEO metadata)"
-blockers: "none (Build lulus 100% tanpa error)"
+  - "Fase 12: Standar Resmi 2025/2026 BAN-PT IAPT 4.1 (39 Indikator PTS Akademik), LAMEMBA DL-05/DL-09 (29 Indikator), Modul SPMI (/dashboard/spmi) & Unggah Bukti Fisik"
+blockers: "none (Build lulus 100% tanpa error, 26 rute tervalidasi)"
 key_files:
-  - "BLUEPRINT.md (Arsitektur lengkap dan dokumentasi 11 fase)"
+  - "BLUEPRINT.md (Arsitektur lengkap dan dokumentasi 12 fase)"
+  - "src/components/dashboard/Iapt41DashboardWidget.tsx (Widget BAN-PT IAPT 4.1)"
+  - "src/components/dashboard/LamembaDashboardWidget.tsx (Widget LAMEMBA DL-05 & DL-09)"
+  - "src/app/dashboard/spmi/page.tsx (Arsip dokumen SPMI Siklus PPEPP)"
   - "src/lib/rateLimit.ts (In-memory sliding-window rate limiter)"
   - "src/app/api/healthz/route.ts (Health check & MongoDB ping)"
   - "src/components/dashboard/NumeratorDenominatorModal.tsx (Drill-down audit formula)"
@@ -25,7 +29,8 @@ env_needed:
 notes:
   - "BATASAN USER: Aplikasi HANYA berpusat pada Penjaminan Mutu (LPM). JANGAN melebar ke sistem operasional non-mutu / ERP."
   - "BATASAN USER: Jangan membuat DOKUMENTASI.md dulu sebelum user memberi izin/instruksi berikutnya."
-  - "Semua perubahan telah di-push bersih ke origin/main (Commit 2b67de3)."
+  - "Pimpinan Institusi: Dr. Ibrahim Syah, S.E., M.M."
+  - "Status Git: Tersinkronisasi penuh dengan origin/main (Commit e5a34c0)."
 ```
 
 ---

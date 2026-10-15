@@ -288,6 +288,34 @@ Memperkuat seluruh pondasi sistem MANTAUIKU sebelum rilis ke server produksi per
    - `src/app/sitemap.ts`: Peta situs XML terstandarisasi.
    - `src/app/layout.tsx`: Standarisasi bahasa `lang="id"`, metadata OpenGraph lengkap, deskripsi institusi resmi LPM STIMI YAPMI, dan theme color Sky-Cyan.
 
+---
+
+## 15. Fase 12 (Selesai): Standar Regulasi Resmi BAN-PT IAPT 4.1, LAMEMBA DL-05/DL-09 & Modul SPMI Terintegrasi
+
+Memutakhirkan sistem akreditasi dan repositori penjaminan mutu sesuai regulasi terbaru Kementerian & Lembaga Akreditasi Mandiri:
+
+1. **BAN-PT Peraturan No. 35 Tahun 2025 (IAPT 4.1 PTS Akademik)**:
+   - 39 butir indikator resmi terbagi dalam 4 Kriteria CRAM (*Culture, Relevance, Accountability, Mission*).
+   - Widget analitik komprehensif: [`Iapt41DashboardWidget.tsx`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/components/dashboard/Iapt41DashboardWidget.tsx) dan data acuan [`iapt41Data.ts`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/data/iapt41Data.ts).
+   - Endpoint terdedikasi: `/api/accreditation/iapt41`.
+
+2. **Instrumen LAMEMBA 2026 (DL-05 & DL-09 IAU Unggul)**:
+   - Evaluasi 5 Kriteria & 29 Indikator LAMEMBA DL-05 dengan struktur 4 Bab resmi per Peraturan LAMEMBA No. 2/2025.
+   - Simulasi Indikator Akreditasi Unggul (IAU DL-09) S1 Manajemen STIMI YAPMI via engine [`lamemba-dl09.ts`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/lib/accreditation/lamemba-dl09.ts).
+   - Widget terintegrasi: [`LamembaDashboardWidget.tsx`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/components/dashboard/LamembaDashboardWidget.tsx).
+
+3. **Modul Dokumen SPMI Siklus PPEPP (`/dashboard/spmi`)**:
+   - Repositori digital dokumen Kebijakan, Manual, Standar, Formulir/SOP, dan Laporan RTM SPMI STIMI YAPMI.
+   - Endpoint: `/api/spmi/documents` & `/api/spmi/seed`.
+   - Model koleksi MongoDB Atlas: [`SpmiDocument.ts`](file:///c:/Users/Iman%20Prasetyo/Documents/GitHub/MANTAUIKU/src/models/SpmiDocument.ts).
+
+4. **Unggah & Manajemen Bukti Fisik Terverifikasi**:
+   - Upload dokumen bukti dukung akreditasi via `/api/accreditation/upload` & `/api/accreditation/evidence`.
+   - Penyimpanan salinan digital sertifikat akreditasi BAN-PT & LAMEMBA asli di `public/uploads/certificates/`.
+
+5. **Pembaruan Kepemimpinan Institusi**:
+   - Ketua STIMI YAPMI Makassar diperbarui ke nama pejabat resmi: **Dr. Ibrahim Syah, S.E., M.M.** pada seluruh lembar pengesahan dan profil pimpinan.
+
 
 
 
