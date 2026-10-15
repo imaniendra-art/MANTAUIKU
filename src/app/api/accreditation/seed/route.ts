@@ -41,108 +41,89 @@ export async function POST() {
       ]);
     }
 
-    // 2. Seed 9 Kriteria LAMEMBA
+    // 2. Seed 5 Kriteria LAMEMBA Edisi 2026 (SN-Dikti & 29 Indikator)
     const existingCriteria = await LamembaCriteria.countDocuments();
     if (existingCriteria === 0) {
       await LamembaCriteria.insertMany([
         {
-          code: 'C.1',
-          name: 'Visi, Misi, Tujuan, dan Strategi (VMTS)',
-          weight: 5,
-          score: 88,
-          targetScore: 85,
-          status: 'UNGGUL',
-          description: 'Pemahaman sivitas akademika terhadap VMTS Prodi Manajemen sangat tinggi dan terintegrasi dalam rencana operasional tahunan.',
-          strengths: ['Sosialisasi VMTS terukur berbasis survei pemahaman 92%', 'Renstra prodi selaras dengan Renstra institusi STIMI YAPMI'],
-          recommendations: ['Peningkatan keterlibatan asosiasi profesi manajemen dalam reviu berkala VMTS'],
-        },
-        {
-          code: 'C.2',
-          name: 'Tata Pamong, Tata Kelola, dan Kerjasama',
-          weight: 10,
-          score: 86,
-          targetScore: 85,
-          status: 'UNGGUL',
-          description: 'Sistem kepemimpinan partisipatif, penjaminan mutu SPMI siklus PPEPP berjalan aktif, dan jejaring kerjasama industri memadai.',
-          strengths: ['Struktur SPMI LPM memiliki garis koordinasi langsung ke Ketua STIMI', 'Tersedia dokumen SOP tata pamong lengkap'],
-          recommendations: ['Mempercepat konversi MoU kemitraan industri menjadi PKS (MoA) operasional'],
-        },
-        {
-          code: 'C.3',
-          name: 'Mahasiswa',
-          weight: 10,
-          score: 84,
-          targetScore: 85,
-          status: 'BAIK_SEKALI',
-          description: 'Rasio pendaftar terhadap yang diterima sehat, layanan bimbingan konseling dan karir aktif, prestasi mahasiswa tingkat wilayah meningkat.',
-          strengths: ['Sistem seleksi mahasiswa baru transparan', 'Pemberian beasiswa berprestasi dan KIP Kuliah tepat sasaran'],
-          recommendations: ['Mendorong keikutsertaan mahasiswa dalam kompetisi bisnis rencana mandiri tingkat nasional (KBMK)'],
-        },
-        {
-          code: 'C.4',
-          name: 'Sumber Daya Manusia (SDM)',
+          code: 'K.1',
+          name: 'Tata Pamong dan Tata Kelola',
           weight: 15,
-          score: 82,
+          score: 0,
           targetScore: 85,
-          status: 'BAIK_SEKALI',
-          description: 'Kualifikasi Dosen Tetap Program Studi (DTPS) seluruhnya berkualifikasi S2/S3 dengan jabatan fungsional Lektor dan Lektor Kepala.',
-          strengths: ['100% dosen tetap memiliki NIDN dan bidang ilmu linier Manajemen', 'Rasio dosen terhadap mahasiswa sangat ideal (1:24)'],
-          recommendations: ['Mendorong 3 dosen yang sedang studi lanjut S3 agar segera menyelesaikan disertasi'],
+          status: 'PERLU_PERBAIKAN',
+          description:
+            'Sistem tata pamong mendeskripsikan pengasuhan (parenting), pengawasan, pembentukan sinergi, penyediaan sumber daya, nilai-nilai VMTS, serta implementasi SPMI siklus PPEPP secara konsisten.',
+          strengths: [
+            'Belum ada dokumen fisik pembuktian yang diunggah ke sistem.',
+          ],
+          recommendations: [
+            'Siapkan dokumen resmi yang diminta pada masing-masing indikator dan unggah berkasnya.',
+          ],
         },
         {
-          code: 'C.5',
-          name: 'Keuangan, Sarana, dan Prasarana',
-          weight: 10,
-          score: 85,
+          code: 'K.2',
+          name: 'Pengelolaan Dosen dan Tenaga Kependidikan',
+          weight: 30,
+          score: 0,
           targetScore: 85,
-          status: 'UNGGUL',
-          description: 'Alokasi anggaran operasional pembelajaran, fasilitas laboratorium komputer bisnis, dan akses e-library jurnal internasional memadai.',
-          strengths: ['Lab komputer dilengkapi software analisis data statistik', 'Ruang kelas ber-AC dengan multimedia interaktif'],
-          recommendations: ['Peremajaan lisensi software analisis bisnis secara berkala'],
+          status: 'PERLU_PERBAIKAN',
+          description:
+            'Pengelolaan dosen dan tendik mencakup kecukupan dan kualifikasi dosen tetap (minimal 5 dosen linier), matriks penugasan, EWMP (56,25 jam/pekan), serta rekrutmen dan pengembangan karir dosen dan tendik berkelanjutan.',
+          strengths: [
+            'Belum ada dokumen fisik pembuktian yang diunggah ke sistem.',
+          ],
+          recommendations: [
+            'Siapkan dokumen profil dosen DKPS Tabel 1 s.d 5 dan unggah berkasnya.',
+          ],
         },
         {
-          code: 'C.6',
-          name: 'Pendidikan (Kurikulum OBE & Pembelajaran)',
-          weight: 20,
-          score: 90,
+          code: 'K.3',
+          name: 'Keuangan dan Sarana Prasarana',
+          weight: 15,
+          score: 0,
           targetScore: 85,
-          status: 'UNGGUL',
-          description: 'Kurikulum telah mengadopsi Outcome-Based Education (OBE), RPS termutakhirkan, dan implementasi MBKM magang bersertifikat berjalan baik.',
-          strengths: ['RPS memuat Capaian Pembelajaran Lulusan (CPL) terukur', 'Pelaksanaan metode pembelajaran studi kasus (case method) dan team-based project'],
-          recommendations: ['Memperluas mata kuliah kolaborasi praktisi mengajar dari dunia perbankan/bisnis'],
+          status: 'PERLU_PERBAIKAN',
+          description:
+            'Pengelolaan sumber daya keuangan menjamin keberlanjutan pembiayaan operasional pendidikan, riset, dan PkM, didukung sarana dan prasarana yang higienis, aman, dan ramah difabel.',
+          strengths: [
+            'Belum ada dokumen fisik pembuktian yang diunggah ke sistem.',
+          ],
+          recommendations: [
+            'Siapkan dokumen RKAT, laporan keuangan DKPS Tabel 6, serta bukti inventaris sarpras.',
+          ],
         },
         {
-          code: 'C.7',
-          name: 'Penelitian Dosen & Mahasiswa',
-          weight: 10,
-          score: 81,
+          code: 'K.4',
+          name: 'Pendidikan dan Pengajaran',
+          weight: 25,
+          score: 0,
           targetScore: 85,
-          status: 'BAIK',
-          description: 'Produktivitas riset dosen tetap berjalan rutin dengan keterlibatan mahasiswa pada tema-tema manajemen keuangan dan pemasaran UMKM.',
-          strengths: ['Tersedia dana hibah penelitian internal dari yayasan', 'Roadmap penelitian LPPM fokus pada penguatan ekonomi lokal'],
-          recommendations: ['Meningkatkan perolehan hibah riset kompetitif nasional Kemendiktisaintek (BIMA)'],
+          status: 'PERLU_PERBAIKAN',
+          description:
+            'Pengelolaan kurikulum berbasis Outcome-Based Education (OBE), peta kurikulum selaras CPL, metode mutakhir (case method & team-based project), serta siklus jaminan pembelajaran (analisis & evaluasi hasil belajar).',
+          strengths: [
+            'Belum ada dokumen fisik pembuktian yang diunggah ke sistem.',
+          ],
+          recommendations: [
+            'Siapkan dokumen kurikulum OBE, peta kurikulum, RPS berbasis kasus/proyek, dan laporan tracer study.',
+          ],
         },
         {
-          code: 'C.8',
-          name: 'Pengabdian kepada Masyarakat (PkM)',
-          weight: 10,
-          score: 83,
+          code: 'K.5',
+          name: 'Penelitian dan Pengabdian kepada Masyarakat (PkM)',
+          weight: 15,
+          score: 0,
           targetScore: 85,
-          status: 'BAIK_SEKALI',
-          description: 'Kegiatan PkM dosen dan mahasiswa aktif memberikan pendampingan manajemen keuangan dan digital marketing bagi pelaku UMKM di Makassar.',
-          strengths: ['Kemitraan PkM dengan binaan UMKM binaan Dinas Koperasi Makassar', 'Keterlibatan mahasiswa dalam kegiatan PkM mencapai 35%'],
-          recommendations: ['Mendorong pendaftaran Hak Kekayaan Intelektual (HKI) atas modul pelatihan PkM'],
-        },
-        {
-          code: 'C.9',
-          name: 'Luaran dan Capaian Tridharma',
-          weight: 10,
-          score: 87,
-          targetScore: 85,
-          status: 'UNGGUL',
-          description: 'Rata-rata IPK lulusan 3.42, masa studi tepat waktu 3.8 tahun, response rate tracer study tinggi, dan waktu tunggu kerja lulusan 3.2 bulan.',
-          strengths: ['Waktu tunggu kerja lulusan singkat (< 4 bulan)', 'Publikasi artikel ilmiah mahasiswa bersama dosen di jurnal terindeks SINTA'],
-          recommendations: ['Peningkatan persentase lulusan yang berwirausaha mandiri berbasis digital'],
+          status: 'PERLU_PERBAIKAN',
+          description:
+            'Pelaksanaan penelitian dan kegiatan PkM relevan dengan bidang ilmu manajemen (EMBA), meningkatkan kompetensi dosen, berkontribusi bagi masyarakat/UMKM, dan diintegrasikan ke dalam materi ajar.',
+          strengths: [
+            'Belum ada dokumen fisik pembuktian yang diunggah ke sistem.',
+          ],
+          recommendations: [
+            'Siapkan dokumen luaran riset dan PkM dosen DKPS Tabel 8 dan unggah berkasnya.',
+          ],
         },
       ]);
     }

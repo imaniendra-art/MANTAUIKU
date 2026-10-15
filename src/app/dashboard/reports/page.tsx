@@ -631,8 +631,8 @@ export default function ReportsPage() {
                       <p className="font-bold text-slate-900">Ketua STIMI YAPMI Makassar</p>
                     </div>
                     <div>
-                      <p className="font-extrabold text-slate-900 underline">{data?.profile?.leaderName || "Dr. H. Rahman, M.M."}</p>
-                      <p className="text-[11px] text-slate-500">NIDN. 0905087302</p>
+                      <p className="font-extrabold text-slate-900 underline">{data?.profile?.leaderName || "Dr. Ibrahim Syah, S.E., M.M."}</p>
+                      <p className="text-[11px] text-slate-500">NIDN. 0920037601</p>
                     </div>
                   </div>
                 </div>

@@ -1291,7 +1291,7 @@ export default function AmiDashboardPage() {
                       <strong>Ketua STIMI YAPMI Makassar</strong>
                     </p>
                     <div>
-                      <p className="font-black underline underline-offset-4">Ibrahim Syah, SE., MM.</p>
+                      <p className="font-black underline underline-offset-4">Dr. Ibrahim Syah, S.E., M.M.</p>
                       <p className="text-[10px] text-slate-500">NIDN. 0920037601</p>
                     </div>
                   </div>

@@ -17,10 +17,23 @@ import {
   ShieldCheck,
   Award,
   GraduationCap,
-  Sparkles
+  Sparkles,
+  BookOpen
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSidebar } from "./SidebarContext";
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  description: string;
+}
+
+interface NavGroup {
+  category: string;
+  items: NavItem[];
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -30,72 +43,107 @@ export default function Sidebar() {
   const userRole = session?.user?.role;
   const isAdmin = userRole === "LPM";
 
-  const navItems = [
-    { 
-      name: "Dashboard Kinerja", 
-      href: "/dashboard", 
-      icon: LayoutDashboard,
-      description: "Ringkasan capaian & skor IKU"
+  // Urutan menu terstruktur selaras dengan alur Penjaminan Mutu & Tampilan Publik
+  const navGroups: NavGroup[] = [
+    {
+      category: "IKHTISAR UTAMA",
+      items: [
+        { 
+          name: "Dashboard Kinerja", 
+          href: "/dashboard", 
+          icon: LayoutDashboard,
+          description: "Ringkasan capaian & skor makro IKU"
+        },
+      ]
     },
-    { 
-      name: "Manajemen Target", 
-      href: "/dashboard/targets", 
-      icon: Target,
-      description: "Penetapan target IKU tahunan"
+    {
+      category: "LEGALITAS & SPMI",
+      items: [
+        { 
+          name: "Akreditasi & DL-05", 
+          href: "/dashboard/accreditation", 
+          icon: Award,
+          description: "Legalitas BAN-PT, LAMEMBA & DL-05"
+        },
+        { 
+          name: "Dokumen & Standar SPMI", 
+          href: "/dashboard/spmi", 
+          icon: BookOpen,
+          description: "Pusat 4 Buku SPMI & Siklus PPEPP"
+        },
+        { 
+          name: "Audit Mutu (AMI)", 
+          href: "/dashboard/ami", 
+          icon: ShieldCheck,
+          description: "Siklus AMI & Temuan KTS/OB 10 Unit"
+        },
+      ]
     },
-    { 
-      name: "Pelaporan Capaian", 
-      href: "/dashboard/achievements", 
-      icon: TrendingUp,
-      description: "Input realisasi & upload bukti"
+    {
+      category: "12 IKU INSTITUSI",
+      items: [
+        { 
+          name: "Pelaporan Capaian", 
+          href: "/dashboard/achievements", 
+          icon: TrendingUp,
+          description: "Input realisasi TW 1-4 & bukti dukung"
+        },
+        { 
+          name: "Manajemen Target", 
+          href: "/dashboard/targets", 
+          icon: Target,
+          description: "Penetapan target tahunan 2026 LPM"
+        },
+      ]
     },
-    { 
-      name: "Audit Mutu (AMI)", 
-      href: "/dashboard/ami", 
-      icon: ShieldCheck,
-      description: "Siklus AMI & Temuan KTS/OB"
+    {
+      category: "UMPAN BALIK SIVITAS",
+      items: [
+        { 
+          name: "Evaluasi & Tracer", 
+          href: "/dashboard/evaluations", 
+          icon: GraduationCap,
+          description: "EDO, EKA & Tracer CDC (Auto-Supply IKU 2)"
+        },
+      ]
     },
-    { 
-      name: "Akreditasi & DL-05", 
-      href: "/dashboard/accreditation", 
-      icon: Award,
-      description: "LAMEMBA & Pemantauan DL-05"
-    },
-    { 
-      name: "Evaluasi & Tracer", 
-      href: "/dashboard/evaluations", 
-      icon: GraduationCap,
-      description: "EDO, EKA & Tracer Study (IKU 2)"
-    },
-    { 
-      name: "AI Quality Copilot", 
-      href: "/dashboard/copilot", 
-      icon: Sparkles,
-      description: "Konsultasi Mutu & Draf LED"
-    },
-    { 
-      name: "Arsip Laporan", 
-      href: "/dashboard/reports", 
-      icon: Archive,
-      description: "Rekap & ekspor laporan kinerja"
+    {
+      category: "AKREDITASI & LAPORAN",
+      items: [
+        { 
+          name: "AI Quality Copilot", 
+          href: "/dashboard/copilot", 
+          icon: Sparkles,
+          description: "Draf Bab LED 9 Kriteria & Konsultasi Mutu"
+        },
+        { 
+          name: "Arsip Laporan", 
+          href: "/dashboard/reports", 
+          icon: Archive,
+          description: "Rekap komparasi, ekspor CSV & PDF kop resmi"
+        },
+      ]
     },
   ];
 
   if (isAdmin) {
-    navItems.push(
-      { 
-        name: "Pengguna & Unit", 
-        href: "/dashboard/users", 
-        icon: Users,
-        description: "Manajemen akun PIC unit kerja"
-      },
-      { 
-        name: "Profil Institusi", 
-        href: "/dashboard/profile", 
-        icon: Building2,
-        description: "Informasi kampus STIMI YAPMI"
-      }
-    );
+    navGroups.push({
+      category: "TATA PAMONG (LPM)",
+      items: [
+        { 
+          name: "Pengguna & Unit", 
+          href: "/dashboard/users", 
+          icon: Users,
+          description: "Manajemen akun PIC & reset kata sandi"
+        },
+        { 
+          name: "Profil Institusi", 
+          href: "/dashboard/profile", 
+          icon: Building2,
+          description: "Profil kampus & ubah kata sandi mandiri"
+        }
+      ]
+    });
   }
 
   // Format unit / role display name
@@ -156,7 +204,7 @@ export default function Sidebar() {
           <button
             onClick={toggleSidebar}
             title="Minimize sidebar"
-            className="w-8 h-8 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 flex items-center justify-center transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -169,52 +217,69 @@ export default function Sidebar() {
           <button
             onClick={toggleSidebar}
             title="Expand sidebar"
-            className="w-8 h-8 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-lg text-slate-400 hover:text-sky-600 hover:bg-sky-50 flex items-center justify-center transition-colors cursor-pointer"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       )}
 
-      {/* Navigation Links */}
-      <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto overflow-x-hidden">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
-          const Icon = item.icon;
+      {/* Navigation Links with Group Headers */}
+      <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto overflow-x-hidden">
+        {navGroups.map((group, groupIdx) => (
+          <div key={group.category} className="space-y-1">
+            {/* Group Label */}
+            {!isCollapsed ? (
+              <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider px-3.5 pt-1 pb-1">
+                {group.category}
+              </div>
+            ) : groupIdx > 0 ? (
+              <div className="border-t border-slate-200/60 my-2" />
+            ) : null}
 
-          return (
-            <div key={item.href} className="relative group">
-              <Link href={item.href}>
-                <div 
-                  className={`
-                    relative flex items-center rounded-xl transition-all duration-200
-                    ${isCollapsed ? "justify-center p-3" : "gap-3 px-3.5 py-3"}
-                    ${isActive 
-                      ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white shadow-md shadow-sky-600/25 font-semibold" 
-                      : "text-slate-600 hover:bg-sky-50/80 hover:text-sky-900"}
-                  `}
-                >
-                  <Icon className={`w-5 h-5 shrink-0 transition-transform ${isActive ? "text-white" : "text-slate-400 group-hover:text-sky-600"}`} />
-                  
-                  {!isCollapsed && (
-                    <span className="text-sm font-medium tracking-normal truncate">
-                      {item.name}
-                    </span>
-                  )}
-                </div>
-              </Link>
+            {/* Group Items */}
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
+                const Icon = item.icon;
 
-              {/* Floating Tooltip in Collapsed Mode */}
-              {isCollapsed && (
-                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-50 whitespace-nowrap min-w-[140px]">
-                  <p className="font-bold text-sky-300">{item.name}</p>
-                  <p className="text-[11px] text-slate-300 mt-0.5">{item.description}</p>
-                  <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
-                </div>
-              )}
+                return (
+                  <div key={item.href} className="relative group">
+                    <Link href={item.href}>
+                      <div 
+                        className={`
+                          relative flex items-center rounded-xl transition-all duration-200 cursor-pointer
+                          ${isCollapsed ? "justify-center p-3" : "gap-3 px-3.5 py-2.5"}
+                          ${isActive 
+                            ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white shadow-md shadow-sky-600/25 font-semibold" 
+                            : "text-slate-600 hover:bg-sky-50/80 hover:text-sky-900"}
+                        `}
+                      >
+                        <Icon className={`w-5 h-5 shrink-0 transition-transform ${isActive ? "text-white" : "text-slate-400 group-hover:text-sky-600"}`} />
+                        
+                        {!isCollapsed && (
+                          <span className="text-xs font-semibold tracking-normal truncate">
+                            {item.name}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+
+                    {/* Floating Tooltip in Collapsed Mode */}
+                    {isCollapsed && (
+                      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-50 whitespace-nowrap min-w-[150px]">
+                        <p className="font-bold text-sky-300">{item.name}</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-semibold">{group.category}</p>
+                        <p className="text-[11px] text-slate-300 mt-0.5">{item.description}</p>
+                        <div className="absolute top-1/2 -left-1 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </nav>
 
       {/* User Info & Logout Section */}
@@ -246,7 +311,7 @@ export default function Sidebar() {
               <button 
                 onClick={() => signOut({ callbackUrl: "/login" })}
                 title="Keluar dari sistem"
-                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -257,7 +322,7 @@ export default function Sidebar() {
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               title="Keluar Sistem"
-              className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors shadow-sm"
+              className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors shadow-sm cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>

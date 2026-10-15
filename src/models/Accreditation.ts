@@ -16,11 +16,11 @@ export interface IAccreditationProfile extends Document {
   updatedAt: Date;
 }
 
-// 2. Kriteria LAMEMBA (Kriteria 1 s/d 9)
+// 2. Kriteria LAMEMBA Edisi 2026 (5 Kriteria SN-Dikti & 29 Indikator)
 export interface ILamembaCriteria extends Document {
-  code: string;               // "C.1", "C.2", ..., "C.9"
-  name: string;               // e.g. "Pendidikan", "Tata Pamong, Tata Kelola, dan Kerjasama"
-  weight: number;             // Bobot persentase
+  code: string;               // "K.1", "K.2", ..., "K.5" (atau "C.1".."C.9" legacy)
+  name: string;               // e.g. "Tata Pamong dan Tata Kelola", "Pendidikan dan Pengajaran"
+  weight: number;             // Bobot persentase (e.g. 15, 30, 15, 25, 15)
   score: number;              // Skor capaian (0-100)
   targetScore: number;        // Target minimum (e.g. 85 untuk Unggul)
   status: 'UNGGUL' | 'BAIK_SEKALI' | 'BAIK' | 'PERLU_PERBAIKAN';
@@ -30,30 +30,113 @@ export interface ILamembaCriteria extends Document {
   updatedAt: Date;
 }
 
-// 3. Instrumen Pemantauan & Evaluasi Tahunan Wajib Lampiran DL-05 LAMEMBA
+// 3. Instrumen Pemantauan & Evaluasi Tahunan Wajib Lampiran DL-05 LAMEMBA (Peraturan No. 2 Tahun 2025)
+export interface ILamembaDl05AnnualLetter {
+  yearIndex: number;           // 0: Baseline, 1: Thn 1, 2: Thn 2, 3: Thn 3, 4: Thn 4
+  yearLabel: string;           // "Tahun Ke-0 (Baseline)", "Tahun Ke-1", dst.
+  letterNumber: string;        // Nomor surat keputusan/rekomendasi
+  letterDate: string;          // Tanggal surat
+  fileUrl?: string;            // URL PDF yang diunggah
+  fileName?: string;           // Nama file PDF
+  uploadedAt?: Date;
+  notes?: string;
+}
+
+export interface ILamembaDl05LearningItem {
+  nomor: number;
+  indikator: string;
+  upayaTahun1: string;
+  hasilTahun1: string;
+  upayaTahun2: string;
+  hasilTahun2: string;
+  upayaTahun3: string;
+  hasilTahun3: string;
+  upayaTahun4: string;
+  hasilTahun4: string;
+}
+
+export interface ILamembaDl05FacultyItem {
+  name: string;
+  status: 'Tetap' | 'Tidak Tetap';
+  nidn: string;
+  jabatanAkademik: string;
+  jalur: 'Akademisi' | 'Praktisi';
+  namaPerusahaan?: string;
+  catatan?: string;
+  isChange: boolean;
+  isKeluar?: boolean;
+}
+
+export interface ILamembaDl05EwmpItem {
+  name: string;
+  psAkreditasiSks: number;
+  psLainDalamPtSks: number;
+  psLainLuarPtSks: number;
+  penelitianSks: number;
+  pkmSks: number;
+  tugasTambahanSks: number;
+  totalSks: number;
+  avgSemesterSks: number;
+  isChange: boolean;
+}
+
+export interface ILamembaDl05IntellectualItem {
+  name: string;
+  rekognisiPendidikan: string;
+  rekognisiPraktik: string;
+  rekognisiPenelitian: string;
+  rekognisiSosial: string;
+  isChange: boolean;
+}
+
+export interface ILamembaDl05StudentItem {
+  semester: 'Ganjil' | 'Genap';
+  mhsAktif: number;
+  mhsPdDikti: number;
+  selisih: number;
+  isChange: boolean;
+}
+
 export interface ILamembaDl05 extends Document {
   academicYear: string;       // e.g. "2025/2026"
   prodiName: string;          // "Program Studi S1 Manajemen"
   submissionDate: Date;
   status: 'DRAFT' | 'SUBMITTED' | 'APPROVED';
+  selectedYearIndex: number;  // 0, 1, 2, 3, 4
   
-  // Bagian 1: Tindak Lanjut Rekomendasi Asesor (Asesmen Lapangan Terakhir)
+  // Koleksi Wajib: 1 Surat Rekomendasi/Keputusan Resmi LAMEMBA per Tahun (Tahun 0 s.d 4)
+  annualLetters: ILamembaDl05AnnualLetter[];
+
+  // Bab I: Jaminan Pembelajaran (Tabel 1.1)
+  learningAssuranceItems: ILamembaDl05LearningItem[];
+  perbaikanBerkelanjutanJaminanPembelajaran?: string;
+
+  // Bab II: Kecukupan dan Kualifikasi Dosen (Tabel 2.1 & 2.3)
+  dosenProfiles: ILamembaDl05FacultyItem[];
+  ewmpList: ILamembaDl05EwmpItem[];
+  perbaikanBerkelanjutanDosen?: string;
+
+  // Bab III: Luaran dan Capaian Tridharma (Tabel 3.1)
+  kontribusiIntelektualDosen: ILamembaDl05IntellectualItem[];
+  perbaikanBerkelanjutanTridharma?: string;
+
+  // Bab IV: Kemahasiswaan & Sinkronisasi PD-Dikti (Tabel 4.1)
+  mahasiswaAktifList: ILamembaDl05StudentItem[];
+  perbaikanBerkelanjutanKemahasiswaan?: string;
+
+  // Legacy fallback fields for backward compatibility
   assessorFollowUps: Array<{
     recommendation: string;
     actionTaken: string;
     status: 'SELESAI' | 'SEDANG_BERJALAN' | 'BELUM';
     evidenceUrl?: string;
   }>;
-
-  // Bagian 2: Kemajuan Implementasi Renstra & CQI
   renstraProgress: Array<{
     targetName: string;
     achievement: string;
     obstacle: string;
     cqiSolution: string;
   }>;
-
-  // Bagian 3: Evaluasi Kinerja Tiga Pilar Kunci
   learningAssurance: {
     cplAchievementPercentage: number;
     obeRpsPercentage: number;
@@ -125,6 +208,95 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
     prodiName: { type: String, required: true, default: 'Program Studi S1 Manajemen' },
     submissionDate: { type: Date, default: Date.now },
     status: { type: String, enum: ['DRAFT', 'SUBMITTED', 'APPROVED'], default: 'SUBMITTED' },
+    selectedYearIndex: { type: Number, default: 1 },
+
+    // Koleksi Wajib 1 Surat Rekomendasi/Keputusan Resmi LAMEMBA per Tahun (Tahun 0 s.d 4)
+    annualLetters: [
+      {
+        yearIndex: { type: Number, required: true },
+        yearLabel: { type: String, required: true },
+        letterNumber: { type: String, default: '' },
+        letterDate: { type: String, default: '' },
+        fileUrl: { type: String },
+        fileName: { type: String },
+        uploadedAt: { type: Date },
+        notes: { type: String },
+      },
+    ],
+
+    // Bab I: Jaminan Pembelajaran (Tabel 1.1)
+    learningAssuranceItems: [
+      {
+        nomor: { type: Number, required: true },
+        indikator: { type: String, required: true },
+        upayaTahun1: { type: String, default: '' },
+        hasilTahun1: { type: String, default: '' },
+        upayaTahun2: { type: String, default: '' },
+        hasilTahun2: { type: String, default: '' },
+        upayaTahun3: { type: String, default: '' },
+        hasilTahun3: { type: String, default: '' },
+        upayaTahun4: { type: String, default: '' },
+        hasilTahun4: { type: String, default: '' },
+      },
+    ],
+    perbaikanBerkelanjutanJaminanPembelajaran: { type: String, default: '' },
+
+    // Bab II: Kecukupan dan Kualifikasi Dosen (Tabel 2.1 & 2.3)
+    dosenProfiles: [
+      {
+        name: { type: String, required: true },
+        status: { type: String, enum: ['Tetap', 'Tidak Tetap'], default: 'Tetap' },
+        nidn: { type: String, default: '' },
+        jabatanAkademik: { type: String, default: 'Lektor' },
+        jalur: { type: String, enum: ['Akademisi', 'Praktisi'], default: 'Akademisi' },
+        namaPerusahaan: { type: String, default: '' },
+        catatan: { type: String, default: '' },
+        isChange: { type: Boolean, default: false },
+        isKeluar: { type: Boolean, default: false },
+      },
+    ],
+    ewmpList: [
+      {
+        name: { type: String, required: true },
+        psAkreditasiSks: { type: Number, default: 0 },
+        psLainDalamPtSks: { type: Number, default: 0 },
+        psLainLuarPtSks: { type: Number, default: 0 },
+        penelitianSks: { type: Number, default: 0 },
+        pkmSks: { type: Number, default: 0 },
+        tugasTambahanSks: { type: Number, default: 0 },
+        totalSks: { type: Number, default: 0 },
+        avgSemesterSks: { type: Number, default: 0 },
+        isChange: { type: Boolean, default: false },
+      },
+    ],
+    perbaikanBerkelanjutanDosen: { type: String, default: '' },
+
+    // Bab III: Luaran dan Capaian Tridharma (Tabel 3.1)
+    kontribusiIntelektualDosen: [
+      {
+        name: { type: String, required: true },
+        rekognisiPendidikan: { type: String, default: '' },
+        rekognisiPraktik: { type: String, default: '' },
+        rekognisiPenelitian: { type: String, default: '' },
+        rekognisiSosial: { type: String, default: '' },
+        isChange: { type: Boolean, default: false },
+      },
+    ],
+    perbaikanBerkelanjutanTridharma: { type: String, default: '' },
+
+    // Bab IV: Kemahasiswaan & Sinkronisasi PD-Dikti (Tabel 4.1)
+    mahasiswaAktifList: [
+      {
+        semester: { type: String, enum: ['Ganjil', 'Genap'], required: true },
+        mhsAktif: { type: Number, default: 0 },
+        mhsPdDikti: { type: Number, default: 0 },
+        selisih: { type: Number, default: 0 },
+        isChange: { type: Boolean, default: false },
+      },
+    ],
+    perbaikanBerkelanjutanKemahasiswaan: { type: String, default: '' },
+
+    // Legacy fields
     assessorFollowUps: [
       {
         recommendation: { type: String, required: true },
@@ -165,6 +337,29 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
   { timestamps: true }
 );
 
+// 4. Evaluasi Mandiri IAPT 4.1 BAN-PT (Peraturan No. 35 Tahun 2025)
+export interface IIapt41Evaluation extends Document {
+  nomor: number;
+  kriteria: string;
+  cramCategory: 'C' | 'R' | 'A' | 'M';
+  status: 'MEMENUHI' | 'BELUM';
+  notes?: string;
+  updatedBy?: string;
+  updatedAt: Date;
+}
+
+const Iapt41EvaluationSchema = new Schema<IIapt41Evaluation>(
+  {
+    nomor: { type: Number, required: true, unique: true },
+    kriteria: { type: String, required: true },
+    cramCategory: { type: String, enum: ['C', 'R', 'A', 'M'], required: true },
+    status: { type: String, enum: ['MEMENUHI', 'BELUM'], default: 'MEMENUHI' },
+    notes: { type: String },
+    updatedBy: { type: String },
+  },
+  { timestamps: true }
+);
+
 export const AccreditationProfile: Model<IAccreditationProfile> =
   mongoose.models.AccreditationProfile ||
   mongoose.model<IAccreditationProfile>('AccreditationProfile', AccreditationProfileSchema);
@@ -176,3 +371,48 @@ export const LamembaCriteria: Model<ILamembaCriteria> =
 export const LamembaDl05: Model<ILamembaDl05> =
   mongoose.models.LamembaDl05 ||
   mongoose.model<ILamembaDl05>('LamembaDl05', LamembaDl05Schema);
+
+export const Iapt41Evaluation: Model<IIapt41Evaluation> =
+  mongoose.models.Iapt41Evaluation ||
+  mongoose.model<IIapt41Evaluation>('Iapt41Evaluation', Iapt41EvaluationSchema);
+
+// 5. Bukti Fisik Digital Mandiri per Kriteria Akreditasi (Renstra, SK, SOTK, MoU, dsb.)
+export interface IAccreditationEvidence extends Document {
+  targetType: 'PRODI' | 'INSTITUSI';
+  criterionCode: string; // e.g. "C.1" .. "C.9" atau "APT-1" .. "APT-39"
+  itemKey: string;       // Unique identifier per item checklist
+  itemTitle: string;
+  evidenceDocName: string;
+  fileUrl: string;
+  fileName: string;
+  originalName: string;
+  fileSize: number;
+  uploadedBy?: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const AccreditationEvidenceSchema = new Schema<IAccreditationEvidence>(
+  {
+    targetType: { type: String, enum: ['PRODI', 'INSTITUSI'], required: true },
+    criterionCode: { type: String, required: true },
+    itemKey: { type: String, required: true },
+    itemTitle: { type: String, required: true },
+    evidenceDocName: { type: String, required: true },
+    fileUrl: { type: String, required: true },
+    fileName: { type: String, required: true },
+    originalName: { type: String, required: true },
+    fileSize: { type: Number, required: true },
+    uploadedBy: { type: String },
+    notes: { type: String },
+  },
+  { timestamps: true }
+);
+
+AccreditationEvidenceSchema.index({ targetType: 1, itemKey: 1 }, { unique: true });
+
+export const AccreditationEvidence: Model<IAccreditationEvidence> =
+  mongoose.models.AccreditationEvidence ||
+  mongoose.model<IAccreditationEvidence>('AccreditationEvidence', AccreditationEvidenceSchema);
+

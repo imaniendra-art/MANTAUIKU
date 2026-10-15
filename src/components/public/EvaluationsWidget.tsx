@@ -227,12 +227,14 @@ export default function EvaluationsWidget() {
 
   return (
     <div className="space-y-12">
-      {/* 1. Header Section */}
-      <div className="text-center max-w-3xl mx-auto space-y-3">
-        <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-100">
-          Umpan Balik Mutu Berkelanjutan • Terintegrasi SIAM
-        </span>
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+      {/* 1. Header Section (Jarak Lega & Rapi) */}
+      <div className="text-center max-w-3xl mx-auto space-y-4 mb-10">
+        <div>
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200 shadow-2xs">
+            Umpan Balik Mutu Berkelanjutan
+          </span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
           Pusat Survei Mutu & Tracer Study Alumni
         </h2>
         <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">

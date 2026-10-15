@@ -367,7 +367,7 @@ export default function ProfileClient({
             <form onSubmit={handleInstSubmit} className="flex-1 space-y-4 text-xs">
               <div className="space-y-1">
                 <label className="font-bold text-slate-700">Nama Lengkap Pimpinan (Ketua / Rektor) *</label>
-                <input required name="leaderName" type="text" defaultValue={initialProfile?.leaderName || "Dr. H. Rahman, M.M."} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-medium" />
+                <input required name="leaderName" type="text" defaultValue={initialProfile?.leaderName || "Dr. Ibrahim Syah, S.E., M.M."} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/30 font-medium" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
