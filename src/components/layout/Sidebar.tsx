@@ -60,10 +60,10 @@ export default function Sidebar() {
       category: "LEGALITAS & SPMI",
       items: [
         { 
-          name: "Akreditasi & DL-05", 
+          name: "Akreditasi & Pemantauan", 
           href: "/dashboard/accreditation", 
           icon: Award,
-          description: "Legalitas BAN-PT, LAMEMBA & DL-05"
+          description: "Legalitas BAN-PT, LAMEMBA & Pemantauan"
         },
         { 
           name: "Dokumen & Standar SPMI", 

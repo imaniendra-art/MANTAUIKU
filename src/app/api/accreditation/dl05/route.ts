@@ -616,6 +616,62 @@ const DEFAULT_TIM_PENYUSUN = [
   },
 ];
 
+// 14. Sub-Tab 4: Identitas Pengusul & Sampul (Sesuai Format Resmi Halaman Muka LAMEMBA)
+const DEFAULT_IDENTITAS_PENGUSUL = {
+  perguruanTinggi: 'Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar',
+  unitPengelola: 'Jurusan Manajemen / Sekolah Tinggi Ilmu Manajemen Indonesia',
+  jenisProgram: 'Sarjana (S1)',
+  namaProdi: 'Program Studi Sarjana Manajemen',
+  alamat: 'Jl. Perintis Kemerdekaan KM. 9, Tamalanrea, Kota Makassar, Sulawesi Selatan 90245',
+  telepon: '0411-588123',
+  emailWeb: 'info@stimiyapmi.ac.id / www.stimiyapmi.ac.id',
+  nomorSkPendirianPt: 'SK Mendikbud RI No. 042/D/O/1997',
+  tanggalSkPendirianPt: '1997-07-25',
+  pejabatSkPendirianPt: 'Menteri Pendidikan dan Kebudayaan RI',
+  nomorSkPembukaanPs: 'SK Dirjen Dikti No. 219/DIKTI/Kep/1999',
+  tanggalSkPembukaanPs: '1999-05-18',
+  pejabatSkPembukaanPs: 'Direktur Jenderal Pendidikan Tinggi',
+  tahunPertamaMenerimaMhs: '1998',
+  peringkatAkreditasiTerbaru: 'Baik Sekali',
+  nomorSkLam: 'SK LAMEMBA No. 933/DE/A.5/AR.10/XII/2023',
+  tanggalKadaluarsa: '2028-12-28',
+  kota: 'Makassar',
+  tahunDokumen: '2025',
+  logoUrl: '/logo_stimi.png',
+};
+
+// 15. Sub-Tab 4: Kata Pengantar Resmi
+const DEFAULT_KATA_PENGANTAR =
+  'Puji dan syukur kami panjatkan ke hadirat Tuhan Yang Maha Esa atas limpahan rahmat dan karunia-Nya sehingga Dokumen Pemantauan dan Evaluasi Tahunan Akreditasi Program Studi (Lampiran DL-05) Program Studi Sarjana Manajemen Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar Tahun Akademik 2025/2026 dapat diselesaikan dengan baik.\n\nDokumen ini disusun sebagai wujud akuntabilitas institusi dalam menjalankan siklus Sistem Penjaminan Mutu Internal (SPMI) berbasis PPEPP (Penetapan, Pelaksanaan, Evaluasi, Pengendalian, dan Peningkatan) serta kepatuhan atas instrumen evaluasi berkala Lembaga Akreditasi Mandiri Ekonomi Manajemen Bisnis dan Akuntansi (LAMEMBA). Dokumen ini menyajikan pelaporan tindak lanjut rekomendasi asesor, evaluasi sasaran strategis Renstra UPPS, ketercapaian Capaian Pembelajaran Lulusan (CPL), profil kualifikasi dosen dan beban kerja EWMP, produktivitas riset dan PkM, hingga sinkronisasi data mahasiswa pada PD-Dikti.\n\nKami menyampaikan apresiasi dan terima kasih yang mendalam kepada seluruh Tim Taskforce DL-05, pimpinan perguruan tinggi, dosen tetap, tenaga kependidikan, serta mahasiswa dan pemangku kepentingan industri yang senantiasa mendukung tercapainya continuous quality improvement menuju akreditasi Unggul.';
+
+// 16. Sub-Tab 4: Narasi Pengantar Bab I (Tindak Lanjut Rekomendasi Asesor)
+const DEFAULT_NARASI_BAB_1 =
+  'Bagian ini memuat penjelasan program studi atas tindak lanjut rekomendasi untuk perbaikan berkelanjutan (continuous improvement) yang telah disampaikan asesor saat Asesmen Lapangan akreditasi LAMEMBA sebelumnya, hambatan yang dihadapi di lapangan, serta solusi taktis dan hasil konkret yang telah dicapai oleh Program Studi Sarjana Manajemen STIMI YAPMI Makassar.';
+
+// 17. Sub-Tab 4: Narasi Pengantar Bab II (Kemajuan Implementasi Strategi Renstra)
+const DEFAULT_NARASI_BAB_2 =
+  'Bagian ini memuat penjelasan program studi tentang capaian implementasi strategi yang tercantum pada Rencana Strategis (Renstra) atau dokumen operasional lainnya, termasuk identifikasi hambatan dan solusi inovatif yang telah dilaksanakan dalam rangka mencapai visi, misi, dan tujuan institusi, sekaligus membangun budaya mutu akademik yang kokoh.';
+
+// 18. Sub-Tab 4: Narasi Pengantar Bab III (Evaluasi Kinerja Program Studi)
+const DEFAULT_NARASI_BAB_3 =
+  'Bagian ini memuat evaluasi pelaksanaan upaya perbaikan berkelanjutan baik perkembangan maupun kemajuan kinerja program studi setiap tahunnya dari 3 (tiga) pilar indikator: (1) Jaminan Pembelajaran, (2) Kecukupan dan Kualifikasi Dosen, serta (3) Luaran dan Capaian Tridharma Perguruan Tinggi yang merujuk pada integrasi data DED, DKPS, dan PD-Dikti Feeder.';
+
+// 19. Sub-Tab 4: Narasi Bab 3.1 (Jaminan Pembelajaran)
+const DEFAULT_NARASI_BAB_31 =
+  'Program studi menunjukkan perbaikan-perbaikan yang dilakukan secara konsisten terhadap pencapaian Capaian Pembelajaran Lulusan (CPL) mahasiswa berdasarkan pemenuhan kriteria 6 butir 1 sampai 4 LAMEMBA, mencakup penjaminan mutu kurikulum OBE, asesmen rubrik case-method dan team-based project, serta audit ketercapaian kompetensi lulusan.';
+
+// 20. Sub-Tab 4: Narasi Bab 3.2 (Kecukupan dan Kualifikasi Dosen)
+const DEFAULT_NARASI_BAB_32 =
+  'Bagian ini melampirkan pembaruan data dosen tetap dengan menggunakan data yang bersumber dari Dokumen Kinerja Program Studi (DKPS) mutakhir dan pangkalan data PD-Dikti, meliputi status kepegawaian, kesesuaian bidang keahlian, sertifikasi profesi/BNSP, rekognisi kontribusi intelektual, dan kesesuaian EWMP pada rentang 12-16 SKS.';
+
+// 21. Sub-Tab 4: Narasi Bab 3.3 (Luaran dan Capaian Tridharma)
+const DEFAULT_NARASI_BAB_33 =
+  'Bagian ini memuat pembaruan produktivitas tridharma dosen dan mahasiswa yang mencakup luaran publikasi ilmiah, perolehan HKI/Hak Cipta, sitasi karya ilmiah dosen pada TS-2 s.d TS, prestasi kejuaraan mahasiswa, serta rekonsiliasi data mahasiswa aktif terhadap feeder PD-Dikti tanpa selisih.';
+
+// 22. Sub-Tab 4: Narasi Penutup & Komitmen Mutu
+const DEFAULT_PENUTUP =
+  'Dokumen Pemantauan dan Evaluasi Tahunan Akreditasi Program Studi (Lampiran DL-05) ini merefleksikan transparansi dan komitmen terpadu seluruh sivitas akademika Program Studi Sarjana Manajemen STIMI YAPMI Makassar dalam menjaga mutu tridharma perguruan tinggi. Seluruh capaian, kendala, dan rekomendasi tindak lanjut yang telah dipetakan akan menjadi dasar perbaikan berkala pada siklus penjaminan mutu berikutnya guna memastikan ketercapaian peringkat akreditasi Unggul.';
+
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
@@ -658,6 +714,15 @@ export async function GET(req: Request) {
         studentOutcomes: DEFAULT_STUDENT_OUTCOMES,
         mahasiswaAktifList: DEFAULT_MAHASISWA_AKTIF,
         timPenyusun: DEFAULT_TIM_PENYUSUN,
+        identitasPengusul: DEFAULT_IDENTITAS_PENGUSUL,
+        kataPengantar: DEFAULT_KATA_PENGANTAR,
+        narasiBab1: DEFAULT_NARASI_BAB_1,
+        narasiBab2: DEFAULT_NARASI_BAB_2,
+        narasiBab3: DEFAULT_NARASI_BAB_3,
+        narasiBab31: DEFAULT_NARASI_BAB_31,
+        narasiBab32: DEFAULT_NARASI_BAB_32,
+        narasiBab33: DEFAULT_NARASI_BAB_33,
+        penutup: DEFAULT_PENUTUP,
         perbaikanBerkelanjutanJaminanPembelajaran:
           'Evaluasi berkala siklus PPEPP jaminan pembelajaran telah menghasilkan pembaruan kurikulum berbasis OBE terstandar dan peningkatan ketercapaian kompetensi lulusan di atas 85%.',
         perbaikanBerkelanjutanDosen:
@@ -670,57 +735,86 @@ export async function GET(req: Request) {
       await dl05.save();
     }
 
-    // Pastikan seluruh array sub-tab terisi lengkap
-    if (!dl05.annualLetters || dl05.annualLetters.length === 0) {
+    // Pastikan seluruh array sub-tab terisi default jika field belum terdefinisi (null/undefined)
+    if (dl05.annualLetters === undefined || dl05.annualLetters === null) {
       dl05.annualLetters = DEFAULT_ANNUAL_LETTERS as any;
     }
-    if (!dl05.assessorFollowUpsList || dl05.assessorFollowUpsList.length === 0) {
+    if (dl05.assessorFollowUpsList === undefined || dl05.assessorFollowUpsList === null) {
       dl05.assessorFollowUpsList = DEFAULT_ASSESSOR_FOLLOW_UPS_LIST as any;
     }
-    if (!dl05.renstraProgressList || dl05.renstraProgressList.length === 0) {
+    if (dl05.renstraProgressList === undefined || dl05.renstraProgressList === null) {
       dl05.renstraProgressList = DEFAULT_RENSTRA_PROGRESS_LIST as any;
     }
-    if (!dl05.learningAssuranceItems || dl05.learningAssuranceItems.length === 0) {
+    if (dl05.learningAssuranceItems === undefined || dl05.learningAssuranceItems === null) {
       dl05.learningAssuranceItems = DEFAULT_LEARNING_ITEMS as any;
     }
-    if (!dl05.dosenProfiles || dl05.dosenProfiles.length === 0) {
+    if (dl05.dosenProfiles === undefined || dl05.dosenProfiles === null) {
       dl05.dosenProfiles = DEFAULT_DOSEN_PROFILES as any;
     }
-    if (!dl05.dosenExpertise || dl05.dosenExpertise.length === 0) {
+    if (dl05.dosenExpertise === undefined || dl05.dosenExpertise === null) {
       dl05.dosenExpertise = DEFAULT_DOSEN_EXPERTISE as any;
     }
-    if (!dl05.kontribusiIntelektualDosen || dl05.kontribusiIntelektualDosen.length === 0) {
+    if (dl05.kontribusiIntelektualDosen === undefined || dl05.kontribusiIntelektualDosen === null) {
       dl05.kontribusiIntelektualDosen = DEFAULT_KONTRIBUSI_INTELEKTUAL as any;
     }
-    if (!dl05.ewmpList || dl05.ewmpList.length === 0) {
+    if (dl05.ewmpList === undefined || dl05.ewmpList === null) {
       dl05.ewmpList = DEFAULT_EWMP_LIST as any;
     }
-    if (!dl05.researchOutcomes || dl05.researchOutcomes.length === 0) {
+    if (dl05.researchOutcomes === undefined || dl05.researchOutcomes === null) {
       dl05.researchOutcomes = DEFAULT_RESEARCH_OUTCOMES as any;
     }
-    if (!dl05.citationsList || dl05.citationsList.length === 0) {
+    if (dl05.citationsList === undefined || dl05.citationsList === null) {
       dl05.citationsList = DEFAULT_CITATIONS as any;
     }
-    if (!dl05.studentOutcomes || dl05.studentOutcomes.length === 0) {
+    if (dl05.studentOutcomes === undefined || dl05.studentOutcomes === null) {
       dl05.studentOutcomes = DEFAULT_STUDENT_OUTCOMES as any;
     }
-    if (!dl05.mahasiswaAktifList || dl05.mahasiswaAktifList.length === 0) {
+    if (dl05.mahasiswaAktifList === undefined || dl05.mahasiswaAktifList === null) {
       dl05.mahasiswaAktifList = DEFAULT_MAHASISWA_AKTIF as any;
     }
-    if (!dl05.timPenyusun || dl05.timPenyusun.length === 0) {
+    if (dl05.timPenyusun === undefined || dl05.timPenyusun === null) {
       dl05.timPenyusun = DEFAULT_TIM_PENYUSUN as any;
+    }
+    if (dl05.identitasPengusul === undefined || dl05.identitasPengusul === null) {
+      dl05.identitasPengusul = DEFAULT_IDENTITAS_PENGUSUL as any;
+    }
+    if (dl05.kataPengantar === undefined || dl05.kataPengantar === null) {
+      dl05.kataPengantar = DEFAULT_KATA_PENGANTAR;
+    }
+    if (dl05.narasiBab1 === undefined || dl05.narasiBab1 === null) {
+      dl05.narasiBab1 = DEFAULT_NARASI_BAB_1;
+    }
+    if (dl05.narasiBab2 === undefined || dl05.narasiBab2 === null) {
+      dl05.narasiBab2 = DEFAULT_NARASI_BAB_2;
+    }
+    if (dl05.narasiBab3 === undefined || dl05.narasiBab3 === null) {
+      dl05.narasiBab3 = DEFAULT_NARASI_BAB_3;
+    }
+    if (dl05.narasiBab31 === undefined || dl05.narasiBab31 === null) {
+      dl05.narasiBab31 = DEFAULT_NARASI_BAB_31;
+    }
+    if (dl05.narasiBab32 === undefined || dl05.narasiBab32 === null) {
+      dl05.narasiBab32 = DEFAULT_NARASI_BAB_32;
+    }
+    if (dl05.narasiBab33 === undefined || dl05.narasiBab33 === null) {
+      dl05.narasiBab33 = DEFAULT_NARASI_BAB_33;
+    }
+    if (dl05.penutup === undefined || dl05.penutup === null) {
+      dl05.penutup = DEFAULT_PENUTUP;
     }
 
     // Sinkronisasi otomatis file bukti digital ke annualLetters
-    dl05.annualLetters.forEach((letItem: any) => {
-      const key = `dl05-surat-rekomendasi-tahun-${letItem.yearIndex}`;
-      const uploaded = lettersEvidenceMap.get(key);
-      if (uploaded && uploaded.fileUrl) {
-        letItem.fileUrl = uploaded.fileUrl;
-        letItem.fileName = uploaded.originalName || uploaded.fileName;
-        letItem.uploadedAt = uploaded.updatedAt || uploaded.createdAt;
-      }
-    });
+    if (Array.isArray(dl05.annualLetters)) {
+      dl05.annualLetters.forEach((letItem: any) => {
+        const key = `dl05-surat-rekomendasi-tahun-${letItem.yearIndex}`;
+        const uploaded = lettersEvidenceMap.get(key);
+        if (uploaded && uploaded.fileUrl) {
+          letItem.fileUrl = uploaded.fileUrl;
+          letItem.fileName = uploaded.originalName || uploaded.fileName;
+          letItem.uploadedAt = uploaded.updatedAt || uploaded.createdAt;
+        }
+      });
+    }
 
     return NextResponse.json({ success: true, data: dl05 });
   } catch (error: unknown) {
@@ -757,6 +851,15 @@ export async function POST(req: Request) {
       perbaikanBerkelanjutanTridharma,
       perbaikanBerkelanjutanKemahasiswaan,
       timPenyusun,
+      identitasPengusul,
+      kataPengantar,
+      narasiBab1,
+      narasiBab2,
+      narasiBab3,
+      narasiBab31,
+      narasiBab32,
+      narasiBab33,
+      penutup,
       status,
       // legacy fields
       assessorFollowUps,
@@ -779,28 +882,79 @@ export async function POST(req: Request) {
     }
 
     if (selectedYearIndex !== undefined) dl05.selectedYearIndex = selectedYearIndex;
-    if (annualLetters) dl05.annualLetters = annualLetters;
-    if (assessorFollowUpsList) dl05.assessorFollowUpsList = assessorFollowUpsList;
-    if (renstraProgressList) dl05.renstraProgressList = renstraProgressList;
-    if (learningAssuranceItems) dl05.learningAssuranceItems = learningAssuranceItems;
+    if (annualLetters !== undefined) {
+      dl05.annualLetters = annualLetters;
+      dl05.markModified('annualLetters');
+    }
+    if (assessorFollowUpsList !== undefined) {
+      dl05.assessorFollowUpsList = assessorFollowUpsList;
+      dl05.markModified('assessorFollowUpsList');
+    }
+    if (renstraProgressList !== undefined) {
+      dl05.renstraProgressList = renstraProgressList;
+      dl05.markModified('renstraProgressList');
+    }
+    if (learningAssuranceItems !== undefined) {
+      dl05.learningAssuranceItems = learningAssuranceItems;
+      dl05.markModified('learningAssuranceItems');
+    }
     if (perbaikanBerkelanjutanJaminanPembelajaran !== undefined)
       dl05.perbaikanBerkelanjutanJaminanPembelajaran = perbaikanBerkelanjutanJaminanPembelajaran;
-    if (dosenProfiles) dl05.dosenProfiles = dosenProfiles;
-    if (dosenExpertise) dl05.dosenExpertise = dosenExpertise;
-    if (kontribusiIntelektualDosen) dl05.kontribusiIntelektualDosen = kontribusiIntelektualDosen;
-    if (ewmpList) dl05.ewmpList = ewmpList;
+    if (dosenProfiles !== undefined) {
+      dl05.dosenProfiles = dosenProfiles;
+      dl05.markModified('dosenProfiles');
+    }
+    if (dosenExpertise !== undefined) {
+      dl05.dosenExpertise = dosenExpertise;
+      dl05.markModified('dosenExpertise');
+    }
+    if (kontribusiIntelektualDosen !== undefined) {
+      dl05.kontribusiIntelektualDosen = kontribusiIntelektualDosen;
+      dl05.markModified('kontribusiIntelektualDosen');
+    }
+    if (ewmpList !== undefined) {
+      dl05.ewmpList = ewmpList;
+      dl05.markModified('ewmpList');
+    }
     if (perbaikanBerkelanjutanDosen !== undefined)
       dl05.perbaikanBerkelanjutanDosen = perbaikanBerkelanjutanDosen;
-    if (researchOutcomes) dl05.researchOutcomes = researchOutcomes;
-    if (citationsList) dl05.citationsList = citationsList;
-    if (studentOutcomes) dl05.studentOutcomes = studentOutcomes;
-    if (mahasiswaAktifList) dl05.mahasiswaAktifList = mahasiswaAktifList;
+    if (researchOutcomes !== undefined) {
+      dl05.researchOutcomes = researchOutcomes;
+      dl05.markModified('researchOutcomes');
+    }
+    if (citationsList !== undefined) {
+      dl05.citationsList = citationsList;
+      dl05.markModified('citationsList');
+    }
+    if (studentOutcomes !== undefined) {
+      dl05.studentOutcomes = studentOutcomes;
+      dl05.markModified('studentOutcomes');
+    }
+    if (mahasiswaAktifList !== undefined) {
+      dl05.mahasiswaAktifList = mahasiswaAktifList;
+      dl05.markModified('mahasiswaAktifList');
+    }
     if (perbaikanBerkelanjutanTridharma !== undefined)
       dl05.perbaikanBerkelanjutanTridharma = perbaikanBerkelanjutanTridharma;
     if (perbaikanBerkelanjutanKemahasiswaan !== undefined)
       dl05.perbaikanBerkelanjutanKemahasiswaan = perbaikanBerkelanjutanKemahasiswaan;
-    if (timPenyusun) dl05.timPenyusun = timPenyusun;
-    if (status) dl05.status = status;
+    if (timPenyusun !== undefined) {
+      dl05.timPenyusun = timPenyusun;
+      dl05.markModified('timPenyusun');
+    }
+    if (identitasPengusul !== undefined) {
+      dl05.identitasPengusul = identitasPengusul;
+      dl05.markModified('identitasPengusul');
+    }
+    if (kataPengantar !== undefined) dl05.kataPengantar = kataPengantar;
+    if (narasiBab1 !== undefined) dl05.narasiBab1 = narasiBab1;
+    if (narasiBab2 !== undefined) dl05.narasiBab2 = narasiBab2;
+    if (narasiBab3 !== undefined) dl05.narasiBab3 = narasiBab3;
+    if (narasiBab31 !== undefined) dl05.narasiBab31 = narasiBab31;
+    if (narasiBab32 !== undefined) dl05.narasiBab32 = narasiBab32;
+    if (narasiBab33 !== undefined) dl05.narasiBab33 = narasiBab33;
+    if (penutup !== undefined) dl05.penutup = penutup;
+    if (status !== undefined) dl05.status = status;
 
     // Legacy fields update
     if (assessorFollowUps) dl05.assessorFollowUps = assessorFollowUps;

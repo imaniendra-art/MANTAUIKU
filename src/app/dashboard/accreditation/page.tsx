@@ -207,6 +207,30 @@ export interface ILamembaDl05StudentOutcomeItem {
   isChange: boolean;
 }
 
+// Identitas Pengusul Dokumen (Sesuai Halaman Depan LAMEMBA)
+export interface ILamembaDl05IdentitasPengusul {
+  perguruanTinggi?: string;
+  unitPengelola?: string;
+  jenisProgram?: string;
+  namaProdi?: string;
+  alamat?: string;
+  telepon?: string;
+  emailWeb?: string;
+  nomorSkPendirianPt?: string;
+  tanggalSkPendirianPt?: string;
+  pejabatSkPendirianPt?: string;
+  nomorSkPembukaanPs?: string;
+  tanggalSkPembukaanPs?: string;
+  pejabatSkPembukaanPs?: string;
+  tahunPertamaMenerimaMhs?: string;
+  peringkatAkreditasiTerbaru?: string;
+  nomorSkLam?: string;
+  tanggalKadaluarsa?: string;
+  kota?: string;
+  tahunDokumen?: string;
+  logoUrl?: string;
+}
+
 export interface ILamembaDl05TimPenyusunItem {
   nama: string;
   nikNidn: string;
@@ -247,8 +271,17 @@ interface IDl05 {
   perbaikanBerkelanjutanTridharma?: string;
   perbaikanBerkelanjutanKemahasiswaan?: string;
 
-  // Sub-Tab 4: Tim Penyusun (6 Orang)
+  // Sub-Tab 4: Sampul, Identitas, Kata Pengantar, Narasi & Penutup
+  identitasPengusul?: ILamembaDl05IdentitasPengusul;
   timPenyusun?: ILamembaDl05TimPenyusunItem[];
+  kataPengantar?: string;
+  narasiBab1?: string;
+  narasiBab2?: string;
+  narasiBab3?: string;
+  narasiBab31?: string;
+  narasiBab32?: string;
+  narasiBab33?: string;
+  penutup?: string;
 
   // Legacy fallback
   assessorFollowUps?: Array<{
@@ -328,6 +361,94 @@ export default function AccreditationDashboardPage() {
   const [editingRenstraList, setEditingRenstraList] = useState<ILamembaDl05RenstraItem[]>([]);
   const [isSavingTable2, setIsSavingTable2] = useState(false);
   const [table2Feedback, setTable2Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 2: Edit State for Tabel 3.1.1 (Jaminan Pembelajaran)
+  const [isEditingTable311, setIsEditingTable311] = useState(false);
+  const [editingLearningList, setEditingLearningList] = useState<ILamembaDl05LearningItem[]>([]);
+  const [editingLearningCqi, setEditingLearningCqi] = useState<string>("");
+  const [isSavingTable311, setIsSavingTable311] = useState(false);
+  const [table311Feedback, setTable311Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 2: Edit State for Tabel 3.2.1 (Profil Kepegawaian Dosen)
+  const [isEditingTable321, setIsEditingTable321] = useState(false);
+  const [editingDosenProfiles, setEditingDosenProfiles] = useState<ILamembaDl05FacultyItem[]>([]);
+  const [isSavingTable321, setIsSavingTable321] = useState(false);
+  const [table321Feedback, setTable321Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 2: Edit State for Tabel 3.2.3 (Latar Belakang Keahlian Dosen)
+  const [isEditingTable323, setIsEditingTable323] = useState(false);
+  const [editingDosenExpertise, setEditingDosenExpertise] = useState<ILamembaDl05FacultyExpertiseItem[]>([]);
+  const [isSavingTable323, setIsSavingTable323] = useState(false);
+  const [table323Feedback, setTable323Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 2: Edit State for Tabel 3.2.5 (Kontribusi Intelektual Dosen)
+  const [isEditingTable325, setIsEditingTable325] = useState(false);
+  const [editingKontribusiIntelektual, setEditingKontribusiIntelektual] = useState<ILamembaDl05IntellectualItem[]>([]);
+  const [isSavingTable325, setIsSavingTable325] = useState(false);
+  const [table325Feedback, setTable325Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 2: Edit State for Tabel 3.2.7 (EWMP Dosen) & CQI Dosen
+  const [isEditingTable327, setIsEditingTable327] = useState(false);
+  const [editingEwmpList, setEditingEwmpList] = useState<ILamembaDl05EwmpItem[]>([]);
+  const [editingDosenCqi, setEditingDosenCqi] = useState<string>("");
+  const [isSavingTable327, setIsSavingTable327] = useState(false);
+  const [table327Feedback, setTable327Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 3: Edit State for Tabel 3.3.1 (Luaran Riset & PkM)
+  const [isEditingTable331, setIsEditingTable331] = useState(false);
+  const [editingResearchOutcomes, setEditingResearchOutcomes] = useState<ILamembaDl05ResearchOutcomeItem[]>([]);
+  const [isSavingTable331, setIsSavingTable331] = useState(false);
+  const [table331Feedback, setTable331Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 3: Edit State for Tabel 3.3.5 (Sitasi Dosen)
+  const [isEditingTable335, setIsEditingTable335] = useState(false);
+  const [editingCitationsList, setEditingCitationsList] = useState<ILamembaDl05CitationItem[]>([]);
+  const [isSavingTable335, setIsSavingTable335] = useState(false);
+  const [table335Feedback, setTable335Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 3: Edit State for Tabel 3.3.7 (Luaran Mahasiswa)
+  const [isEditingTable337, setIsEditingTable337] = useState(false);
+  const [editingStudentOutcomes, setEditingStudentOutcomes] = useState<ILamembaDl05StudentOutcomeItem[]>([]);
+  const [isSavingTable337, setIsSavingTable337] = useState(false);
+  const [table337Feedback, setTable337Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 3: Edit State for Tabel 3.3.9 (Kemahasiswaan & PD-Dikti) & CQI
+  const [isEditingTable339, setIsEditingTable339] = useState(false);
+  const [editingMahasiswaAktifList, setEditingMahasiswaAktifList] = useState<ILamembaDl05StudentItem[]>([]);
+  const [editingTridharmaCqi, setEditingTridharmaCqi] = useState<string>("");
+  const [editingKemahasiswaanCqi, setEditingKemahasiswaanCqi] = useState<string>("");
+  const [isSavingTable339, setIsSavingTable339] = useState(false);
+  const [table339Feedback, setTable339Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 4: Edit State for Identitas Pengusul & Sampul
+  const [isEditingIdentitas, setIsEditingIdentitas] = useState(false);
+  const [editingIdentitas, setEditingIdentitas] = useState<ILamembaDl05IdentitasPengusul>({});
+  const [isSavingIdentitas, setIsSavingIdentitas] = useState(false);
+  const [identitasFeedback, setIdentitasFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 4: Edit State for Tim Penyusun
+  const [isEditingTimPenyusun, setIsEditingTimPenyusun] = useState(false);
+  const [editingTimPenyusun, setEditingTimPenyusun] = useState<ILamembaDl05TimPenyusunItem[]>([]);
+  const [isSavingTimPenyusun, setIsSavingTimPenyusun] = useState(false);
+  const [timPenyusunFeedback, setTimPenyusunFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 4: Edit State for Kata Pengantar
+  const [isEditingKataPengantar, setIsEditingKataPengantar] = useState(false);
+  const [editingKataPengantar, setEditingKataPengantar] = useState<string>("");
+  const [isSavingKataPengantar, setIsSavingKataPengantar] = useState(false);
+  const [kataPengantarFeedback, setKataPengantarFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 4: Edit State for Narasi Antar-Bab & Penutup
+  const [isEditingNarasi, setIsEditingNarasi] = useState(false);
+  const [editingNarasiBab1, setEditingNarasiBab1] = useState<string>("");
+  const [editingNarasiBab2, setEditingNarasiBab2] = useState<string>("");
+  const [editingNarasiBab3, setEditingNarasiBab3] = useState<string>("");
+  const [editingNarasiBab31, setEditingNarasiBab31] = useState<string>("");
+  const [editingNarasiBab32, setEditingNarasiBab32] = useState<string>("");
+  const [editingNarasiBab33, setEditingNarasiBab33] = useState<string>("");
+  const [editingPenutup, setEditingPenutup] = useState<string>("");
+  const [isSavingNarasi, setIsSavingNarasi] = useState(false);
+  const [narasiFeedback, setNarasiFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Modals
   const [isPrintDl05ModalOpen, setIsPrintDl05ModalOpen] = useState(false);
@@ -610,21 +731,9 @@ export default function AccreditationDashboardPage() {
 
   // Sub-Tab 1: Handlers for Tabel 1.1 (Tindak Lanjut Rekomendasi Asesor)
   const handleStartEditTable1 = () => {
-    const initialList = (dl05?.assessorFollowUpsList && dl05.assessorFollowUpsList.length > 0)
+    const initialList = dl05?.assessorFollowUpsList
       ? JSON.parse(JSON.stringify(dl05.assessorFollowUpsList))
-      : [
-          {
-            recommendationNo: 1,
-            recommendation: "",
-            yearIndex: 1,
-            actionTaken: "",
-            obstacle: "",
-            cqiSolution: "",
-            achievement: "",
-            status: "SEDANG_BERJALAN" as const,
-            evidenceUrl: "",
-          }
-        ];
+      : [];
     setEditingAssessorList(initialList);
     setIsEditingTable1(true);
     setTable1Feedback(null);
@@ -700,18 +809,9 @@ export default function AccreditationDashboardPage() {
 
   // Sub-Tab 1: Handlers for Tabel 2.1 (Kemajuan Implementasi Renstra)
   const handleStartEditTable2 = () => {
-    const initialList = (dl05?.renstraProgressList && dl05.renstraProgressList.length > 0)
+    const initialList = dl05?.renstraProgressList
       ? JSON.parse(JSON.stringify(dl05.renstraProgressList))
-      : [
-          {
-            yearIndex: 1,
-            strategy: "",
-            actionTaken: "",
-            obstacle: "",
-            cqiSolution: "",
-            achievement: "",
-          }
-        ];
+      : [];
     setEditingRenstraList(initialList);
     setIsEditingTable2(true);
     setTable2Feedback(null);
@@ -779,31 +879,937 @@ export default function AccreditationDashboardPage() {
     }
   };
 
-  return (
-    <div className="space-y-8 pb-16">
-      {/* 1. Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-sky-950 via-sky-900 to-cyan-950 p-6 sm:p-8 rounded-3xl text-white shadow-xl shadow-sky-950/10 border border-sky-700/30">
-        <div className="space-y-2 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 text-xs font-semibold backdrop-blur-md">
-            <Award className="w-4 h-4 text-cyan-300" />
-            <span>Akreditasi Institusi & LAMEMBA • Lampiran Wajib DL-05</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            Matriks Akreditasi & Pemantauan Tahunan DL-05
-          </h1>
-          <p className="text-xs sm:text-sm text-sky-100/80 leading-relaxed">
-            Sistem pemantauan status akreditasi BAN-PT & LAMEMBA, evaluasi instrumen LAMEMBA (DL-05 Status Terakreditasi & DL-09 IAU Unggul), dan penyusunan instrumen pemantauan tahunan pasca-akreditasi sesuai <strong>Lampiran DL-05 LAMEMBA</strong>.
-          </p>
-        </div>
+  // ==========================================
+  // SUB-TAB 2 HANDLERS (BAB III.1 & BAB III.2)
+  // ==========================================
 
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => setIsPrintDl05ModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-white font-extrabold text-xs shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02]"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Cetak Laporan DL-05 LAMEMBA</span>
-          </button>
+  // Tabel 3.1.1 (Jaminan Pembelajaran) & CQI CPL
+  const handleStartEditTable311 = () => {
+    const initialList = dl05?.learningAssuranceItems
+      ? JSON.parse(JSON.stringify(dl05.learningAssuranceItems))
+      : [];
+    setEditingLearningList(initialList);
+    setEditingLearningCqi(dl05?.perbaikanBerkelanjutanJaminanPembelajaran || "");
+    setIsEditingTable311(true);
+    setTable311Feedback(null);
+  };
+
+  const handleCancelEditTable311 = () => {
+    setIsEditingTable311(false);
+    setTable311Feedback(null);
+  };
+
+  const handleAddRowTable311 = () => {
+    setEditingLearningList(prev => [
+      ...prev,
+      {
+        nomor: prev.length + 1,
+        indikator: "",
+        upayaTahun1: "",
+        hasilTahun1: "",
+        upayaTahun2: "",
+        hasilTahun2: "",
+        upayaTahun3: "",
+        hasilTahun3: "",
+        upayaTahun4: "",
+        hasilTahun4: "",
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable311 = (idx: number) => {
+    setEditingLearningList(prev => {
+      const updated = prev.filter((_, i) => i !== idx);
+      return updated.map((item, i) => ({ ...item, nomor: i + 1 }));
+    });
+  };
+
+  const handleUpdateRowTable311 = (idx: number, field: keyof ILamembaDl05LearningItem, value: any) => {
+    setEditingLearningList(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveTable311 = async () => {
+    if (!dl05) return;
+    setIsSavingTable311(true);
+    setTable311Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          learningAssuranceItems: editingLearningList,
+          perbaikanBerkelanjutanJaminanPembelajaran: editingLearningCqi,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable311Feedback({ type: "success", text: "Perubahan data Tabel 3.1.1 Jaminan Pembelajaran & CQI berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable311(false);
+          setTable311Feedback(null);
+        }, 1200);
+      } else {
+        setTable311Feedback({ type: "error", text: data.error || "Gagal menyimpan perubahan Tabel 3.1.1." });
+      }
+    } catch {
+      setTable311Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 3.1.1." });
+    } finally {
+      setIsSavingTable311(false);
+    }
+  };
+
+  // Tabel 3.2.1 (Profil Kepegawaian Dosen)
+  const handleStartEditTable321 = () => {
+    const initialList = dl05?.dosenProfiles
+      ? JSON.parse(JSON.stringify(dl05.dosenProfiles))
+      : [];
+    setEditingDosenProfiles(initialList);
+    setIsEditingTable321(true);
+    setTable321Feedback(null);
+  };
+
+  const handleCancelEditTable321 = () => {
+    setIsEditingTable321(false);
+    setTable321Feedback(null);
+  };
+
+  const handleAddRowTable321 = () => {
+    setEditingDosenProfiles(prev => [
+      ...prev,
+      {
+        name: "",
+        status: "Tetap",
+        nidn: "",
+        jabatanAkademik: "Lektor",
+        jalur: "Akademisi",
+        namaPerusahaan: "",
+        isChange: false,
+        isKeluar: false,
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable321 = (idx: number) => {
+    setEditingDosenProfiles(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTable321 = (idx: number, field: keyof ILamembaDl05FacultyItem, value: any) => {
+    setEditingDosenProfiles(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveTable321 = async () => {
+    if (!dl05) return;
+    setIsSavingTable321(true);
+    setTable321Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          dosenProfiles: editingDosenProfiles,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable321Feedback({ type: "success", text: "Perubahan data Tabel 3.2.1 Profil Kepegawaian Dosen berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable321(false);
+          setTable321Feedback(null);
+        }, 1200);
+      } else {
+        setTable321Feedback({ type: "error", text: data.error || "Gagal menyimpan data Tabel 3.2.1." });
+      }
+    } catch {
+      setTable321Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 3.2.1." });
+    } finally {
+      setIsSavingTable321(false);
+    }
+  };
+
+  // Tabel 3.2.3 (Latar Belakang Keahlian Dosen)
+  const handleStartEditTable323 = () => {
+    const initialList = dl05?.dosenExpertise
+      ? JSON.parse(JSON.stringify(dl05.dosenExpertise))
+      : [];
+    setEditingDosenExpertise(initialList);
+    setIsEditingTable323(true);
+    setTable323Feedback(null);
+  };
+
+  const handleCancelEditTable323 = () => {
+    setIsEditingTable323(false);
+    setTable323Feedback(null);
+  };
+
+  const handleAddRowTable323 = () => {
+    setEditingDosenExpertise(prev => [
+      ...prev,
+      {
+        name: "",
+        magister: "",
+        doktor: "",
+        bidangKeahlian: "",
+        serdos: "",
+        sertifikatProfesi: "",
+        isChange: false,
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable323 = (idx: number) => {
+    setEditingDosenExpertise(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTable323 = (idx: number, field: keyof ILamembaDl05FacultyExpertiseItem, value: any) => {
+    setEditingDosenExpertise(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveTable323 = async () => {
+    if (!dl05) return;
+    setIsSavingTable323(true);
+    setTable323Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          dosenExpertise: editingDosenExpertise,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable323Feedback({ type: "success", text: "Perubahan data Tabel 3.2.3 Latar Belakang Keahlian Dosen berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable323(false);
+          setTable323Feedback(null);
+        }, 1200);
+      } else {
+        setTable323Feedback({ type: "error", text: data.error || "Gagal menyimpan data Tabel 3.2.3." });
+      }
+    } catch {
+      setTable323Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 3.2.3." });
+    } finally {
+      setIsSavingTable323(false);
+    }
+  };
+
+  // Tabel 3.2.5 (Kontribusi Intelektual Dosen)
+  const handleStartEditTable325 = () => {
+    const initialList = dl05?.kontribusiIntelektualDosen
+      ? JSON.parse(JSON.stringify(dl05.kontribusiIntelektualDosen))
+      : [];
+    setEditingKontribusiIntelektual(initialList);
+    setIsEditingTable325(true);
+    setTable325Feedback(null);
+  };
+
+  const handleCancelEditTable325 = () => {
+    setIsEditingTable325(false);
+    setTable325Feedback(null);
+  };
+
+  const handleAddRowTable325 = () => {
+    setEditingKontribusiIntelektual(prev => [
+      ...prev,
+      {
+        name: "",
+        rekognisiPendidikan: "",
+        rekognisiPraktik: "",
+        rekognisiPenelitian: "",
+        rekognisiSosial: "",
+        isChange: false,
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable325 = (idx: number) => {
+    setEditingKontribusiIntelektual(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTable325 = (idx: number, field: keyof ILamembaDl05IntellectualItem, value: any) => {
+    setEditingKontribusiIntelektual(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveTable325 = async () => {
+    if (!dl05) return;
+    setIsSavingTable325(true);
+    setTable325Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          kontribusiIntelektualDosen: editingKontribusiIntelektual,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable325Feedback({ type: "success", text: "Perubahan data Tabel 3.2.5 Kontribusi Intelektual Dosen berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable325(false);
+          setTable325Feedback(null);
+        }, 1200);
+      } else {
+        setTable325Feedback({ type: "error", text: data.error || "Gagal menyimpan data Tabel 3.2.5." });
+      }
+    } catch {
+      setTable325Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 3.2.5." });
+    } finally {
+      setIsSavingTable325(false);
+    }
+  };
+
+  // Tabel 3.2.7 (EWMP Dosen) & CQI Dosen
+  const handleStartEditTable327 = () => {
+    const initialList = dl05?.ewmpList
+      ? JSON.parse(JSON.stringify(dl05.ewmpList))
+      : [];
+    setEditingEwmpList(initialList);
+    setEditingDosenCqi(dl05?.perbaikanBerkelanjutanDosen || "");
+    setIsEditingTable327(true);
+    setTable327Feedback(null);
+  };
+
+  const handleCancelEditTable327 = () => {
+    setIsEditingTable327(false);
+    setTable327Feedback(null);
+  };
+
+  const handleAddRowTable327 = () => {
+    setEditingEwmpList(prev => [
+      ...prev,
+      {
+        name: "",
+        psAkreditasiSks: 0,
+        psLainDalamPtSks: 0,
+        psLainLuarPtSks: 0,
+        penelitianSks: 0,
+        pkmSks: 0,
+        tugasTambahanSks: 0,
+        totalSks: 0,
+        avgSemesterSks: 0,
+        isChange: false,
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable327 = (idx: number) => {
+    setEditingEwmpList(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTable327 = (idx: number, field: keyof ILamembaDl05EwmpItem, value: any) => {
+    setEditingEwmpList(prev => {
+      const updated = [...prev];
+      const numVal = typeof value === "number" ? value : parseFloat(value) || 0;
+      updated[idx] = { ...updated[idx], [field]: field === "name" || field === "isChange" ? value : numVal };
+      const row = updated[idx];
+      row.totalSks = (Number(row.psAkreditasiSks) || 0) +
+                     (Number(row.psLainDalamPtSks) || 0) +
+                     (Number(row.psLainLuarPtSks) || 0) +
+                     (Number(row.penelitianSks) || 0) +
+                     (Number(row.pkmSks) || 0) +
+                     (Number(row.tugasTambahanSks) || 0);
+      return updated;
+    });
+  };
+
+  const handleSaveTable327 = async () => {
+    if (!dl05) return;
+    setIsSavingTable327(true);
+    setTable327Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          ewmpList: editingEwmpList,
+          perbaikanBerkelanjutanDosen: editingDosenCqi,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable327Feedback({ type: "success", text: "Perubahan data Tabel 3.2.7 EWMP Dosen & Catatan CQI berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable327(false);
+          setTable327Feedback(null);
+        }, 1200);
+      } else {
+        setTable327Feedback({ type: "error", text: data.error || "Gagal menyimpan data Tabel 3.2.7." });
+      }
+    } catch {
+      setTable327Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 3.2.7." });
+    } finally {
+      setIsSavingTable327(false);
+    }
+  };
+
+  // ==========================================
+  // SUB-TAB 3 HANDLERS (BAB III.3)
+  // ==========================================
+
+  // Tabel 3.3.1 (Luaran Riset & PkM)
+  const handleStartEditTable331 = () => {
+    const initialList = dl05?.researchOutcomes
+      ? JSON.parse(JSON.stringify(dl05.researchOutcomes))
+      : [];
+    setEditingResearchOutcomes(initialList);
+    setIsEditingTable331(true);
+    setTable331Feedback(null);
+  };
+
+  const handleCancelEditTable331 = () => {
+    setIsEditingTable331(false);
+    setTable331Feedback(null);
+  };
+
+  const handleAddRowTable331 = () => {
+    setEditingResearchOutcomes(prev => [
+      ...prev,
+      {
+        judul: "",
+        tahun: new Date().getFullYear(),
+        jenisLuaran: "Jurnal Ilmiah",
+        sumberBiayaPtMandiri: 1,
+        sumberBiayaLuarPt: 0,
+        sumberBiayaLuarNegeri: 0,
+        publikasiTidakTerakreditasi: 0,
+        publikasiNasionalTerakreditasi: 1,
+        publikasiInternasional: 0,
+        publikasiInternasionalBereputasi: 0,
+        seminarWilayah: 0,
+        seminarNasional: 0,
+        seminarInternasional: 0,
+        tulisanMediaWilayah: 0,
+        tulisanMediaNasional: 0,
+        tulisanMediaInternasional: 0,
+        pagelaranWilayah: 0,
+        pagelaranNasional: 0,
+        pagelaranInternasional: 0,
+        isChange: false,
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable331 = (idx: number) => {
+    setEditingResearchOutcomes(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTable331 = (idx: number, field: keyof ILamembaDl05ResearchOutcomeItem, value: any) => {
+    setEditingResearchOutcomes(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveTable331 = async () => {
+    if (!dl05) return;
+    setIsSavingTable331(true);
+    setTable331Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          researchOutcomes: editingResearchOutcomes,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable331Feedback({ type: "success", text: "Perubahan data Tabel 3.3.1 Luaran Riset & PkM berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable331(false);
+          setTable331Feedback(null);
+        }, 1200);
+      } else {
+        setTable331Feedback({ type: "error", text: data.error || "Gagal menyimpan data Tabel 3.3.1." });
+      }
+    } catch {
+      setTable331Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 3.3.1." });
+    } finally {
+      setIsSavingTable331(false);
+    }
+  };
+
+  // Tabel 3.3.5 (Sitasi Dosen)
+  const handleStartEditTable335 = () => {
+    const initialList = dl05?.citationsList
+      ? JSON.parse(JSON.stringify(dl05.citationsList))
+      : [];
+    setEditingCitationsList(initialList);
+    setIsEditingTable335(true);
+    setTable335Feedback(null);
+  };
+
+  const handleCancelEditTable335 = () => {
+    setIsEditingTable335(false);
+    setTable335Feedback(null);
+  };
+
+  const handleAddRowTable335 = () => {
+    setEditingCitationsList(prev => [
+      ...prev,
+      {
+        judulArtikel: "",
+        tahunTerbit: new Date().getFullYear() - 1,
+        penulis: "",
+        jenisPublikasi: "Jurnal Nasional Terakreditasi",
+        sitasiTs2: 0,
+        sitasiTs1: 0,
+        sitasiTs: 0,
+        linkArtikel: "",
+        isChange: false,
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable335 = (idx: number) => {
+    setEditingCitationsList(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTable335 = (idx: number, field: keyof ILamembaDl05CitationItem, value: any) => {
+    setEditingCitationsList(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveTable335 = async () => {
+    if (!dl05) return;
+    setIsSavingTable335(true);
+    setTable335Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          citationsList: editingCitationsList,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable335Feedback({ type: "success", text: "Perubahan data Tabel 3.3.5 Sitasi Dosen berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable335(false);
+          setTable335Feedback(null);
+        }, 1200);
+      } else {
+        setTable335Feedback({ type: "error", text: data.error || "Gagal menyimpan data Tabel 3.3.5." });
+      }
+    } catch {
+      setTable335Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 3.3.5." });
+    } finally {
+      setIsSavingTable335(false);
+    }
+  };
+
+  // Tabel 3.3.7 (Luaran Mahasiswa)
+  const handleStartEditTable337 = () => {
+    const initialList = dl05?.studentOutcomes
+      ? JSON.parse(JSON.stringify(dl05.studentOutcomes))
+      : [];
+    setEditingStudentOutcomes(initialList);
+    setIsEditingTable337(true);
+    setTable337Feedback(null);
+  };
+
+  const handleCancelEditTable337 = () => {
+    setIsEditingTable337(false);
+    setTable337Feedback(null);
+  };
+
+  const handleAddRowTable337 = () => {
+    setEditingStudentOutcomes(prev => [
+      ...prev,
+      {
+        judulLuaran: "",
+        tahun: new Date().getFullYear(),
+        namaMahasiswa: "",
+        jenisLuaran: "Prestasi / Rekognisi",
+        buktiLuaran: "",
+        isChange: false,
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable337 = (idx: number) => {
+    setEditingStudentOutcomes(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTable337 = (idx: number, field: keyof ILamembaDl05StudentOutcomeItem, value: any) => {
+    setEditingStudentOutcomes(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveTable337 = async () => {
+    if (!dl05) return;
+    setIsSavingTable337(true);
+    setTable337Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          studentOutcomes: editingStudentOutcomes,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable337Feedback({ type: "success", text: "Perubahan data Tabel 3.3.7 Luaran Mahasiswa berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable337(false);
+          setTable337Feedback(null);
+        }, 1200);
+      } else {
+        setTable337Feedback({ type: "error", text: data.error || "Gagal menyimpan data Tabel 3.3.7." });
+      }
+    } catch {
+      setTable337Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 3.3.7." });
+    } finally {
+      setIsSavingTable337(false);
+    }
+  };
+
+  // Tabel 3.3.9 (Kemahasiswaan & PD-Dikti) & CQI
+  const handleStartEditTable339 = () => {
+    const initialList = dl05?.mahasiswaAktifList
+      ? JSON.parse(JSON.stringify(dl05.mahasiswaAktifList))
+      : [];
+    setEditingMahasiswaAktifList(initialList);
+    setEditingTridharmaCqi(dl05?.perbaikanBerkelanjutanTridharma || "");
+    setEditingKemahasiswaanCqi(dl05?.perbaikanBerkelanjutanKemahasiswaan || "");
+    setIsEditingTable339(true);
+    setTable339Feedback(null);
+  };
+
+  const handleCancelEditTable339 = () => {
+    setIsEditingTable339(false);
+    setTable339Feedback(null);
+  };
+
+  const handleAddRowTable339 = () => {
+    setEditingMahasiswaAktifList(prev => [
+      ...prev,
+      {
+        semester: prev.length % 2 === 0 ? "Ganjil" : "Genap",
+        mhsAktif: 0,
+        mhsPdDikti: 0,
+        selisih: 0,
+        isChange: false,
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable339 = (idx: number) => {
+    setEditingMahasiswaAktifList(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTable339 = (idx: number, field: keyof ILamembaDl05StudentItem, value: any) => {
+    setEditingMahasiswaAktifList(prev => {
+      const updated = [...prev];
+      const numVal = typeof value === "number" ? value : parseInt(value) || 0;
+      updated[idx] = { ...updated[idx], [field]: field === "semester" || field === "isChange" ? value : numVal };
+      const row = updated[idx];
+      row.selisih = Math.abs((Number(row.mhsAktif) || 0) - (Number(row.mhsPdDikti) || 0));
+      return updated;
+    });
+  };
+
+  const handleSaveTable339 = async () => {
+    if (!dl05) return;
+    setIsSavingTable339(true);
+    setTable339Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          mahasiswaAktifList: editingMahasiswaAktifList,
+          perbaikanBerkelanjutanTridharma: editingTridharmaCqi,
+          perbaikanBerkelanjutanKemahasiswaan: editingKemahasiswaanCqi,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable339Feedback({ type: "success", text: "Perubahan data Tabel 3.3.9 Rekonsiliasi PD-Dikti & CQI berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable339(false);
+          setTable339Feedback(null);
+        }, 1200);
+      } else {
+        setTable339Feedback({ type: "error", text: data.error || "Gagal menyimpan data Tabel 3.3.9." });
+      }
+    } catch {
+      setTable339Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 3.3.9." });
+    } finally {
+      setIsSavingTable339(false);
+    }
+  };
+
+  // Sub-Tab 4 Handlers: Identitas Pengusul & Sampul
+  const handleStartEditIdentitas = () => {
+    setEditingIdentitas(
+      dl05?.identitasPengusul || {
+        perguruanTinggi: "Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar",
+        unitPengelola: "Jurusan Manajemen / Sekolah Tinggi Ilmu Manajemen Indonesia",
+        jenisProgram: "Sarjana (S1)",
+        namaProdi: "Program Studi Sarjana Manajemen",
+        alamat: "Jl. Perintis Kemerdekaan KM. 9, Tamalanrea, Kota Makassar, Sulawesi Selatan 90245",
+        telepon: "0411-588123",
+        emailWeb: "info@stimiyapmi.ac.id / www.stimiyapmi.ac.id",
+        nomorSkPendirianPt: "SK Mendikbud RI No. 042/D/O/1997",
+        tanggalSkPendirianPt: "1997-07-25",
+        pejabatSkPendirianPt: "Menteri Pendidikan dan Kebudayaan RI",
+        nomorSkPembukaanPs: "SK Dirjen Dikti No. 219/DIKTI/Kep/1999",
+        tanggalSkPembukaanPs: "1999-05-18",
+        pejabatSkPembukaanPs: "Direktur Jenderal Pendidikan Tinggi",
+        tahunPertamaMenerimaMhs: "1998",
+        peringkatAkreditasiTerbaru: "Baik Sekali",
+        nomorSkLam: "SK LAMEMBA No. 933/DE/A.5/AR.10/XII/2023",
+        tanggalKadaluarsa: "2028-12-28",
+        kota: "Makassar",
+        tahunDokumen: "2025",
+        logoUrl: "/logo_stimi.png",
+      }
+    );
+    setIsEditingIdentitas(true);
+    setIdentitasFeedback(null);
+  };
+
+  const handleUpdateIdentitasField = (field: keyof ILamembaDl05IdentitasPengusul, value: string) => {
+    setEditingIdentitas((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveIdentitas = async () => {
+    if (!dl05) return;
+    setIsSavingIdentitas(true);
+    setIdentitasFeedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          identitasPengusul: editingIdentitas,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIdentitasFeedback({ type: "success", text: "Identitas Pengusul & Sampul berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingIdentitas(false);
+          setIdentitasFeedback(null);
+        }, 1200);
+      } else {
+        setIdentitasFeedback({ type: "error", text: data.error || "Gagal menyimpan identitas pengusul." });
+      }
+    } catch {
+      setIdentitasFeedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan identitas pengusul." });
+    } finally {
+      setIsSavingIdentitas(false);
+    }
+  };
+
+  // Sub-Tab 4 Handlers: Tim Penyusun
+  const handleStartEditTimPenyusun = () => {
+    setEditingTimPenyusun(dl05?.timPenyusun ? JSON.parse(JSON.stringify(dl05.timPenyusun)) : []);
+    setIsEditingTimPenyusun(true);
+    setTimPenyusunFeedback(null);
+  };
+
+  const handleAddRowTimPenyusun = () => {
+    setEditingTimPenyusun((prev) => [
+      ...prev,
+      {
+        nama: "Nama Anggota Baru",
+        nikNidn: "NIDN. -",
+        jabatan: "Dosen / Tim Taskforce",
+        peran: "Anggota Tim Evaluasi",
+      },
+    ]);
+  };
+
+  const handleRemoveRowTimPenyusun = (idx: number) => {
+    setEditingTimPenyusun((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTimPenyusun = (idx: number, field: keyof ILamembaDl05TimPenyusunItem, value: any) => {
+    setEditingTimPenyusun((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], [field]: value };
+      return next;
+    });
+  };
+
+  const handleSaveTimPenyusun = async () => {
+    if (!dl05) return;
+    setIsSavingTimPenyusun(true);
+    setTimPenyusunFeedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          timPenyusun: editingTimPenyusun,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTimPenyusunFeedback({ type: "success", text: "Daftar Tim Penyusun berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTimPenyusun(false);
+          setTimPenyusunFeedback(null);
+        }, 1200);
+      } else {
+        setTimPenyusunFeedback({ type: "error", text: data.error || "Gagal menyimpan tim penyusun." });
+      }
+    } catch {
+      setTimPenyusunFeedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan tim penyusun." });
+    } finally {
+      setIsSavingTimPenyusun(false);
+    }
+  };
+
+  // Sub-Tab 4 Handlers: Kata Pengantar
+  const handleStartEditKataPengantar = () => {
+    setEditingKataPengantar(dl05?.kataPengantar || "");
+    setIsEditingKataPengantar(true);
+    setKataPengantarFeedback(null);
+  };
+
+  const handleSaveKataPengantar = async () => {
+    if (!dl05) return;
+    setIsSavingKataPengantar(true);
+    setKataPengantarFeedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          kataPengantar: editingKataPengantar,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setKataPengantarFeedback({ type: "success", text: "Kata Pengantar berhasil diperbarui!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingKataPengantar(false);
+          setKataPengantarFeedback(null);
+        }, 1200);
+      } else {
+        setKataPengantarFeedback({ type: "error", text: data.error || "Gagal menyimpan kata pengantar." });
+      }
+    } catch {
+      setKataPengantarFeedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan kata pengantar." });
+    } finally {
+      setIsSavingKataPengantar(false);
+    }
+  };
+
+  // Sub-Tab 4 Handlers: Narasi Antar-Bab & Penutup
+  const handleStartEditNarasi = () => {
+    setEditingNarasiBab1(dl05?.narasiBab1 || "");
+    setEditingNarasiBab2(dl05?.narasiBab2 || "");
+    setEditingNarasiBab3(dl05?.narasiBab3 || "");
+    setEditingNarasiBab31(dl05?.narasiBab31 || "");
+    setEditingNarasiBab32(dl05?.narasiBab32 || "");
+    setEditingNarasiBab33(dl05?.narasiBab33 || "");
+    setEditingPenutup(dl05?.penutup || "");
+    setIsEditingNarasi(true);
+    setNarasiFeedback(null);
+  };
+
+  const handleSaveNarasi = async () => {
+    if (!dl05) return;
+    setIsSavingNarasi(true);
+    setNarasiFeedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          narasiBab1: editingNarasiBab1,
+          narasiBab2: editingNarasiBab2,
+          narasiBab3: editingNarasiBab3,
+          narasiBab31: editingNarasiBab31,
+          narasiBab32: editingNarasiBab32,
+          narasiBab33: editingNarasiBab33,
+          penutup: editingPenutup,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNarasiFeedback({ type: "success", text: "Seluruh Narasi Pengantar Bab & Penutup berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingNarasi(false);
+          setNarasiFeedback(null);
+        }, 1200);
+      } else {
+        setNarasiFeedback({ type: "error", text: data.error || "Gagal menyimpan narasi bab." });
+      }
+    } catch {
+      setNarasiFeedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan narasi." });
+    } finally {
+      setIsSavingNarasi(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 pb-16">
+      {/* 1. Header Halaman */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+            Akreditasi & Pemantauan
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Status Legalitas BAN-PT, Akreditasi LAMEMBA, serta Dokumen Pemantauan & Evaluasi Tahunan (DL-05).
+          </p>
         </div>
       </div>
 
@@ -1405,6 +2411,13 @@ export default function AccreditationDashboardPage() {
                               </td>
                             </tr>
                           ))}
+                          {editingAssessorList.length === 0 && (
+                            <tr>
+                              <td colSpan={8} className="p-6 text-center text-slate-400 italic bg-slate-50/50">
+                                Belum ada baris rekomendasi. Klik tombol <strong>&quot;+ Tambah Baris Rekomendasi Asesor&quot;</strong> di bawah untuk menambahkan data baru, atau klik <strong>&quot;Simpan Perubahan Tabel 1.1&quot;</strong> untuk menyimpan tabel dalam keadaan kosong.
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -1666,6 +2679,13 @@ export default function AccreditationDashboardPage() {
                               </td>
                             </tr>
                           ))}
+                          {editingRenstraList.length === 0 && (
+                            <tr>
+                              <td colSpan={7} className="p-6 text-center text-slate-400 italic bg-slate-50/50">
+                                Belum ada baris sasaran renstra. Klik tombol <strong>&quot;+ Tambah Baris Sasaran Renstra&quot;</strong> di bawah untuk menambahkan data baru, atau klik <strong>&quot;Simpan Perubahan Tabel 2.1&quot;</strong> untuk menyimpan tabel dalam keadaan kosong.
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -1740,7 +2760,7 @@ export default function AccreditationDashboardPage() {
 
               {/* BAB III.1: JAMINAN PEMBELAJARAN (TABEL 3.1.1) */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
-                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
@@ -1755,88 +2775,287 @@ export default function AccreditationDashboardPage() {
                     </p>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-purple-50 text-purple-800 border border-purple-200">
-                    Tabel 3.1.1 Standar LAMEMBA
-                  </span>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-slate-200 text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-700">
-                        <th className="border border-slate-200 p-3 text-center w-12 font-black">No</th>
-                        <th className="border border-slate-200 p-3 text-left w-1/3 font-black">
-                          Indikator Jaminan Pembelajaran
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black">
-                          Upaya yang Dilakukan (Tahun Ke-{selectedDl05Year})
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black">
-                          Hasil yang Dicapai (Tahun Ke-{selectedDl05Year})
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.learningAssuranceItems || []).map((item) => {
-                        const upayaText =
-                          selectedDl05Year === 1
-                            ? item.upayaTahun1
-                            : selectedDl05Year === 2
-                            ? item.upayaTahun2
-                            : selectedDl05Year === 3
-                            ? item.upayaTahun3
-                            : selectedDl05Year === 4
-                            ? item.upayaTahun4
-                            : "Data baseline penetapan akreditasi awal.";
-
-                        const hasilText =
-                          selectedDl05Year === 1
-                            ? item.hasilTahun1
-                            : selectedDl05Year === 2
-                            ? item.hasilTahun2
-                            : selectedDl05Year === 3
-                            ? item.hasilTahun3
-                            : selectedDl05Year === 4
-                            ? item.hasilTahun4
-                            : "Sesuai berita acara penetapan visitasi akreditasi terakhir.";
-
-                        return (
-                          <tr key={item.nomor} className="align-top hover:bg-slate-50/60 transition-colors">
-                            <td className="border border-slate-200 p-3 text-center font-bold text-slate-500">
-                              {item.nomor}
-                            </td>
-                            <td className="border border-slate-200 p-3 font-semibold text-slate-800 leading-relaxed">
-                              {item.indikator}
-                            </td>
-                            <td className="border border-slate-200 p-3 text-slate-700 leading-relaxed">
-                              {upayaText ? (
-                                <span>{upayaText}</span>
-                              ) : (
-                                <span className="text-amber-600 italic">Belum ada upaya dilaporkan untuk tahun ini.</span>
-                              )}
-                            </td>
-                            <td className="border border-slate-200 p-3 text-slate-700 leading-relaxed">
-                              {hasilText ? (
-                                <span className="font-semibold text-purple-900">{hasilText}</span>
-                              ) : (
-                                <span className="text-amber-600 italic">Belum ada hasil dilaporkan untuk tahun ini.</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {dl05.perbaikanBerkelanjutanJaminanPembelajaran && (
-                  <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100 text-xs space-y-1">
-                    <span className="font-black text-purple-900 block">
-                      Catatan Perbaikan Berkelanjutan (CQI) Jaminan Pembelajaran:
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-purple-50 text-purple-800 border border-purple-200">
+                      Tabel 3.1.1 Standar LAMEMBA
                     </span>
-                    <p className="text-purple-800 leading-relaxed">
-                      {dl05.perbaikanBerkelanjutanJaminanPembelajaran}
-                    </p>
+                    {!isEditingTable311 ? (
+                      <button
+                        onClick={handleStartEditTable311}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 3.1.1</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable311}
+                          disabled={isSavingTable311}
+                          className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable311}
+                          disabled={isSavingTable311}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable311 ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Save className="w-3.5 h-3.5" />
+                          )}
+                          <span>{isSavingTable311 ? "Menyimpan..." : "Simpan Perubahan"}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {table311Feedback && (
+                  <div
+                    className={`p-3.5 rounded-2xl text-xs flex items-center gap-2.5 ${
+                      table311Feedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {table311Feedback.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{table311Feedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingTable311 ? (
+                  /* VIEW MODE TABEL 3.1.1 */
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-50 text-slate-700">
+                            <th className="border border-slate-200 p-3 text-center w-12 font-black">No</th>
+                            <th className="border border-slate-200 p-3 text-left w-1/3 font-black">
+                              Indikator Jaminan Pembelajaran
+                            </th>
+                            <th className="border border-slate-200 p-3 text-left font-black">
+                              Upaya yang Dilakukan (Tahun Ke-{selectedDl05Year})
+                            </th>
+                            <th className="border border-slate-200 p-3 text-left font-black">
+                              Hasil yang Dicapai (Tahun Ke-{selectedDl05Year})
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(dl05.learningAssuranceItems || []).length > 0 ? (
+                            dl05.learningAssuranceItems!.map((item) => {
+                              const upayaText =
+                                selectedDl05Year === 1
+                                  ? item.upayaTahun1
+                                  : selectedDl05Year === 2
+                                  ? item.upayaTahun2
+                                  : selectedDl05Year === 3
+                                  ? item.upayaTahun3
+                                  : selectedDl05Year === 4
+                                  ? item.upayaTahun4
+                                  : "Data baseline penetapan akreditasi awal.";
+
+                              const hasilText =
+                                selectedDl05Year === 1
+                                  ? item.hasilTahun1
+                                  : selectedDl05Year === 2
+                                  ? item.hasilTahun2
+                                  : selectedDl05Year === 3
+                                  ? item.hasilTahun3
+                                  : selectedDl05Year === 4
+                                  ? item.hasilTahun4
+                                  : "Sesuai berita acara penetapan visitasi akreditasi terakhir.";
+
+                              return (
+                                <tr key={item.nomor} className="align-top hover:bg-slate-50/60 transition-colors">
+                                  <td className="border border-slate-200 p-3 text-center font-bold text-slate-500">
+                                    {item.nomor}
+                                  </td>
+                                  <td className="border border-slate-200 p-3 font-semibold text-slate-800 leading-relaxed">
+                                    {item.indikator}
+                                  </td>
+                                  <td className="border border-slate-200 p-3 text-slate-700 leading-relaxed">
+                                    {upayaText ? (
+                                      <span>{upayaText}</span>
+                                    ) : (
+                                      <span className="text-amber-600 italic">Belum ada upaya dilaporkan untuk tahun ini.</span>
+                                    )}
+                                  </td>
+                                  <td className="border border-slate-200 p-3 text-slate-700 leading-relaxed">
+                                    {hasilText ? (
+                                      <span className="font-semibold text-purple-900">{hasilText}</span>
+                                    ) : (
+                                      <span className="text-amber-600 italic">Belum ada hasil dilaporkan untuk tahun ini.</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          ) : (
+                            <tr>
+                              <td colSpan={4} className="p-6 text-center text-slate-400 italic">
+                                Belum ada data jaminan pembelajaran. Klik tombol &quot;Edit Tabel 3.1.1&quot; untuk menambahkan data.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {dl05.perbaikanBerkelanjutanJaminanPembelajaran && (
+                      <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100 text-xs space-y-1">
+                        <span className="font-black text-purple-900 block">
+                          Catatan Perbaikan Berkelanjutan (CQI) Jaminan Pembelajaran:
+                        </span>
+                        <p className="text-purple-800 leading-relaxed">
+                          {dl05.perbaikanBerkelanjutanJaminanPembelajaran}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* EDIT MODE TABEL 3.1.1 */
+                  <div className="space-y-4">
+                    <div className="bg-purple-50/60 p-3 rounded-2xl border border-purple-200 text-xs text-purple-900 flex items-center justify-between">
+                      <span>
+                        ✏️ Mengedit Upaya & Hasil untuk <strong>Tahun Ke-{selectedDl05Year || 1}</strong>. Gunakan tombol siklus tahun di atas tabel untuk beralih tahun lainnya.
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700">
+                            <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
+                            <th className="border border-slate-200 p-2.5 text-left w-1/3 font-black">
+                              Indikator Jaminan Pembelajaran (CPL)
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">
+                              Upaya yang Dilakukan (Tahun Ke-{selectedDl05Year || 1})
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">
+                              Hasil yang Dicapai (Tahun Ke-{selectedDl05Year || 1})
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-center w-12 font-black">
+                              Hapus
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {editingLearningList.map((item, idx) => {
+                            const yearKey = (selectedDl05Year === 2 ? 2 : selectedDl05Year === 3 ? 3 : selectedDl05Year === 4 ? 4 : 1) as 1 | 2 | 3 | 4;
+                            const upayaField = `upayaTahun${yearKey}` as keyof ILamembaDl05LearningItem;
+                            const hasilField = `hasilTahun${yearKey}` as keyof ILamembaDl05LearningItem;
+
+                            return (
+                              <tr key={idx} className="align-top hover:bg-slate-50/40">
+                                <td className="border border-slate-200 p-2 text-center font-bold text-slate-500 pt-3">
+                                  {item.nomor}
+                                </td>
+                                <td className="border border-slate-200 p-2">
+                                  <textarea
+                                    rows={3}
+                                    value={item.indikator}
+                                    onChange={(e) => handleUpdateRowTable311(idx, "indikator", e.target.value)}
+                                    placeholder="Tuliskan indikator jaminan pembelajaran..."
+                                    className="w-full p-2 border border-slate-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-2">
+                                  <textarea
+                                    rows={3}
+                                    value={(item[upayaField] as string) || ""}
+                                    onChange={(e) => handleUpdateRowTable311(idx, upayaField, e.target.value)}
+                                    placeholder={`Upaya intervensi kurikulum tahun ke-${yearKey}...`}
+                                    className="w-full p-2 border border-slate-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-2">
+                                  <textarea
+                                    rows={3}
+                                    value={(item[hasilField] as string) || ""}
+                                    onChange={(e) => handleUpdateRowTable311(idx, hasilField, e.target.value)}
+                                    placeholder={`Capaian / hasil pengukuran CPL tahun ke-${yearKey}...`}
+                                    className="w-full p-2 border border-purple-300 rounded-lg text-xs font-semibold leading-relaxed focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-2 text-center pt-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveRowTable311(idx)}
+                                    className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                                    title="Hapus Baris"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {editingLearningList.length === 0 && (
+                            <tr>
+                              <td colSpan={5} className="p-6 text-center text-slate-400 italic bg-slate-50/50">
+                                Belum ada indikator jaminan pembelajaran. Klik tombol <strong>&quot;+ Tambah Indikator CPL&quot;</strong> di bawah untuk menambahkan data baru, atau klik <strong>&quot;Simpan Perubahan Tabel 3.1.1&quot;</strong> untuk menyimpan tabel dalam keadaan kosong.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="space-y-1.5 p-4 rounded-2xl bg-purple-50/40 border border-purple-200">
+                      <label className="text-xs font-black text-purple-900 block">
+                        Catatan Perbaikan Berkelanjutan (CQI) Jaminan Pembelajaran:
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editingLearningCqi}
+                        onChange={(e) => setEditingLearningCqi(e.target.value)}
+                        placeholder="Uraikan evaluasi berkala siklus PPEPP dan pembaruan kurikulum berbasis OBE..."
+                        className="w-full p-2.5 border border-purple-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={handleAddRowTable311}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dashed border-purple-300 bg-purple-50/60 hover:bg-purple-100/70 text-purple-800 font-bold text-xs transition-colors cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Tambah Indikator CPL</span>
+                      </button>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable311}
+                          disabled={isSavingTable311}
+                          className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable311}
+                          disabled={isSavingTable311}
+                          className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable311 ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                          <span>{isSavingTable311 ? "Menyimpan..." : "Simpan Perubahan Tabel 3.1.1"}</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1865,246 +3084,972 @@ export default function AccreditationDashboardPage() {
 
                 {/* Sub-A: Tabel 3.2.1 Status Kepegawaian & Jalur Rekrutmen Dosen */}
                 <div className="space-y-3">
-                  <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>Tabel 3.2.1 Profil Kepegawaian & Jalur Rekrutmen Dosen</span>
-                  </h5>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-slate-200 text-xs">
-                      <thead>
-                        <tr className="bg-slate-50 text-slate-700">
-                          <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">Nama Dosen</th>
-                          <th className="border border-slate-200 p-2.5 text-center font-black">Status</th>
-                          <th className="border border-slate-200 p-2.5 text-center font-black">NIDN</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">Jabatan Akademik</th>
-                          <th className="border border-slate-200 p-2.5 text-center font-black">Jalur</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">Perusahaan Asal</th>
-                          <th className="border border-slate-200 p-2.5 text-center font-black">Perubahan</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(dl05.dosenProfiles || []).map((dosen, idx) => (
-                          <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
-                            <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
-                              {idx + 1}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 font-bold text-slate-900">
-                              {dosen.name}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center">
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                  dosen.status === "Tetap"
-                                    ? "bg-emerald-100 text-emerald-800"
-                                    : "bg-slate-100 text-slate-700"
-                                }`}
-                              >
-                                {dosen.status}
-                              </span>
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center font-mono text-[11px] text-slate-600">
-                              {dosen.nidn}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-700">
-                              {dosen.jabatanAkademik}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center">
-                              <span
-                                className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                                  dosen.jalur === "Praktisi"
-                                    ? "bg-purple-100 text-purple-800 border border-purple-200"
-                                    : "bg-sky-100 text-sky-800 border border-sky-200"
-                                }`}
-                              >
-                                {dosen.jalur === "Praktisi" ? "💼 Praktisi Industri" : "🎓 Akademisi"}
-                              </span>
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-600">
-                              {dosen.namaPerusahaan || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center">
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                  dosen.isChange
-                                    ? "bg-amber-100 text-amber-800"
-                                    : "bg-slate-100 text-slate-600"
-                                }`}
-                              >
-                                {dosen.isChange ? "Ada Perubahan" : "Tetap (Baseline)"}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="flex items-center justify-between gap-2">
+                    <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>Tabel 3.2.1 Profil Kepegawaian & Jalur Rekrutmen Dosen</span>
+                    </h5>
+                    {!isEditingTable321 ? (
+                      <button
+                        onClick={handleStartEditTable321}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 3.2.1</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable321}
+                          disabled={isSavingTable321}
+                          className="px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable321}
+                          disabled={isSavingTable321}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable321 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>{isSavingTable321 ? "Menyimpan..." : "Simpan"}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
+
+                  {table321Feedback && (
+                    <div
+                      className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                        table321Feedback.type === "success"
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          : "bg-rose-50 text-rose-800 border border-rose-200"
+                      }`}
+                    >
+                      {table321Feedback.type === "success" ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      )}
+                      <span>{table321Feedback.text}</span>
+                    </div>
+                  )}
+
+                  {!isEditingTable321 ? (
+                    /* VIEW MODE TABEL 3.2.1 */
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-50 text-slate-700">
+                            <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Nama Dosen</th>
+                            <th className="border border-slate-200 p-2.5 text-center font-black">Status</th>
+                            <th className="border border-slate-200 p-2.5 text-center font-black">NIDN</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Jabatan Akademik</th>
+                            <th className="border border-slate-200 p-2.5 text-center font-black">Jalur</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Perusahaan Asal</th>
+                            <th className="border border-slate-200 p-2.5 text-center font-black">Perubahan</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(dl05.dosenProfiles || []).length > 0 ? (
+                            dl05.dosenProfiles!.map((dosen, idx) => (
+                              <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
+                                <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 font-bold text-slate-900">
+                                  {dosen.name}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center">
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                      dosen.status === "Tetap"
+                                        ? "bg-emerald-100 text-emerald-800"
+                                        : "bg-slate-100 text-slate-700"
+                                    }`}
+                                  >
+                                    {dosen.status}
+                                  </span>
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center font-mono text-[11px] text-slate-600">
+                                  {dosen.nidn}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-700">
+                                  {dosen.jabatanAkademik}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center">
+                                  <span
+                                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+                                      dosen.jalur === "Praktisi"
+                                        ? "bg-purple-100 text-purple-800 border border-purple-200"
+                                        : "bg-sky-100 text-sky-800 border border-sky-200"
+                                    }`}
+                                  >
+                                    {dosen.jalur === "Praktisi" ? "💼 Praktisi Industri" : "🎓 Akademisi"}
+                                  </span>
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-600">
+                                  {dosen.namaPerusahaan || "-"}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center">
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                      dosen.isChange
+                                        ? "bg-amber-100 text-amber-800"
+                                        : "bg-slate-100 text-slate-600"
+                                    }`}
+                                  >
+                                    {dosen.isChange ? "Ada Perubahan" : "Tetap (Baseline)"}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={8} className="p-6 text-center text-slate-400 italic">
+                                Belum ada data profil kepegawaian dosen. Klik &quot;Edit Tabel 3.2.1&quot; untuk menambahkan data.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    /* EDIT MODE TABEL 3.2.1 */
+                    <div className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-slate-200 text-xs">
+                          <thead>
+                            <tr className="bg-slate-100 text-slate-700">
+                              <th className="border border-slate-200 p-2 text-center w-8 font-black">No</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">Nama Dosen</th>
+                              <th className="border border-slate-200 p-2 text-center w-28 font-black">Status</th>
+                              <th className="border border-slate-200 p-2 text-center w-28 font-black">NIDN</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">Jabatan Akademik</th>
+                              <th className="border border-slate-200 p-2 text-center w-28 font-black">Jalur</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">Perusahaan Asal</th>
+                              <th className="border border-slate-200 p-2 text-center w-24 font-black">Perubahan</th>
+                              <th className="border border-slate-200 p-2 text-center w-10 font-black">Hapus</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {editingDosenProfiles.map((dosen, idx) => (
+                              <tr key={idx} className="align-middle hover:bg-slate-50/40">
+                                <td className="border border-slate-200 p-2 text-center font-bold text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={dosen.name}
+                                    onChange={(e) => handleUpdateRowTable321(idx, "name", e.target.value)}
+                                    placeholder="Nama lengkap & gelar..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-bold bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-center">
+                                  <select
+                                    value={dosen.status}
+                                    onChange={(e) => handleUpdateRowTable321(idx, "status", e.target.value as any)}
+                                    className="p-1.5 border border-slate-300 rounded-lg text-xs bg-white font-bold"
+                                  >
+                                    <option value="Tetap">Tetap</option>
+                                    <option value="Tidak Tetap">Tidak Tetap</option>
+                                  </select>
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={dosen.nidn}
+                                    onChange={(e) => handleUpdateRowTable321(idx, "nidn", e.target.value)}
+                                    placeholder="NIDN/NIDK..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-mono text-center bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <select
+                                    value={dosen.jabatanAkademik}
+                                    onChange={(e) => handleUpdateRowTable321(idx, "jabatanAkademik", e.target.value)}
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  >
+                                    <option value="Tenaga Pengajar">Tenaga Pengajar</option>
+                                    <option value="Asisten Ahli">Asisten Ahli</option>
+                                    <option value="Lektor">Lektor</option>
+                                    <option value="Lektor Kepala">Lektor Kepala</option>
+                                    <option value="Guru Besar">Guru Besar</option>
+                                  </select>
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-center">
+                                  <select
+                                    value={dosen.jalur}
+                                    onChange={(e) => handleUpdateRowTable321(idx, "jalur", e.target.value as any)}
+                                    className="p-1.5 border border-slate-300 rounded-lg text-xs bg-white font-bold"
+                                  >
+                                    <option value="Akademisi">Akademisi</option>
+                                    <option value="Praktisi">Praktisi</option>
+                                  </select>
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={dosen.namaPerusahaan || ""}
+                                    onChange={(e) => handleUpdateRowTable321(idx, "namaPerusahaan", e.target.value)}
+                                    placeholder="Nama perusahaan jika praktisi..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-center">
+                                  <select
+                                    value={dosen.isChange ? "true" : "false"}
+                                    onChange={(e) => handleUpdateRowTable321(idx, "isChange", e.target.value === "true")}
+                                    className="p-1.5 border border-slate-300 rounded-lg text-[11px] bg-white font-bold"
+                                  >
+                                    <option value="false">Tetap</option>
+                                    <option value="true">Perubahan</option>
+                                  </select>
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveRowTable321(idx)}
+                                    className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded cursor-pointer"
+                                    title="Hapus Baris"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                            {editingDosenProfiles.length === 0 && (
+                              <tr>
+                                <td colSpan={9} className="p-4 text-center text-slate-400 italic bg-slate-50/50">
+                                  Belum ada data dosen. Klik &quot;+ Tambah Baris Dosen&quot; di bawah untuk menambah data baru.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={handleAddRowTable321}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-dashed border-purple-300 bg-purple-50/60 hover:bg-purple-100/70 text-purple-800 font-bold text-xs cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Tambah Baris Dosen</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Sub-B: Tabel 3.2.3 Latar Belakang Keahlian Dosen & BNSP */}
                 <div className="space-y-3 pt-3 border-t border-slate-100">
-                  <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center justify-between">
-                    <span>Tabel 3.2.3 Profil Dosen Berdasarkan Latar Belakang Keahlian & Sertifikasi BNSP</span>
-                  </h5>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-slate-200 text-xs">
-                      <thead>
-                        <tr className="bg-slate-50 text-slate-700">
-                          <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black w-48">Nama Dosen</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">Pendidikan Magister (S2)</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">Pendidikan Doktor (S3)</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">Bidang Keahlian</th>
-                          <th className="border border-slate-200 p-2.5 text-center font-black">No. Serdos</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">Sertifikat Kompetensi / Profesi BNSP</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(dl05.dosenExpertise || []).map((exp, idx) => (
-                          <tr key={idx} className="align-top hover:bg-slate-50/60 transition-colors">
-                            <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
-                              {idx + 1}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 font-bold text-slate-900">
-                              {exp.name}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-700">
-                              {exp.magister}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-700">
-                              {exp.doktor || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 font-medium text-purple-900">
-                              {exp.bidangKeahlian}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center font-mono text-[11px] text-slate-600">
-                              {exp.serdos || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-emerald-900 font-semibold">
-                              {exp.sertifikatProfesi || "-"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="flex items-center justify-between gap-2">
+                    <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center justify-between">
+                      <span>Tabel 3.2.3 Profil Dosen Berdasarkan Latar Belakang Keahlian & Sertifikasi BNSP</span>
+                    </h5>
+                    {!isEditingTable323 ? (
+                      <button
+                        onClick={handleStartEditTable323}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 3.2.3</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable323}
+                          disabled={isSavingTable323}
+                          className="px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable323}
+                          disabled={isSavingTable323}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable323 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>{isSavingTable323 ? "Menyimpan..." : "Simpan"}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
+
+                  {table323Feedback && (
+                    <div
+                      className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                        table323Feedback.type === "success"
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          : "bg-rose-50 text-rose-800 border border-rose-200"
+                      }`}
+                    >
+                      {table323Feedback.type === "success" ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      )}
+                      <span>{table323Feedback.text}</span>
+                    </div>
+                  )}
+
+                  {!isEditingTable323 ? (
+                    /* VIEW MODE TABEL 3.2.3 */
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-50 text-slate-700">
+                            <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black w-48">Nama Dosen</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Pendidikan Magister (S2)</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Pendidikan Doktor (S3)</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Bidang Keahlian</th>
+                            <th className="border border-slate-200 p-2.5 text-center font-black">No. Serdos</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Sertifikat Kompetensi / Profesi BNSP</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(dl05.dosenExpertise || []).length > 0 ? (
+                            dl05.dosenExpertise!.map((exp, idx) => (
+                              <tr key={idx} className="align-top hover:bg-slate-50/60 transition-colors">
+                                <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 font-bold text-slate-900">
+                                  {exp.name}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-700">
+                                  {exp.magister}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-700">
+                                  {exp.doktor || "-"}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 font-medium text-purple-900">
+                                  {exp.bidangKeahlian}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center font-mono text-[11px] text-slate-600">
+                                  {exp.serdos || "-"}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-emerald-900 font-semibold">
+                                  {exp.sertifikatProfesi || "-"}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={7} className="p-6 text-center text-slate-400 italic">
+                                Belum ada data latar belakang keahlian dosen. Klik &quot;Edit Tabel 3.2.3&quot; untuk menambahkan data.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    /* EDIT MODE TABEL 3.2.3 */
+                    <div className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-slate-200 text-xs">
+                          <thead>
+                            <tr className="bg-slate-100 text-slate-700">
+                              <th className="border border-slate-200 p-2 text-center w-8 font-black">No</th>
+                              <th className="border border-slate-200 p-2 text-left font-black w-44">Nama Dosen</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">Magister (S2)</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">Doktor (S3)</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">Bidang Keahlian</th>
+                              <th className="border border-slate-200 p-2 text-center w-28 font-black">No. Serdos</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">Sertifikat BNSP / Profesi</th>
+                              <th className="border border-slate-200 p-2 text-center w-10 font-black">Hapus</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {editingDosenExpertise.map((exp, idx) => (
+                              <tr key={idx} className="align-top hover:bg-slate-50/40">
+                                <td className="border border-slate-200 p-2 text-center font-bold text-slate-500 pt-3">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={exp.name}
+                                    onChange={(e) => handleUpdateRowTable323(idx, "name", e.target.value)}
+                                    placeholder="Nama dosen..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-bold bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={exp.magister}
+                                    onChange={(e) => handleUpdateRowTable323(idx, "magister", e.target.value)}
+                                    placeholder="Magister S2..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={exp.doktor || ""}
+                                    onChange={(e) => handleUpdateRowTable323(idx, "doktor", e.target.value)}
+                                    placeholder="Doktor S3 (jika ada)..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={exp.bidangKeahlian}
+                                    onChange={(e) => handleUpdateRowTable323(idx, "bidangKeahlian", e.target.value)}
+                                    placeholder="Bidang keahlian..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white text-purple-900 font-semibold"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={exp.serdos || ""}
+                                    onChange={(e) => handleUpdateRowTable323(idx, "serdos", e.target.value)}
+                                    placeholder="No. Serdos..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-mono text-center bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={exp.sertifikatProfesi || ""}
+                                    onChange={(e) => handleUpdateRowTable323(idx, "sertifikatProfesi", e.target.value)}
+                                    placeholder="Sertifikat BNSP / Industri..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-emerald-900 font-semibold bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-center pt-2.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveRowTable323(idx)}
+                                    className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded cursor-pointer"
+                                    title="Hapus Baris"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                            {editingDosenExpertise.length === 0 && (
+                              <tr>
+                                <td colSpan={8} className="p-4 text-center text-slate-400 italic bg-slate-50/50">
+                                  Belum ada data keahlian dosen. Klik &quot;+ Tambah Baris Keahlian Dosen&quot; di bawah untuk menambah data.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={handleAddRowTable323}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-dashed border-purple-300 bg-purple-50/60 hover:bg-purple-100/70 text-purple-800 font-bold text-xs cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Tambah Baris Keahlian Dosen</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Sub-C: Tabel 3.2.5 Kontribusi Intelektual Dosen */}
                 <div className="space-y-3 pt-3 border-t border-slate-100">
-                  <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center justify-between">
-                    <span>Tabel 3.2.5 Kontribusi Intelektual Dosen (4 Bidang Rekognisi)</span>
-                  </h5>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-slate-200 text-xs">
-                      <thead>
-                        <tr className="bg-slate-50 text-slate-700">
-                          <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black w-48">Nama Dosen</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">1. Rekognisi Pendidikan</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">2. Rekognisi Praktik Bisnis</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">3. Rekognisi Riset & Publikasi</th>
-                          <th className="border border-slate-200 p-2.5 text-left font-black">4. Rekognisi Sosial</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(dl05.kontribusiIntelektualDosen || []).map((item, idx) => (
-                          <tr key={idx} className="align-top hover:bg-slate-50/60 transition-colors">
-                            <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
-                              {idx + 1}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 font-bold text-slate-900">
-                              {item.name}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-700 leading-relaxed">
-                              {item.rekognisiPendidikan || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-700 leading-relaxed">
-                              {item.rekognisiPraktik || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-700 leading-relaxed">
-                              {item.rekognisiPenelitian || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-700 leading-relaxed">
-                              {item.rekognisiSosial || "-"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="flex items-center justify-between gap-2">
+                    <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center justify-between">
+                      <span>Tabel 3.2.5 Kontribusi Intelektual Dosen (4 Bidang Rekognisi)</span>
+                    </h5>
+                    {!isEditingTable325 ? (
+                      <button
+                        onClick={handleStartEditTable325}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 3.2.5</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable325}
+                          disabled={isSavingTable325}
+                          className="px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable325}
+                          disabled={isSavingTable325}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable325 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>{isSavingTable325 ? "Menyimpan..." : "Simpan"}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
+
+                  {table325Feedback && (
+                    <div
+                      className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                        table325Feedback.type === "success"
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          : "bg-rose-50 text-rose-800 border border-rose-200"
+                      }`}
+                    >
+                      {table325Feedback.type === "success" ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      )}
+                      <span>{table325Feedback.text}</span>
+                    </div>
+                  )}
+
+                  {!isEditingTable325 ? (
+                    /* VIEW MODE TABEL 3.2.5 */
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-50 text-slate-700">
+                            <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black w-48">Nama Dosen</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">1. Rekognisi Pendidikan</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">2. Rekognisi Praktik Bisnis</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">3. Rekognisi Riset & Publikasi</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">4. Rekognisi Sosial</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(dl05.kontribusiIntelektualDosen || []).length > 0 ? (
+                            dl05.kontribusiIntelektualDosen!.map((item, idx) => (
+                              <tr key={idx} className="align-top hover:bg-slate-50/60 transition-colors">
+                                <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 font-bold text-slate-900">
+                                  {item.name}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-700 leading-relaxed">
+                                  {item.rekognisiPendidikan || "-"}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-700 leading-relaxed">
+                                  {item.rekognisiPraktik || "-"}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-700 leading-relaxed">
+                                  {item.rekognisiPenelitian || "-"}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-700 leading-relaxed">
+                                  {item.rekognisiSosial || "-"}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={6} className="p-6 text-center text-slate-400 italic">
+                                Belum ada data kontribusi intelektual dosen. Klik &quot;Edit Tabel 3.2.5&quot; untuk menambahkan data.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    /* EDIT MODE TABEL 3.2.5 */
+                    <div className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-slate-200 text-xs">
+                          <thead>
+                            <tr className="bg-slate-100 text-slate-700">
+                              <th className="border border-slate-200 p-2 text-center w-8 font-black">No</th>
+                              <th className="border border-slate-200 p-2 text-left font-black w-40">Nama Dosen</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">1. Rekognisi Pendidikan</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">2. Rekognisi Praktik Bisnis</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">3. Rekognisi Riset & Publikasi</th>
+                              <th className="border border-slate-200 p-2 text-left font-black">4. Rekognisi Sosial</th>
+                              <th className="border border-slate-200 p-2 text-center w-10 font-black">Hapus</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {editingKontribusiIntelektual.map((item, idx) => (
+                              <tr key={idx} className="align-top hover:bg-slate-50/40">
+                                <td className="border border-slate-200 p-2 text-center font-bold text-slate-500 pt-3">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="text"
+                                    value={item.name}
+                                    onChange={(e) => handleUpdateRowTable325(idx, "name", e.target.value)}
+                                    placeholder="Nama dosen..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-bold bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <textarea
+                                    rows={2}
+                                    value={item.rekognisiPendidikan || ""}
+                                    onChange={(e) => handleUpdateRowTable325(idx, "rekognisiPendidikan", e.target.value)}
+                                    placeholder="Bahan ajar, modul, rekognisi pengajaran..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <textarea
+                                    rows={2}
+                                    value={item.rekognisiPraktik || ""}
+                                    onChange={(e) => handleUpdateRowTable325(idx, "rekognisiPraktik", e.target.value)}
+                                    placeholder="Konsultansi, narasumber bisnis..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <textarea
+                                    rows={2}
+                                    value={item.rekognisiPenelitian || ""}
+                                    onChange={(e) => handleUpdateRowTable325(idx, "rekognisiPenelitian", e.target.value)}
+                                    placeholder="Reviewer jurnal, keynote speaker riset..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <textarea
+                                    rows={2}
+                                    value={item.rekognisiSosial || ""}
+                                    onChange={(e) => handleUpdateRowTable325(idx, "rekognisiSosial", e.target.value)}
+                                    placeholder="Pengurus asosiasi, pembina UMKM..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-center pt-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveRowTable325(idx)}
+                                    className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded cursor-pointer"
+                                    title="Hapus Baris"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                            {editingKontribusiIntelektual.length === 0 && (
+                              <tr>
+                                <td colSpan={7} className="p-4 text-center text-slate-400 italic bg-slate-50/50">
+                                  Belum ada data kontribusi intelektual. Klik &quot;+ Tambah Baris Kontribusi Intelektual&quot; di bawah untuk menambah data.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={handleAddRowTable325}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-dashed border-purple-300 bg-purple-50/60 hover:bg-purple-100/70 text-purple-800 font-bold text-xs cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Tambah Baris Kontribusi Intelektual</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Sub-D: Tabel 3.2.7 EWMP */}
                 <div className="space-y-3 pt-3 border-t border-slate-100">
-                  <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center justify-between">
-                    <span>Tabel 3.2.7 Ekuivalensi Waktu Mengajar Penuh (EWMP) Dosen</span>
-                    <span className="text-[11px] font-normal text-slate-500 normal-case">
-                      Standar SN-Dikti: 12 - 16 SKS per semester
-                    </span>
-                  </h5>
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        Tabel 3.2.7 Ekuivalensi Waktu Mengajar Penuh (EWMP) Dosen
+                      </h5>
+                      <span className="text-[11px] font-normal text-slate-500">
+                        Standar SN-Dikti: 12 - 16 SKS per semester
+                      </span>
+                    </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse border border-slate-200 text-xs">
-                      <thead>
-                        <tr className="bg-slate-50 text-slate-700 text-center">
-                          <th className="border border-slate-200 p-2.5 text-left font-black">Nama Dosen</th>
-                          <th className="border border-slate-200 p-2.5 font-black">PS Sendiri (SKS)</th>
-                          <th className="border border-slate-200 p-2.5 font-black">PS Lain PT (SKS)</th>
-                          <th className="border border-slate-200 p-2.5 font-black">Luar PT (SKS)</th>
-                          <th className="border border-slate-200 p-2.5 font-black">Penelitian (SKS)</th>
-                          <th className="border border-slate-200 p-2.5 font-black">PkM (SKS)</th>
-                          <th className="border border-slate-200 p-2.5 font-black">Tugas Tambahan (SKS)</th>
-                          <th className="border border-slate-200 p-2.5 font-black bg-slate-100">Total SKS</th>
-                          <th className="border border-slate-200 p-2.5 font-black">Kepatuhan</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(dl05.ewmpList || []).map((ewmp, idx) => {
-                          const isCompliant = ewmp.totalSks >= 12 && ewmp.totalSks <= 16;
-                          return (
-                            <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors text-center">
-                              <td className="border border-slate-200 p-2.5 text-left font-bold text-slate-900">
-                                {ewmp.name}
-                              </td>
-                              <td className="border border-slate-200 p-2.5">{ewmp.psAkreditasiSks}</td>
-                              <td className="border border-slate-200 p-2.5">{ewmp.psLainDalamPtSks}</td>
-                              <td className="border border-slate-200 p-2.5">{ewmp.psLainLuarPtSks}</td>
-                              <td className="border border-slate-200 p-2.5">{ewmp.penelitianSks}</td>
-                              <td className="border border-slate-200 p-2.5">{ewmp.pkmSks}</td>
-                              <td className="border border-slate-200 p-2.5">{ewmp.tugasTambahanSks}</td>
-                              <td className="border border-slate-200 p-2.5 font-black text-slate-900 bg-slate-50">
-                                {ewmp.totalSks} SKS
-                              </td>
-                              <td className="border border-slate-200 p-2.5">
-                                <span
-                                  className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                                    isCompliant
-                                      ? "bg-emerald-100 text-emerald-800"
-                                      : "bg-amber-100 text-amber-800"
-                                  }`}
-                                >
-                                  {isCompliant ? "🟢 Memenuhi" : "🟡 Perlu Penyesuaian"}
-                                </span>
-                              </td>
+                    {!isEditingTable327 ? (
+                      <button
+                        onClick={handleStartEditTable327}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 3.2.7</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable327}
+                          disabled={isSavingTable327}
+                          className="px-2.5 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable327}
+                          disabled={isSavingTable327}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable327 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>{isSavingTable327 ? "Menyimpan..." : "Simpan"}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {table327Feedback && (
+                    <div
+                      className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                        table327Feedback.type === "success"
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          : "bg-rose-50 text-rose-800 border border-rose-200"
+                      }`}
+                    >
+                      {table327Feedback.type === "success" ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                      )}
+                      <span>{table327Feedback.text}</span>
+                    </div>
+                  )}
+
+                  {!isEditingTable327 ? (
+                    /* VIEW MODE TABEL 3.2.7 */
+                    <div className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-slate-200 text-xs">
+                          <thead>
+                            <tr className="bg-slate-50 text-slate-700 text-center">
+                              <th className="border border-slate-200 p-2.5 text-left font-black">Nama Dosen</th>
+                              <th className="border border-slate-200 p-2.5 font-black">PS Sendiri (SKS)</th>
+                              <th className="border border-slate-200 p-2.5 font-black">PS Lain PT (SKS)</th>
+                              <th className="border border-slate-200 p-2.5 font-black">Luar PT (SKS)</th>
+                              <th className="border border-slate-200 p-2.5 font-black">Penelitian (SKS)</th>
+                              <th className="border border-slate-200 p-2.5 font-black">PkM (SKS)</th>
+                              <th className="border border-slate-200 p-2.5 font-black">Tugas Tambahan (SKS)</th>
+                              <th className="border border-slate-200 p-2.5 font-black bg-slate-100">Total SKS</th>
+                              <th className="border border-slate-200 p-2.5 font-black">Kepatuhan</th>
                             </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                          </thead>
+                          <tbody>
+                            {(dl05.ewmpList || []).length > 0 ? (
+                              dl05.ewmpList!.map((ewmp, idx) => {
+                                const isCompliant = ewmp.totalSks >= 12 && ewmp.totalSks <= 16;
+                                return (
+                                  <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors text-center">
+                                    <td className="border border-slate-200 p-2.5 text-left font-bold text-slate-900">
+                                      {ewmp.name}
+                                    </td>
+                                    <td className="border border-slate-200 p-2.5">{ewmp.psAkreditasiSks}</td>
+                                    <td className="border border-slate-200 p-2.5">{ewmp.psLainDalamPtSks}</td>
+                                    <td className="border border-slate-200 p-2.5">{ewmp.psLainLuarPtSks}</td>
+                                    <td className="border border-slate-200 p-2.5">{ewmp.penelitianSks}</td>
+                                    <td className="border border-slate-200 p-2.5">{ewmp.pkmSks}</td>
+                                    <td className="border border-slate-200 p-2.5">{ewmp.tugasTambahanSks}</td>
+                                    <td className="border border-slate-200 p-2.5 font-black text-slate-900 bg-slate-50">
+                                      {ewmp.totalSks} SKS
+                                    </td>
+                                    <td className="border border-slate-200 p-2.5">
+                                      <span
+                                        className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                                          isCompliant
+                                            ? "bg-emerald-100 text-emerald-800"
+                                            : "bg-amber-100 text-amber-800"
+                                        }`}
+                                      >
+                                        {isCompliant ? "🟢 Memenuhi" : "🟡 Perlu Penyesuaian"}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })
+                            ) : (
+                              <tr>
+                                <td colSpan={9} className="p-6 text-center text-slate-400 italic">
+                                  Belum ada data EWMP dosen. Klik &quot;Edit Tabel 3.2.7&quot; untuk menambahkan data.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
 
-                {dl05.perbaikanBerkelanjutanDosen && (
-                  <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100 text-xs space-y-1">
-                    <span className="font-black text-purple-900 block">
-                      Catatan Perbaikan Berkelanjutan (CQI) Dosen:
-                    </span>
-                    <p className="text-purple-800 leading-relaxed">{dl05.perbaikanBerkelanjutanDosen}</p>
-                  </div>
-                )}
+                      {dl05.perbaikanBerkelanjutanDosen && (
+                        <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-100 text-xs space-y-1">
+                          <span className="font-black text-purple-900 block">
+                            Catatan Perbaikan Berkelanjutan (CQI) Dosen:
+                          </span>
+                          <p className="text-purple-800 leading-relaxed">{dl05.perbaikanBerkelanjutanDosen}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* EDIT MODE TABEL 3.2.7 */
+                    <div className="space-y-4">
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-slate-200 text-xs">
+                          <thead>
+                            <tr className="bg-slate-100 text-slate-700 text-center">
+                              <th className="border border-slate-200 p-2 text-left font-black">Nama Dosen</th>
+                              <th className="border border-slate-200 p-2 font-black w-20">PS Sendiri</th>
+                              <th className="border border-slate-200 p-2 font-black w-20">PS Lain PT</th>
+                              <th className="border border-slate-200 p-2 font-black w-20">Luar PT</th>
+                              <th className="border border-slate-200 p-2 font-black w-20">Penelitian</th>
+                              <th className="border border-slate-200 p-2 font-black w-20">PkM</th>
+                              <th className="border border-slate-200 p-2 font-black w-20">Tugas Tambahan</th>
+                              <th className="border border-slate-200 p-2 font-black w-24 bg-slate-200">Total SKS</th>
+                              <th className="border border-slate-200 p-2 font-black w-10">Hapus</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {editingEwmpList.map((ewmp, idx) => {
+                              const isCompliant = ewmp.totalSks >= 12 && ewmp.totalSks <= 16;
+                              return (
+                                <tr key={idx} className="align-middle hover:bg-slate-50/40 text-center">
+                                  <td className="border border-slate-200 p-1.5 text-left">
+                                    <input
+                                      type="text"
+                                      value={ewmp.name}
+                                      onChange={(e) => handleUpdateRowTable327(idx, "name", e.target.value)}
+                                      placeholder="Nama dosen..."
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-bold bg-white"
+                                    />
+                                  </td>
+                                  <td className="border border-slate-200 p-1.5">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      step={0.5}
+                                      value={ewmp.psAkreditasiSks}
+                                      onChange={(e) => handleUpdateRowTable327(idx, "psAkreditasiSks", e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-center bg-white font-mono"
+                                    />
+                                  </td>
+                                  <td className="border border-slate-200 p-1.5">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      step={0.5}
+                                      value={ewmp.psLainDalamPtSks}
+                                      onChange={(e) => handleUpdateRowTable327(idx, "psLainDalamPtSks", e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-center bg-white font-mono"
+                                    />
+                                  </td>
+                                  <td className="border border-slate-200 p-1.5">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      step={0.5}
+                                      value={ewmp.psLainLuarPtSks}
+                                      onChange={(e) => handleUpdateRowTable327(idx, "psLainLuarPtSks", e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-center bg-white font-mono"
+                                    />
+                                  </td>
+                                  <td className="border border-slate-200 p-1.5">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      step={0.5}
+                                      value={ewmp.penelitianSks}
+                                      onChange={(e) => handleUpdateRowTable327(idx, "penelitianSks", e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-center bg-white font-mono"
+                                    />
+                                  </td>
+                                  <td className="border border-slate-200 p-1.5">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      step={0.5}
+                                      value={ewmp.pkmSks}
+                                      onChange={(e) => handleUpdateRowTable327(idx, "pkmSks", e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-center bg-white font-mono"
+                                    />
+                                  </td>
+                                  <td className="border border-slate-200 p-1.5">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      step={0.5}
+                                      value={ewmp.tugasTambahanSks}
+                                      onChange={(e) => handleUpdateRowTable327(idx, "tugasTambahanSks", e.target.value)}
+                                      className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-center bg-white font-mono"
+                                    />
+                                  </td>
+                                  <td className="border border-slate-200 p-1.5 bg-slate-50 font-black">
+                                    <span className={isCompliant ? "text-emerald-700" : "text-amber-700"}>
+                                      {ewmp.totalSks} SKS
+                                    </span>
+                                  </td>
+                                  <td className="border border-slate-200 p-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveRowTable327(idx)}
+                                      className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded cursor-pointer"
+                                      title="Hapus Baris"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                            {editingEwmpList.length === 0 && (
+                              <tr>
+                                <td colSpan={9} className="p-4 text-center text-slate-400 italic bg-slate-50/50">
+                                  Belum ada data EWMP. Klik &quot;+ Tambah Baris EWMP Dosen&quot; di bawah untuk menambah data.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="space-y-1.5 p-4 rounded-2xl bg-purple-50/40 border border-purple-200">
+                        <label className="text-xs font-black text-purple-900 block">
+                          Catatan Perbaikan Berkelanjutan (CQI) Dosen:
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={editingDosenCqi}
+                          onChange={(e) => setEditingDosenCqi(e.target.value)}
+                          placeholder="Uraikan strategi pemerataan beban kerja dosen (12-14 SKS), peningkatan kualifikasi S3 dan jabatan fungsional Lektor Kepala..."
+                          className="w-full p-2.5 border border-purple-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-purple-500"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={handleAddRowTable327}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-dashed border-purple-300 bg-purple-50/60 hover:bg-purple-100/70 text-purple-800 font-bold text-xs cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Tambah Baris EWMP Dosen</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -2114,7 +4059,7 @@ export default function AccreditationDashboardPage() {
             <div className="space-y-8">
               {/* BAB III.3: LUARAN RISET & PKM (TABEL 3.3.1 S.D 3.3.3) */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
-                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-800 flex items-center justify-center font-bold">
@@ -2129,63 +4074,268 @@ export default function AccreditationDashboardPage() {
                     </p>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-sky-50 text-sky-800 border border-sky-200">
-                    Tabel 3.3.1 s.d 3.3.3
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-sky-50 text-sky-800 border border-sky-200">
+                      Tabel 3.3.1 s.d 3.3.3
+                    </span>
+                    {!isEditingTable331 ? (
+                      <button
+                        onClick={handleStartEditTable331}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 3.3.1</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable331}
+                          disabled={isSavingTable331}
+                          className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable331}
+                          disabled={isSavingTable331}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable331 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>{isSavingTable331 ? "Menyimpan..." : "Simpan Perubahan"}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-slate-200 text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-700">
-                        <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
-                        <th className="border border-slate-200 p-2.5 text-left font-black">Judul Luaran Penelitian / PkM</th>
-                        <th className="border border-slate-200 p-2.5 text-center w-16 font-black">Tahun</th>
-                        <th className="border border-slate-200 p-2.5 text-left font-black">Jenis Luaran</th>
-                        <th className="border border-slate-200 p-2.5 text-center font-black">Sumber Pembiayaan</th>
-                        <th className="border border-slate-200 p-2.5 text-center font-black">Kategori Publikasi / Forum</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.researchOutcomes || []).map((res, idx) => {
-                        const sumberText = res.sumberBiayaPtMandiri ? "PT / Mandiri" : res.sumberBiayaLuarPt ? "Luar PT / DRTPM" : "Luar Negeri";
-                        const kategoriText = res.publikasiNasionalTerakreditasi ? "Jurnal Nasional Terakreditasi (SINTA)" : res.publikasiInternasionalBereputasi ? "Jurnal Internasional Bereputasi" : res.seminarNasional ? "Seminar Nasional" : res.seminarInternasional ? "Seminar Internasional" : "Buku / Media";
+                {table331Feedback && (
+                  <div
+                    className={`p-3.5 rounded-2xl text-xs flex items-center gap-2.5 ${
+                      table331Feedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {table331Feedback.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{table331Feedback.text}</span>
+                  </div>
+                )}
 
-                        return (
-                          <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
-                            <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
-                              {idx + 1}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 font-bold text-slate-900 leading-relaxed">
-                              {res.judul}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center font-mono text-slate-600">
-                              {res.tahun}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-700">
-                              {res.jenisLuaran}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center">
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
-                                {sumberText}
-                              </span>
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center">
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                {kategoriText}
-                              </span>
+                {!isEditingTable331 ? (
+                  /* VIEW MODE TABEL 3.3.1 */
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-slate-200 text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 text-slate-700">
+                          <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
+                          <th className="border border-slate-200 p-2.5 text-left font-black">Judul Luaran Penelitian / PkM</th>
+                          <th className="border border-slate-200 p-2.5 text-center w-16 font-black">Tahun</th>
+                          <th className="border border-slate-200 p-2.5 text-left font-black">Jenis Luaran</th>
+                          <th className="border border-slate-200 p-2.5 text-center font-black">Sumber Pembiayaan</th>
+                          <th className="border border-slate-200 p-2.5 text-center font-black">Kategori Publikasi / Forum</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.researchOutcomes || []).length > 0 ? (
+                          dl05.researchOutcomes!.map((res, idx) => {
+                            const sumberText = res.sumberBiayaPtMandiri ? "PT / Mandiri" : res.sumberBiayaLuarPt ? "Luar PT / DRTPM" : "Luar Negeri";
+                            const kategoriText = res.publikasiNasionalTerakreditasi ? "Jurnal Nasional Terakreditasi (SINTA)" : res.publikasiInternasionalBereputasi ? "Jurnal Internasional Bereputasi" : res.seminarNasional ? "Seminar Nasional" : res.seminarInternasional ? "Seminar Internasional" : "Buku / Media";
+
+                            return (
+                              <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
+                                <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 font-bold text-slate-900 leading-relaxed">
+                                  {res.judul}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center font-mono text-slate-600">
+                                  {res.tahun}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-700">
+                                  {res.jenisLuaran}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center">
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                                    {sumberText}
+                                  </span>
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center">
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    {kategoriText}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        ) : (
+                          <tr>
+                            <td colSpan={6} className="p-6 text-center text-slate-400 italic">
+                              Belum ada data luaran penelitian dan PkM dosen. Klik &quot;Edit Tabel 3.3.1&quot; untuk menambahkan data.
                             </td>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  /* EDIT MODE TABEL 3.3.1 */
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700">
+                            <th className="border border-slate-200 p-2 text-center w-8 font-black">No</th>
+                            <th className="border border-slate-200 p-2 text-left font-black">Judul Luaran Riset / PkM</th>
+                            <th className="border border-slate-200 p-2 text-center w-20 font-black">Tahun</th>
+                            <th className="border border-slate-200 p-2 text-left w-36 font-black">Jenis Luaran</th>
+                            <th className="border border-slate-200 p-2 text-center w-36 font-black">Sumber Pembiayaan</th>
+                            <th className="border border-slate-200 p-2 text-left w-48 font-black">Kategori Publikasi</th>
+                            <th className="border border-slate-200 p-2 text-center w-10 font-black">Hapus</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {editingResearchOutcomes.map((res, idx) => (
+                            <tr key={idx} className="align-top hover:bg-slate-50/40">
+                              <td className="border border-slate-200 p-2 text-center font-bold text-slate-500 pt-3">
+                                {idx + 1}
+                              </td>
+                              <td className="border border-slate-200 p-1.5">
+                                <textarea
+                                  rows={2}
+                                  value={res.judul}
+                                  onChange={(e) => handleUpdateRowTable331(idx, "judul", e.target.value)}
+                                  placeholder="Judul artikel ilmiah / paten / buku..."
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-bold bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-1.5">
+                                <input
+                                  type="number"
+                                  value={res.tahun}
+                                  onChange={(e) => handleUpdateRowTable331(idx, "tahun", parseInt(e.target.value) || 2024)}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-mono text-center bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-1.5">
+                                <select
+                                  value={res.jenisLuaran}
+                                  onChange={(e) => handleUpdateRowTable331(idx, "jenisLuaran", e.target.value)}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                >
+                                  <option value="Jurnal Ilmiah">Jurnal Ilmiah</option>
+                                  <option value="HKI: Paten / Hak Cipta">HKI: Paten / Hak Cipta</option>
+                                  <option value="Buku / Book Chapter">Buku / Book Chapter</option>
+                                  <option value="Prosiding Seminar">Prosiding Seminar</option>
+                                  <option value="Media Massa">Media Massa</option>
+                                </select>
+                              </td>
+                              <td className="border border-slate-200 p-1.5 text-center">
+                                <select
+                                  value={res.sumberBiayaPtMandiri ? "mandiri" : res.sumberBiayaLuarPt ? "luar_pt" : "luar_negeri"}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setEditingResearchOutcomes(prev => {
+                                      const updated = [...prev];
+                                      updated[idx] = {
+                                        ...updated[idx],
+                                        sumberBiayaPtMandiri: val === "mandiri" ? 1 : 0,
+                                        sumberBiayaLuarPt: val === "luar_pt" ? 1 : 0,
+                                        sumberBiayaLuarNegeri: val === "luar_negeri" ? 1 : 0,
+                                      };
+                                      return updated;
+                                    });
+                                  }}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white font-bold"
+                                >
+                                  <option value="mandiri">PT / Mandiri</option>
+                                  <option value="luar_pt">Luar PT / DRTPM</option>
+                                  <option value="luar_negeri">Luar Negeri</option>
+                                </select>
+                              </td>
+                              <td className="border border-slate-200 p-1.5">
+                                <select
+                                  value={
+                                    res.publikasiNasionalTerakreditasi
+                                      ? "sinta"
+                                      : res.publikasiInternasionalBereputasi
+                                      ? "scopus"
+                                      : res.seminarNasional
+                                      ? "sem_nas"
+                                      : res.seminarInternasional
+                                      ? "sem_int"
+                                      : "buku"
+                                  }
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setEditingResearchOutcomes(prev => {
+                                      const updated = [...prev];
+                                      updated[idx] = {
+                                        ...updated[idx],
+                                        publikasiNasionalTerakreditasi: val === "sinta" ? 1 : 0,
+                                        publikasiInternasionalBereputasi: val === "scopus" ? 1 : 0,
+                                        seminarNasional: val === "sem_nas" ? 1 : 0,
+                                        seminarInternasional: val === "sem_int" ? 1 : 0,
+                                        tulisanMediaNasional: val === "buku" ? 1 : 0,
+                                      };
+                                      return updated;
+                                    });
+                                  }}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white text-emerald-900 font-semibold"
+                                >
+                                  <option value="sinta">Jurnal Nasional (SINTA)</option>
+                                  <option value="scopus">Jurnal Internasional Bereputasi</option>
+                                  <option value="sem_nas">Seminar Nasional</option>
+                                  <option value="sem_int">Seminar Internasional</option>
+                                  <option value="buku">Buku / Media</option>
+                                </select>
+                              </td>
+                              <td className="border border-slate-200 p-1.5 text-center pt-3">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveRowTable331(idx)}
+                                  className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded cursor-pointer"
+                                  title="Hapus Baris"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {editingResearchOutcomes.length === 0 && (
+                            <tr>
+                              <td colSpan={7} className="p-4 text-center text-slate-400 italic bg-slate-50/50">
+                                Belum ada data luaran riset. Klik &quot;+ Tambah Baris Luaran Riset & PkM&quot; di bawah untuk menambah data.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleAddRowTable331}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dashed border-sky-300 bg-sky-50/60 hover:bg-sky-100/70 text-sky-800 font-bold text-xs cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Tambah Baris Luaran Riset & PkM</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* BAB III.3: TABEL SITASI DOSEN (TABEL 3.3.5) */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
-                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center font-bold">
@@ -2200,75 +4350,262 @@ export default function AccreditationDashboardPage() {
                     </p>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-teal-50 text-teal-800 border border-teal-200">
-                    Tabel 3.3.5 Standar LAMEMBA
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-teal-50 text-teal-800 border border-teal-200">
+                      Tabel 3.3.5 Standar LAMEMBA
+                    </span>
+                    {!isEditingTable335 ? (
+                      <button
+                        onClick={handleStartEditTable335}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 3.3.5</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable335}
+                          disabled={isSavingTable335}
+                          className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable335}
+                          disabled={isSavingTable335}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable335 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>{isSavingTable335 ? "Menyimpan..." : "Simpan Perubahan"}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-slate-200 text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-700 text-center">
-                        <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
-                        <th className="border border-slate-200 p-2.5 text-left font-black">Judul Artikel yang Disitasi</th>
-                        <th className="border border-slate-200 p-2.5 text-left font-black">Penulis</th>
-                        <th className="border border-slate-200 p-2.5 text-left font-black">Jurnal / Publikasi</th>
-                        <th className="border border-slate-200 p-2.5 font-black">TS-2</th>
-                        <th className="border border-slate-200 p-2.5 font-black">TS-1</th>
-                        <th className="border border-slate-200 p-2.5 font-black">TS</th>
-                        <th className="border border-slate-200 p-2.5 font-black bg-teal-50 text-teal-950">Total</th>
-                        <th className="border border-slate-200 p-2.5 font-black">Tautan / DOI</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.citationsList || []).map((cite, idx) => {
-                        const total = (cite.sitasiTs2 || 0) + (cite.sitasiTs1 || 0) + (cite.sitasiTs || 0);
-                        return (
-                          <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
-                            <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
-                              {idx + 1}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 font-bold text-slate-900 leading-relaxed">
-                              {cite.judulArtikel}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-700">
-                              {cite.penulis}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-slate-600">
-                              {cite.jenisPublikasi}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center font-mono">{cite.sitasiTs2}</td>
-                            <td className="border border-slate-200 p-2.5 text-center font-mono">{cite.sitasiTs1}</td>
-                            <td className="border border-slate-200 p-2.5 text-center font-mono">{cite.sitasiTs}</td>
-                            <td className="border border-slate-200 p-2.5 text-center font-black font-mono text-teal-900 bg-teal-50/50">
-                              {total}
-                            </td>
-                            <td className="border border-slate-200 p-2.5 text-center">
-                              {cite.linkArtikel ? (
-                                <a
-                                  href={cite.linkArtikel}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 font-bold hover:underline"
-                                >
-                                  <span>Buka Link</span>
-                                  <ExternalLink className="w-3 h-3" />
-                                </a>
-                              ) : (
-                                <span className="text-slate-400">-</span>
-                              )}
+                {table335Feedback && (
+                  <div
+                    className={`p-3.5 rounded-2xl text-xs flex items-center gap-2.5 ${
+                      table335Feedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {table335Feedback.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{table335Feedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingTable335 ? (
+                  /* VIEW MODE TABEL 3.3.5 */
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-slate-200 text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 text-slate-700 text-center">
+                          <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
+                          <th className="border border-slate-200 p-2.5 text-left font-black">Judul Artikel yang Disitasi</th>
+                          <th className="border border-slate-200 p-2.5 text-left font-black">Penulis</th>
+                          <th className="border border-slate-200 p-2.5 text-left font-black">Jurnal / Publikasi</th>
+                          <th className="border border-slate-200 p-2.5 font-black">TS-2</th>
+                          <th className="border border-slate-200 p-2.5 font-black">TS-1</th>
+                          <th className="border border-slate-200 p-2.5 font-black">TS</th>
+                          <th className="border border-slate-200 p-2.5 font-black bg-teal-50 text-teal-950">Total</th>
+                          <th className="border border-slate-200 p-2.5 font-black">Tautan / DOI</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.citationsList || []).length > 0 ? (
+                          dl05.citationsList!.map((cite, idx) => {
+                            const total = (cite.sitasiTs2 || 0) + (cite.sitasiTs1 || 0) + (cite.sitasiTs || 0);
+                            return (
+                              <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
+                                <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 font-bold text-slate-900 leading-relaxed">
+                                  {cite.judulArtikel}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-700">
+                                  {cite.penulis}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-slate-600">
+                                  {cite.jenisPublikasi}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center font-mono">{cite.sitasiTs2}</td>
+                                <td className="border border-slate-200 p-2.5 text-center font-mono">{cite.sitasiTs1}</td>
+                                <td className="border border-slate-200 p-2.5 text-center font-mono">{cite.sitasiTs}</td>
+                                <td className="border border-slate-200 p-2.5 text-center font-black font-mono text-teal-900 bg-teal-50/50">
+                                  {total}
+                                </td>
+                                <td className="border border-slate-200 p-2.5 text-center">
+                                  {cite.linkArtikel ? (
+                                    <a
+                                      href={cite.linkArtikel}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 font-bold hover:underline"
+                                    >
+                                      <span>Buka Link</span>
+                                      <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  ) : (
+                                    <span className="text-slate-400">-</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        ) : (
+                          <tr>
+                            <td colSpan={9} className="p-6 text-center text-slate-400 italic">
+                              Belum ada data sitasi dosen. Klik &quot;Edit Tabel 3.3.5&quot; untuk menambahkan data.
                             </td>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  /* EDIT MODE TABEL 3.3.5 */
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700 text-center">
+                            <th className="border border-slate-200 p-2 text-center w-8 font-black">No</th>
+                            <th className="border border-slate-200 p-2 text-left font-black">Judul Artikel yang Disitasi</th>
+                            <th className="border border-slate-200 p-2 text-left w-36 font-black">Penulis</th>
+                            <th className="border border-slate-200 p-2 text-left w-40 font-black">Jurnal / Publikasi</th>
+                            <th className="border border-slate-200 p-2 font-black w-16">TS-2</th>
+                            <th className="border border-slate-200 p-2 font-black w-16">TS-1</th>
+                            <th className="border border-slate-200 p-2 font-black w-16">TS</th>
+                            <th className="border border-slate-200 p-2 font-black w-20 bg-teal-100">Total</th>
+                            <th className="border border-slate-200 p-2 text-left w-36 font-black">Tautan / DOI</th>
+                            <th className="border border-slate-200 p-2 font-black w-10">Hapus</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {editingCitationsList.map((cite, idx) => {
+                            const total = (Number(cite.sitasiTs2) || 0) + (Number(cite.sitasiTs1) || 0) + (Number(cite.sitasiTs) || 0);
+                            return (
+                              <tr key={idx} className="align-middle hover:bg-slate-50/40 text-center">
+                                <td className="border border-slate-200 p-2 text-center font-bold text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-left">
+                                  <textarea
+                                    rows={2}
+                                    value={cite.judulArtikel}
+                                    onChange={(e) => handleUpdateRowTable335(idx, "judulArtikel", e.target.value)}
+                                    placeholder="Judul artikel ilmiah..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-bold bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-left">
+                                  <input
+                                    type="text"
+                                    value={cite.penulis}
+                                    onChange={(e) => handleUpdateRowTable335(idx, "penulis", e.target.value)}
+                                    placeholder="Nama penulis..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-left">
+                                  <input
+                                    type="text"
+                                    value={cite.jenisPublikasi}
+                                    onChange={(e) => handleUpdateRowTable335(idx, "jenisPublikasi", e.target.value)}
+                                    placeholder="Nama jurnal / prosiding..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={cite.sitasiTs2}
+                                    onChange={(e) => handleUpdateRowTable335(idx, "sitasiTs2", parseInt(e.target.value) || 0)}
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-center font-mono bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={cite.sitasiTs1}
+                                    onChange={(e) => handleUpdateRowTable335(idx, "sitasiTs1", parseInt(e.target.value) || 0)}
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-center font-mono bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={cite.sitasiTs}
+                                    onChange={(e) => handleUpdateRowTable335(idx, "sitasiTs", parseInt(e.target.value) || 0)}
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs text-center font-mono bg-white"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5 font-black font-mono text-teal-900 bg-teal-50">
+                                  {total}
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-left">
+                                  <input
+                                    type="text"
+                                    value={cite.linkArtikel}
+                                    onChange={(e) => handleUpdateRowTable335(idx, "linkArtikel", e.target.value)}
+                                    placeholder="https://doi.org/..."
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-mono bg-white text-sky-700"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveRowTable335(idx)}
+                                    className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded cursor-pointer"
+                                    title="Hapus Baris"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {editingCitationsList.length === 0 && (
+                            <tr>
+                              <td colSpan={10} className="p-4 text-center text-slate-400 italic bg-slate-50/50">
+                                Belum ada data sitasi dosen. Klik &quot;+ Tambah Baris Sitasi&quot; di bawah untuk menambah data.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleAddRowTable335}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dashed border-teal-300 bg-teal-50/60 hover:bg-teal-100/70 text-teal-800 font-bold text-xs cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Tambah Baris Sitasi</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* BAB III.3: TABEL LUARAN MAHASISWA (TABEL 3.3.7) */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
-                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
@@ -2283,66 +4620,228 @@ export default function AccreditationDashboardPage() {
                     </p>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-200">
-                    Tabel 3.3.7 Standar LAMEMBA
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-200">
+                      Tabel 3.3.7 Standar LAMEMBA
+                    </span>
+                    {!isEditingTable337 ? (
+                      <button
+                        onClick={handleStartEditTable337}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 3.3.7</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable337}
+                          disabled={isSavingTable337}
+                          className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable337}
+                          disabled={isSavingTable337}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable337 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>{isSavingTable337 ? "Menyimpan..." : "Simpan Perubahan"}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-slate-200 text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-700">
-                        <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
-                        <th className="border border-slate-200 p-2.5 text-left font-black">Judul Luaran / Prestasi Mahasiswa</th>
-                        <th className="border border-slate-200 p-2.5 text-center w-16 font-black">Tahun</th>
-                        <th className="border border-slate-200 p-2.5 text-left font-black">Nama Mahasiswa</th>
-                        <th className="border border-slate-200 p-2.5 text-left font-black">Jenis Luaran</th>
-                        <th className="border border-slate-200 p-2.5 text-center font-black">Bukti Dokumen</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.studentOutcomes || []).map((mhs, idx) => (
-                        <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
-                          <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
-                            {idx + 1}
-                          </td>
-                          <td className="border border-slate-200 p-2.5 font-bold text-slate-900 leading-relaxed">
-                            {mhs.judulLuaran}
-                          </td>
-                          <td className="border border-slate-200 p-2.5 text-center font-mono text-slate-600">
-                            {mhs.tahun}
-                          </td>
-                          <td className="border border-slate-200 p-2.5 text-slate-800 font-semibold">
-                            {mhs.namaMahasiswa}
-                          </td>
-                          <td className="border border-slate-200 p-2.5 text-slate-600">
-                            {mhs.jenisLuaran}
-                          </td>
-                          <td className="border border-slate-200 p-2.5 text-center">
-                            {mhs.buktiLuaran ? (
-                              <a
-                                href={mhs.buktiLuaran}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-bold hover:underline"
-                              >
-                                <span>Bukti Fisik</span>
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
-                            ) : (
-                              <span className="text-slate-400">-</span>
-                            )}
-                          </td>
+                {table337Feedback && (
+                  <div
+                    className={`p-3.5 rounded-2xl text-xs flex items-center gap-2.5 ${
+                      table337Feedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {table337Feedback.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{table337Feedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingTable337 ? (
+                  /* VIEW MODE TABEL 3.3.7 */
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-slate-200 text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 text-slate-700">
+                          <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
+                          <th className="border border-slate-200 p-2.5 text-left font-black">Judul Luaran / Prestasi Mahasiswa</th>
+                          <th className="border border-slate-200 p-2.5 text-center w-16 font-black">Tahun</th>
+                          <th className="border border-slate-200 p-2.5 text-left font-black">Nama Mahasiswa</th>
+                          <th className="border border-slate-200 p-2.5 text-left font-black">Jenis Luaran</th>
+                          <th className="border border-slate-200 p-2.5 text-center font-black">Bukti Dokumen</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {(dl05.studentOutcomes || []).length > 0 ? (
+                          dl05.studentOutcomes!.map((mhs, idx) => (
+                            <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
+                              <td className="border border-slate-200 p-2.5 text-center font-bold text-slate-500">
+                                {idx + 1}
+                              </td>
+                              <td className="border border-slate-200 p-2.5 font-bold text-slate-900 leading-relaxed">
+                                {mhs.judulLuaran}
+                              </td>
+                              <td className="border border-slate-200 p-2.5 text-center font-mono text-slate-600">
+                                {mhs.tahun}
+                              </td>
+                              <td className="border border-slate-200 p-2.5 text-slate-800 font-semibold">
+                                {mhs.namaMahasiswa}
+                              </td>
+                              <td className="border border-slate-200 p-2.5 text-slate-600">
+                                {mhs.jenisLuaran}
+                              </td>
+                              <td className="border border-slate-200 p-2.5 text-center">
+                                {mhs.buktiLuaran ? (
+                                  <a
+                                    href={mhs.buktiLuaran}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 font-bold hover:underline"
+                                  >
+                                    <span>Bukti Fisik</span>
+                                    <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                ) : (
+                                  <span className="text-slate-400">-</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={6} className="p-6 text-center text-slate-400 italic">
+                              Belum ada data luaran mahasiswa. Klik &quot;Edit Tabel 3.3.7&quot; untuk menambahkan data.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  /* EDIT MODE TABEL 3.3.7 */
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700">
+                            <th className="border border-slate-200 p-2 text-center w-8 font-black">No</th>
+                            <th className="border border-slate-200 p-2 text-left font-black">Judul Luaran / Prestasi</th>
+                            <th className="border border-slate-200 p-2 text-center w-20 font-black">Tahun</th>
+                            <th className="border border-slate-200 p-2 text-left w-44 font-black">Nama Mahasiswa</th>
+                            <th className="border border-slate-200 p-2 text-left w-36 font-black">Jenis Luaran</th>
+                            <th className="border border-slate-200 p-2 text-left w-40 font-black">Tautan Bukti Dokumen</th>
+                            <th className="border border-slate-200 p-2 text-center w-10 font-black">Hapus</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {editingStudentOutcomes.map((mhs, idx) => (
+                            <tr key={idx} className="align-middle hover:bg-slate-50/40">
+                              <td className="border border-slate-200 p-2 text-center font-bold text-slate-500">
+                                {idx + 1}
+                              </td>
+                              <td className="border border-slate-200 p-1.5">
+                                <textarea
+                                  rows={2}
+                                  value={mhs.judulLuaran}
+                                  onChange={(e) => handleUpdateRowTable337(idx, "judulLuaran", e.target.value)}
+                                  placeholder="Judul prestasi / produk kewirausahaan / publikasi..."
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-bold bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-1.5">
+                                <input
+                                  type="number"
+                                  value={mhs.tahun}
+                                  onChange={(e) => handleUpdateRowTable337(idx, "tahun", parseInt(e.target.value) || 2024)}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-mono text-center bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-1.5">
+                                <input
+                                  type="text"
+                                  value={mhs.namaMahasiswa}
+                                  onChange={(e) => handleUpdateRowTable337(idx, "namaMahasiswa", e.target.value)}
+                                  placeholder="Nama mahasiswa..."
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-semibold bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-1.5">
+                                <select
+                                  value={mhs.jenisLuaran}
+                                  onChange={(e) => handleUpdateRowTable337(idx, "jenisLuaran", e.target.value)}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white"
+                                >
+                                  <option value="Prestasi / Rekognisi">Prestasi / Rekognisi</option>
+                                  <option value="Publikasi Ilmiah">Publikasi Ilmiah</option>
+                                  <option value="Produk Kewirausahaan">Produk Kewirausahaan</option>
+                                  <option value="HKI Mahasiswa">HKI Mahasiswa</option>
+                                </select>
+                              </td>
+                              <td className="border border-slate-200 p-1.5">
+                                <input
+                                  type="text"
+                                  value={mhs.buktiLuaran}
+                                  onChange={(e) => handleUpdateRowTable337(idx, "buktiLuaran", e.target.value)}
+                                  placeholder="https://... atau drive link"
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-mono text-emerald-800 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-1.5 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveRowTable337(idx)}
+                                  className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded cursor-pointer"
+                                  title="Hapus Baris"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {editingStudentOutcomes.length === 0 && (
+                            <tr>
+                              <td colSpan={7} className="p-4 text-center text-slate-400 italic bg-slate-50/50">
+                                Belum ada data prestasi mahasiswa. Klik &quot;+ Tambah Baris Luaran Mahasiswa&quot; di bawah untuk menambah data.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleAddRowTable337}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dashed border-amber-300 bg-amber-50/60 hover:bg-amber-100/70 text-amber-800 font-bold text-xs cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Tambah Baris Luaran Mahasiswa</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* BAB III.3: REKONSILIASI PD-DIKTI (TABEL 3.3.9) */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
-                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center font-bold">
@@ -2357,81 +4856,272 @@ export default function AccreditationDashboardPage() {
                     </p>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-cyan-50 text-cyan-800 border border-cyan-200">
-                    Tabel 3.3.9 Rekonsiliasi Feeder
-                  </span>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-slate-200 text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-700 text-center">
-                        <th className="border border-slate-200 p-3 text-left font-black">Semester</th>
-                        <th className="border border-slate-200 p-3 font-black">Jumlah Mahasiswa Aktif Kampus</th>
-                        <th className="border border-slate-200 p-3 font-black">Terdaftar di PD-Dikti</th>
-                        <th className="border border-slate-200 p-3 font-black">Selisih (Discrepancy)</th>
-                        <th className="border border-slate-200 p-3 font-black">Status Validitas Feeder</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.mahasiswaAktifList || []).map((mhs, idx) => {
-                        const isZeroDiscrepancy = mhs.selisih === 0;
-                        return (
-                          <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors text-center">
-                            <td className="border border-slate-200 p-3 text-left font-black text-slate-900">
-                              Semester {mhs.semester} ({dl05.academicYear})
-                            </td>
-                            <td className="border border-slate-200 p-3 font-bold text-slate-900">
-                              {mhs.mhsAktif} Orang
-                            </td>
-                            <td className="border border-slate-200 p-3 font-bold text-slate-900">
-                              {mhs.mhsPdDikti} Orang
-                            </td>
-                            <td className="border border-slate-200 p-3 font-black">
-                              <span
-                                className={
-                                  isZeroDiscrepancy ? "text-emerald-700 font-mono" : "text-rose-700 font-mono"
-                                }
-                              >
-                                {mhs.selisih} Mahasiswa
-                              </span>
-                            </td>
-                            <td className="border border-slate-200 p-3">
-                              <span
-                                className={`px-3 py-1 rounded-full text-[11px] font-black inline-flex items-center gap-1.5 ${
-                                  isZeroDiscrepancy
-                                    ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                    : "bg-rose-100 text-rose-800 border border-rose-200"
-                                }`}
-                              >
-                                {isZeroDiscrepancy ? (
-                                  <>
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
-                                    <span>100% Sinkron (Nol Selisih)</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <AlertCircle className="w-3.5 h-3.5" />
-                                    <span>Terdapat Selisih Data</span>
-                                  </>
-                                )}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {dl05.perbaikanBerkelanjutanKemahasiswaan && (
-                  <div className="p-4 rounded-2xl bg-cyan-50/60 border border-cyan-100 text-xs space-y-1">
-                    <span className="font-black text-cyan-900 block">
-                      Catatan Rekonsiliasi PD-Dikti & Kemahasiswaan:
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-cyan-50 text-cyan-800 border border-cyan-200">
+                      Tabel 3.3.9 Rekonsiliasi Feeder
                     </span>
-                    <p className="text-cyan-800 leading-relaxed">
-                      {dl05.perbaikanBerkelanjutanKemahasiswaan}
-                    </p>
+                    {!isEditingTable339 ? (
+                      <button
+                        onClick={handleStartEditTable339}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 3.3.9</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable339}
+                          disabled={isSavingTable339}
+                          className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable339}
+                          disabled={isSavingTable339}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable339 ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>{isSavingTable339 ? "Menyimpan..." : "Simpan Perubahan"}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {table339Feedback && (
+                  <div
+                    className={`p-3.5 rounded-2xl text-xs flex items-center gap-2.5 ${
+                      table339Feedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {table339Feedback.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{table339Feedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingTable339 ? (
+                  /* VIEW MODE TABEL 3.3.9 */
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-50 text-slate-700 text-center">
+                            <th className="border border-slate-200 p-3 text-left font-black">Semester</th>
+                            <th className="border border-slate-200 p-3 font-black">Jumlah Mahasiswa Aktif Kampus</th>
+                            <th className="border border-slate-200 p-3 font-black">Terdaftar di PD-Dikti</th>
+                            <th className="border border-slate-200 p-3 font-black">Selisih (Discrepancy)</th>
+                            <th className="border border-slate-200 p-3 font-black">Status Validitas Feeder</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(dl05.mahasiswaAktifList || []).length > 0 ? (
+                            dl05.mahasiswaAktifList!.map((mhs, idx) => {
+                              const isZeroDiscrepancy = mhs.selisih === 0;
+                              return (
+                                <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors text-center">
+                                  <td className="border border-slate-200 p-3 text-left font-black text-slate-900">
+                                    Semester {mhs.semester} ({dl05.academicYear})
+                                  </td>
+                                  <td className="border border-slate-200 p-3 font-bold text-slate-900">
+                                    {mhs.mhsAktif} Orang
+                                  </td>
+                                  <td className="border border-slate-200 p-3 font-bold text-slate-900">
+                                    {mhs.mhsPdDikti} Orang
+                                  </td>
+                                  <td className="border border-slate-200 p-3 font-black">
+                                    <span
+                                      className={
+                                        isZeroDiscrepancy ? "text-emerald-700 font-mono" : "text-rose-700 font-mono"
+                                      }
+                                    >
+                                      {mhs.selisih} Mahasiswa
+                                    </span>
+                                  </td>
+                                  <td className="border border-slate-200 p-3">
+                                    <span
+                                      className={`px-3 py-1 rounded-full text-[11px] font-black inline-flex items-center gap-1.5 ${
+                                        isZeroDiscrepancy
+                                          ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                          : "bg-rose-100 text-rose-800 border border-rose-200"
+                                      }`}
+                                    >
+                                      {isZeroDiscrepancy ? (
+                                        <>
+                                          <CheckCircle2 className="w-3.5 h-3.5" />
+                                          <span>100% Sinkron (Nol Selisih)</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <AlertCircle className="w-3.5 h-3.5" />
+                                          <span>Terdapat Selisih Data</span>
+                                        </>
+                                      )}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          ) : (
+                            <tr>
+                              <td colSpan={5} className="p-6 text-center text-slate-400 italic">
+                                Belum ada data rekonsiliasi mahasiswa aktif PD-Dikti. Klik &quot;Edit Tabel 3.3.9&quot; untuk menambahkan data.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {dl05.perbaikanBerkelanjutanTridharma && (
+                      <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-100 text-xs space-y-1">
+                        <span className="font-black text-sky-900 block">
+                          Catatan Perbaikan Berkelanjutan (CQI) Tridharma:
+                        </span>
+                        <p className="text-sky-800 leading-relaxed">
+                          {dl05.perbaikanBerkelanjutanTridharma}
+                        </p>
+                      </div>
+                    )}
+
+                    {dl05.perbaikanBerkelanjutanKemahasiswaan && (
+                      <div className="p-4 rounded-2xl bg-cyan-50/60 border border-cyan-100 text-xs space-y-1">
+                        <span className="font-black text-cyan-900 block">
+                          Catatan Rekonsiliasi PD-Dikti & Kemahasiswaan:
+                        </span>
+                        <p className="text-cyan-800 leading-relaxed">
+                          {dl05.perbaikanBerkelanjutanKemahasiswaan}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* EDIT MODE TABEL 3.3.9 */
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700 text-center">
+                            <th className="border border-slate-200 p-2 text-center w-8 font-black">No</th>
+                            <th className="border border-slate-200 p-2 text-left font-black w-36">Semester</th>
+                            <th className="border border-slate-200 p-2 font-black">Mhs Aktif Kampus</th>
+                            <th className="border border-slate-200 p-2 font-black">Mhs di PD-Dikti</th>
+                            <th className="border border-slate-200 p-2 font-black w-28 bg-slate-200">Selisih</th>
+                            <th className="border border-slate-200 p-2 font-black w-10">Hapus</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {editingMahasiswaAktifList.map((mhs, idx) => {
+                            const diff = Math.abs((Number(mhs.mhsAktif) || 0) - (Number(mhs.mhsPdDikti) || 0));
+                            return (
+                              <tr key={idx} className="align-middle hover:bg-slate-50/40 text-center">
+                                <td className="border border-slate-200 p-2 text-center font-bold text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="border border-slate-200 p-1.5 text-left">
+                                  <select
+                                    value={mhs.semester}
+                                    onChange={(e) => handleUpdateRowTable339(idx, "semester", e.target.value as any)}
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs bg-white font-bold"
+                                  >
+                                    <option value="Ganjil">Semester Ganjil</option>
+                                    <option value="Genap">Semester Genap</option>
+                                  </select>
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={mhs.mhsAktif}
+                                    onChange={(e) => handleUpdateRowTable339(idx, "mhsAktif", parseInt(e.target.value) || 0)}
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-mono text-center bg-white font-bold"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={mhs.mhsPdDikti}
+                                    onChange={(e) => handleUpdateRowTable339(idx, "mhsPdDikti", parseInt(e.target.value) || 0)}
+                                    className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-mono text-center bg-white font-bold"
+                                  />
+                                </td>
+                                <td className="border border-slate-200 p-1.5 bg-slate-50">
+                                  <span className={`font-mono font-black ${diff === 0 ? "text-emerald-700" : "text-rose-700"}`}>
+                                    {diff} Mhs
+                                  </span>
+                                </td>
+                                <td className="border border-slate-200 p-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveRowTable339(idx)}
+                                    className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded cursor-pointer"
+                                    title="Hapus Baris"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {editingMahasiswaAktifList.length === 0 && (
+                            <tr>
+                              <td colSpan={6} className="p-4 text-center text-slate-400 italic bg-slate-50/50">
+                                Belum ada data mahasiswa aktif. Klik &quot;+ Tambah Baris Semester&quot; di bawah untuk menambah data.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="space-y-4 pt-2">
+                      <div className="space-y-1.5 p-4 rounded-2xl bg-sky-50/40 border border-sky-200">
+                        <label className="text-xs font-black text-sky-900 block">
+                          Catatan Perbaikan Berkelanjutan (CQI) Tridharma:
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={editingTridharmaCqi}
+                          onChange={(e) => setEditingTridharmaCqi(e.target.value)}
+                          placeholder="Uraikan hilirisasi riset dosen ke pengabdian masyarakat dan insentif publikasi bereputasi..."
+                          className="w-full p-2.5 border border-sky-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-sky-500"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 p-4 rounded-2xl bg-cyan-50/40 border border-cyan-200">
+                        <label className="text-xs font-black text-cyan-900 block">
+                          Catatan Rekonsiliasi PD-Dikti & Kemahasiswaan:
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={editingKemahasiswaanCqi}
+                          onChange={(e) => setEditingKemahasiswaanCqi(e.target.value)}
+                          placeholder="Uraikan mekanisme sinkronisasi data feeder PD-Dikti setiap awal semester dan pembinaan prestasi..."
+                          className="w-full p-2.5 border border-cyan-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-cyan-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleAddRowTable339}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dashed border-cyan-300 bg-cyan-50/60 hover:bg-cyan-100/70 text-cyan-800 font-bold text-xs cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Tambah Baris Semester</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -2441,7 +5131,937 @@ export default function AccreditationDashboardPage() {
           {/* SUB-TAB 4: ARSIP SURAT REKOMENDASI LAM & CETAK BORANG LENGKAP */}
           {activeDl05SubTab === "arsip_cetak" && (
             <div className="space-y-8">
-              {/* 1. KOLEKSI WAJIB: 1 SURAT REKOMENDASI RESMI LAMEMBA PER TAHUN (TAHUN 0 S.D 4) */}
+              {/* 1. SAMPUL DEPAN & IDENTITAS PENGUSUL */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                        <Building2 className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-base font-black text-slate-900">
+                        Halaman Muka (Sampul) & Identitas Pengusul
+                      </h4>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Informasi resmi perguruan tinggi, unit pengelola, program studi, SK pendirian/pembukaan, akreditasi, dan logo resmi sesuai template muka LAMEMBA (Kode: DL-05)
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {isEditingIdentitas ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingIdentitas(false)}
+                          disabled={isSavingIdentitas}
+                          className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all cursor-pointer"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveIdentitas}
+                          disabled={isSavingIdentitas}
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                        >
+                          {isSavingIdentitas ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>Simpan Identitas</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleStartEditIdentitas}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold text-xs transition-all cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Identitas & Sampul</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {identitasFeedback && (
+                  <div
+                    className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                      identitasFeedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {identitasFeedback.type === "success" ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                    <span>{identitasFeedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingIdentitas ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Visual Card Preview Sampul */}
+                    <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-50 to-amber-50/30 border border-amber-200/70 flex flex-col items-center text-center justify-between space-y-4">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 px-2.5 py-0.5 rounded-full bg-amber-100 border border-amber-200">
+                        Pratinjau Sampul Depan
+                      </span>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={dl05.identitasPengusul?.logoUrl || "/logo_stimi.png"}
+                        alt="Logo Perguruan Tinggi"
+                        className="w-24 h-24 object-contain drop-shadow-sm my-2"
+                      />
+                      <div className="space-y-1">
+                        <p className="text-[11px] font-black uppercase text-slate-800 tracking-tight">
+                          DOKUMEN PEMANTAUAN DAN EVALUASI TAHUN KE-{selectedDl05Year}
+                        </p>
+                        <p className="text-[10px] font-bold text-slate-600 uppercase">
+                          AKREDITASI PROGRAM STUDI
+                        </p>
+                        <p className="text-xs font-black text-amber-900 uppercase pt-2">
+                          {dl05.identitasPengusul?.namaProdi || dl05.prodiName}
+                        </p>
+                        <p className="text-[11px] font-extrabold text-slate-900 uppercase">
+                          {dl05.identitasPengusul?.perguruanTinggi || "STIMI YAPMI MAKASSAR"}
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          {dl05.identitasPengusul?.unitPengelola || "JURUSAN MANAJEMEN"}
+                        </p>
+                      </div>
+                      <div className="pt-2 border-t border-amber-200/60 w-full text-[10px] font-mono font-bold text-slate-600">
+                        {dl05.identitasPengusul?.kota || "MAKASSAR"}, {dl05.identitasPengusul?.tahunDokumen || "2025"}
+                      </div>
+                    </div>
+
+                    {/* Tabel Rincian Identitas Pengusul 16 Butir */}
+                    <div className="lg:col-span-2 overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <tbody>
+                          <tr className="border-b border-slate-200 hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-600 w-1/3 bg-slate-50">Perguruan Tinggi</td>
+                            <td className="p-2.5 font-black text-slate-900">{dl05.identitasPengusul?.perguruanTinggi || "STIMI YAPMI Makassar"}</td>
+                          </tr>
+                          <tr className="border-b border-slate-200 hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-600 bg-slate-50">Unit Pengelola Program Studi</td>
+                            <td className="p-2.5 text-slate-800">{dl05.identitasPengusul?.unitPengelola || "Jurusan Manajemen"}</td>
+                          </tr>
+                          <tr className="border-b border-slate-200 hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-600 bg-slate-50">Jenis Program & Nama Prodi</td>
+                            <td className="p-2.5 text-slate-800 font-semibold">{dl05.identitasPengusul?.jenisProgram || "Sarjana (S1)"} • {dl05.identitasPengusul?.namaProdi || "Manajemen"}</td>
+                          </tr>
+                          <tr className="border-b border-slate-200 hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-600 bg-slate-50">Alamat Kampus</td>
+                            <td className="p-2.5 text-slate-700">{dl05.identitasPengusul?.alamat || "Jl. Perintis Kemerdekaan KM. 9, Makassar"}</td>
+                          </tr>
+                          <tr className="border-b border-slate-200 hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-600 bg-slate-50">Kontak Telepon & Website</td>
+                            <td className="p-2.5 text-slate-700 font-mono text-[11px]">{dl05.identitasPengusul?.telepon || "-"} • {dl05.identitasPengusul?.emailWeb || "-"}</td>
+                          </tr>
+                          <tr className="border-b border-slate-200 hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-600 bg-slate-50">SK Pendirian PT</td>
+                            <td className="p-2.5 text-slate-700 font-mono text-[11px]">{dl05.identitasPengusul?.nomorSkPendirianPt || "-"} ({dl05.identitasPengusul?.tanggalSkPendirianPt || "-"}) oleh {dl05.identitasPengusul?.pejabatSkPendirianPt || "-"}</td>
+                          </tr>
+                          <tr className="border-b border-slate-200 hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-600 bg-slate-50">SK Pembukaan Program Studi</td>
+                            <td className="p-2.5 text-slate-700 font-mono text-[11px]">{dl05.identitasPengusul?.nomorSkPembukaanPs || "-"} ({dl05.identitasPengusul?.tanggalSkPembukaanPs || "-"}) oleh {dl05.identitasPengusul?.pejabatSkPembukaanPs || "-"}</td>
+                          </tr>
+                          <tr className="border-b border-slate-200 hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-600 bg-slate-50">Tahun Pertama Menerima Mahasiswa</td>
+                            <td className="p-2.5 font-black text-slate-900">{dl05.identitasPengusul?.tahunPertamaMenerimaMhs || "1998"}</td>
+                          </tr>
+                          <tr className="border-b border-slate-200 hover:bg-slate-50/60">
+                            <td className="p-2.5 font-bold text-slate-600 bg-slate-50">Peringkat Akreditasi Terkini & SK LAM</td>
+                            <td className="p-2.5 text-slate-800">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 mr-2">
+                                {dl05.identitasPengusul?.peringkatAkreditasiTerbaru || "Baik Sekali"}
+                              </span>
+                              <span className="font-mono text-[11px]">{dl05.identitasPengusul?.nomorSkLam || "-"}</span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="p-2.5 font-bold text-slate-600 bg-slate-50">Kota Kedudukan & Tahun Dokumen</td>
+                            <td className="p-2.5 text-slate-800 font-bold">{dl05.identitasPengusul?.kota || "Makassar"}, Tahun {dl05.identitasPengusul?.tahunDokumen || "2025"}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  /* Form Edit Mode Identitas */
+                  <div className="space-y-4 pt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Nama Perguruan Tinggi</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.perguruanTinggi || ""}
+                          onChange={(e) => handleUpdateIdentitasField("perguruanTinggi", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Unit Pengelola Program Studi (UPPS)</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.unitPengelola || ""}
+                          onChange={(e) => handleUpdateIdentitasField("unitPengelola", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Nama Program Studi</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.namaProdi || ""}
+                          onChange={(e) => handleUpdateIdentitasField("namaProdi", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Jenis Program (Strata)</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.jenisProgram || ""}
+                          onChange={(e) => handleUpdateIdentitasField("jenisProgram", e.target.value)}
+                          placeholder="Sarjana (S1)"
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1 md:col-span-2">
+                        <label className="text-[11px] font-bold text-slate-700 block">Alamat Kampus</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.alamat || ""}
+                          onChange={(e) => handleUpdateIdentitasField("alamat", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Nomor Telepon</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.telepon || ""}
+                          onChange={(e) => handleUpdateIdentitasField("telepon", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">E-mail dan Website Resmi</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.emailWeb || ""}
+                          onChange={(e) => handleUpdateIdentitasField("emailWeb", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">URL Logo Perguruan Tinggi</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.logoUrl || ""}
+                          onChange={(e) => handleUpdateIdentitasField("logoUrl", e.target.value)}
+                          placeholder="/logo_stimi.png"
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Nomor SK Pendirian PT</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.nomorSkPendirianPt || ""}
+                          onChange={(e) => handleUpdateIdentitasField("nomorSkPendirianPt", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Tanggal SK Pendirian PT</label>
+                        <input
+                          type="date"
+                          value={editingIdentitas.tanggalSkPendirianPt || ""}
+                          onChange={(e) => handleUpdateIdentitasField("tanggalSkPendirianPt", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Pejabat SK Pendirian PT</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.pejabatSkPendirianPt || ""}
+                          onChange={(e) => handleUpdateIdentitasField("pejabatSkPendirianPt", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Nomor SK Pembukaan PS</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.nomorSkPembukaanPs || ""}
+                          onChange={(e) => handleUpdateIdentitasField("nomorSkPembukaanPs", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Tanggal SK Pembukaan PS</label>
+                        <input
+                          type="date"
+                          value={editingIdentitas.tanggalSkPembukaanPs || ""}
+                          onChange={(e) => handleUpdateIdentitasField("tanggalSkPembukaanPs", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Pejabat SK Pembukaan PS</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.pejabatSkPembukaanPs || ""}
+                          onChange={(e) => handleUpdateIdentitasField("pejabatSkPembukaanPs", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Tahun Pertama Menerima Mhs</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.tahunPertamaMenerimaMhs || ""}
+                          onChange={(e) => handleUpdateIdentitasField("tahunPertamaMenerimaMhs", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Peringkat Akreditasi Terkini</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.peringkatAkreditasiTerbaru || ""}
+                          onChange={(e) => handleUpdateIdentitasField("peringkatAkreditasiTerbaru", e.target.value)}
+                          placeholder="Baik Sekali / Unggul"
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-semibold"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Nomor SK LAMEMBA</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.nomorSkLam || ""}
+                          onChange={(e) => handleUpdateIdentitasField("nomorSkLam", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Tanggal Kedaluwarsa SK</label>
+                        <input
+                          type="date"
+                          value={editingIdentitas.tanggalKadaluarsa || ""}
+                          onChange={(e) => handleUpdateIdentitasField("tanggalKadaluarsa", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Kota Kedudukan PT</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.kota || ""}
+                          onChange={(e) => handleUpdateIdentitasField("kota", e.target.value)}
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Tahun Dokumen Evaluasi</label>
+                        <input
+                          type="text"
+                          value={editingIdentitas.tahunDokumen || ""}
+                          onChange={(e) => handleUpdateIdentitasField("tahunDokumen", e.target.value)}
+                          placeholder="2025"
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 2. IDENTITAS TIM PENYUSUN EVALUASI DIRI (TASKFORCE DL-05) */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-800 flex items-center justify-center font-bold">
+                        <Award className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-base font-black text-slate-900">
+                        Identitas Tim Penyusun Evaluasi Diri (Taskforce DL-05)
+                      </h4>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Daftar personil pimpinan UPPS, gugus kendali mutu, prodi, dan dosen penyusun borang resmi sesuai template halaman depan LAMEMBA
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {isEditingTimPenyusun ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingTimPenyusun(false)}
+                          disabled={isSavingTimPenyusun}
+                          className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all cursor-pointer"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTimPenyusun}
+                          disabled={isSavingTimPenyusun}
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                        >
+                          {isSavingTimPenyusun ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>Simpan Tim</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleStartEditTimPenyusun}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-bold text-xs transition-all cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tim Penyusun</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {timPenyusunFeedback && (
+                  <div
+                    className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                      timPenyusunFeedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {timPenyusunFeedback.type === "success" ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                    <span>{timPenyusunFeedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingTimPenyusun ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-slate-200 text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 text-slate-700">
+                          <th className="border border-slate-200 p-3 text-center w-12 font-black">No</th>
+                          <th className="border border-slate-200 p-3 text-left font-black">Nama Lengkap</th>
+                          <th className="border border-slate-200 p-3 text-left font-black">NIDN / NIK</th>
+                          <th className="border border-slate-200 p-3 text-left font-black">Jabatan Struktural</th>
+                          <th className="border border-slate-200 p-3 text-left font-black">Peran dalam Tim Evaluasi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.timPenyusun || []).map((tp, idx) => (
+                          <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
+                            <td className="border border-slate-200 p-3 text-center font-bold text-slate-500">
+                              {idx + 1}
+                            </td>
+                            <td className="border border-slate-200 p-3 font-bold text-slate-900">
+                              {tp.nama}
+                            </td>
+                            <td className="border border-slate-200 p-3 font-mono text-slate-600">
+                              {tp.nikNidn}
+                            </td>
+                            <td className="border border-slate-200 p-3 text-slate-700">
+                              {tp.jabatan}
+                            </td>
+                            <td className="border border-slate-200 p-3">
+                              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-sky-50 text-sky-900 border border-sky-200">
+                                {tp.peran}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                        {(dl05.timPenyusun || []).length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="p-4 text-center text-slate-400 italic bg-slate-50">
+                              Belum ada anggota tim penyusun. Klik &quot;Edit Tim Penyusun&quot; untuk menambahkan anggota.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="space-y-4 pt-2">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-sky-50 text-sky-900">
+                            <th className="border border-slate-200 p-2.5 text-center w-12 font-black">No</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Nama Lengkap</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">NIDN / NIK</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Jabatan Struktural</th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">Peran dalam Tim</th>
+                            <th className="border border-slate-200 p-2.5 text-center w-14 font-black">Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {editingTimPenyusun.map((tp, idx) => (
+                            <tr key={idx} className="align-middle">
+                              <td className="border border-slate-200 p-2 text-center font-bold text-slate-500">
+                                {idx + 1}
+                              </td>
+                              <td className="border border-slate-200 p-2">
+                                <input
+                                  type="text"
+                                  value={tp.nama}
+                                  onChange={(e) => handleUpdateRowTimPenyusun(idx, "nama", e.target.value)}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs"
+                                  placeholder="Nama Lengkap dengan Gelar"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2">
+                                <input
+                                  type="text"
+                                  value={tp.nikNidn}
+                                  onChange={(e) => handleUpdateRowTimPenyusun(idx, "nikNidn", e.target.value)}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-mono"
+                                  placeholder="NIDN. ..."
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2">
+                                <input
+                                  type="text"
+                                  value={tp.jabatan}
+                                  onChange={(e) => handleUpdateRowTimPenyusun(idx, "jabatan", e.target.value)}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs"
+                                  placeholder="Jabatan di Kampus"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2">
+                                <input
+                                  type="text"
+                                  value={tp.peran}
+                                  onChange={(e) => handleUpdateRowTimPenyusun(idx, "peran", e.target.value)}
+                                  className="w-full p-1.5 border border-slate-300 rounded-lg text-xs font-semibold"
+                                  placeholder="Peran di Taskforce"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveRowTimPenyusun(idx)}
+                                  className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded cursor-pointer"
+                                  title="Hapus Anggota"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {editingTimPenyusun.length === 0 && (
+                            <tr>
+                              <td colSpan={6} className="p-4 text-center text-slate-400 italic bg-slate-50">
+                                Anggota tim kosong. Klik &quot;+ Tambah Anggota Tim&quot; di bawah untuk menambah.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleAddRowTimPenyusun}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dashed border-sky-300 bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold text-xs cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Tambah Anggota Tim</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* 3. KATA PENGANTAR */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
+                        <BookOpen className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-base font-black text-slate-900">
+                        Kata Pengantar Dokumen DL-05
+                      </h4>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Prakata resmi pimpinan perguruan tinggi dan ketua taskforce pengusul borang pemantauan tahunan LAMEMBA
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {isEditingKataPengantar ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingKataPengantar(false)}
+                          disabled={isSavingKataPengantar}
+                          className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all cursor-pointer"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveKataPengantar}
+                          disabled={isSavingKataPengantar}
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                        >
+                          {isSavingKataPengantar ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>Simpan Kata Pengantar</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleStartEditKataPengantar}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold text-xs transition-all cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Kata Pengantar</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {kataPengantarFeedback && (
+                  <div
+                    className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                      kataPengantarFeedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {kataPengantarFeedback.type === "success" ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                    <span>{kataPengantarFeedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingKataPengantar ? (
+                  <div className="p-5 rounded-2xl bg-purple-50/30 border border-purple-100 space-y-3 text-xs text-slate-700 leading-relaxed whitespace-pre-line text-justify">
+                    {dl05.kataPengantar || "(Kata Pengantar belum diisi)"}
+                  </div>
+                ) : (
+                  <div className="space-y-2 pt-1">
+                    <textarea
+                      rows={8}
+                      value={editingKataPengantar}
+                      onChange={(e) => setEditingKataPengantar(e.target.value)}
+                      placeholder="Tuliskan kata pengantar resmi di sini..."
+                      className="w-full p-3.5 border border-purple-300 rounded-2xl text-xs bg-white focus:ring-2 focus:ring-purple-500 leading-relaxed"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 4. DAFTAR ISI DOKUMEN DL-05 */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+                <div className="border-b border-slate-100 pb-3 flex items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center font-bold">
+                        <Layers className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-base font-black text-slate-900">
+                        Daftar Isi Dokumen (Sesuai Struktur Baku LAMEMBA)
+                      </h4>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Struktur bab dan urutan lampiran otomatis diselaraskan secara konsisten ke pratinjau cetak
+                    </p>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-teal-50 text-teal-800 border border-teal-200">
+                    Format Resmi Word
+                  </span>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200 space-y-2.5 text-xs text-slate-800 font-medium">
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/60 font-bold">
+                    <span>Halaman Muka (Sampul Dokumen & Logo Perguruan Tinggi)</span>
+                    <span className="font-mono text-slate-400">Hal. i</span>
+                  </div>
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/60 font-bold">
+                    <span>Identitas Pengusul</span>
+                    <span className="font-mono text-slate-400">Hal. ii</span>
+                  </div>
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/60 font-bold">
+                    <span>Identitas Tim Penyusun Dokumen Evaluasi Diri</span>
+                    <span className="font-mono text-slate-400">Hal. iii</span>
+                  </div>
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/60 font-bold">
+                    <span>Kata Pengantar</span>
+                    <span className="font-mono text-slate-400">Hal. iv</span>
+                  </div>
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/60 font-bold">
+                    <span>Daftar Isi</span>
+                    <span className="font-mono text-slate-400">Hal. v</span>
+                  </div>
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/60">
+                    <span className="font-black text-slate-900">BAB I TINDAK LANJUT REKOMENDASI ASESOR</span>
+                    <span className="font-mono text-slate-400">Hal. 1</span>
+                  </div>
+                  <div className="pl-4 flex items-center justify-between text-slate-600 text-[11px]">
+                    <span>• Tabel 1.1 Tindak Lanjut Rekomendasi Asesor</span>
+                    <span className="font-mono text-slate-400">Hal. 1</span>
+                  </div>
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/60">
+                    <span className="font-black text-slate-900">BAB II KEMAJUAN IMPLEMENTASI STRATEGI</span>
+                    <span className="font-mono text-slate-400">Hal. 2</span>
+                  </div>
+                  <div className="pl-4 flex items-center justify-between text-slate-600 text-[11px]">
+                    <span>• Tabel 2.1 Kemajuan Implementasi Strategi Renstra</span>
+                    <span className="font-mono text-slate-400">Hal. 2</span>
+                  </div>
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/60">
+                    <span className="font-black text-slate-900">BAB III EVALUASI KINERJA PROGRAM STUDI</span>
+                    <span className="font-mono text-slate-400">Hal. 3</span>
+                  </div>
+                  <div className="pl-4 flex items-center justify-between text-slate-600 text-[11px]">
+                    <span>• 3.1 Jaminan Pembelajaran (Tabel 3.1.1 Jaminan Pembelajaran & CQI)</span>
+                    <span className="font-mono text-slate-400">Hal. 3</span>
+                  </div>
+                  <div className="pl-4 flex items-center justify-between text-slate-600 text-[11px]">
+                    <span>• 3.2 Kecukupan dan Kualifikasi Dosen (Tabel 3.2.1, 3.2.3, 3.2.5, 3.2.7)</span>
+                    <span className="font-mono text-slate-400">Hal. 4</span>
+                  </div>
+                  <div className="pl-4 flex items-center justify-between text-slate-600 text-[11px]">
+                    <span>• 3.3 Luaran dan Capaian Tridharma (Tabel 3.3.1-3.3.3, 3.3.5, 3.3.7, 3.3.9)</span>
+                    <span className="font-mono text-slate-400">Hal. 6</span>
+                  </div>
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/60 font-bold">
+                    <span>BAB IV PENUTUP & LEMBAR PENGESAHAN 3 PIHAK</span>
+                    <span className="font-mono text-slate-400">Hal. 8</span>
+                  </div>
+                  <div className="flex items-center justify-between font-bold text-emerald-800">
+                    <span>LAMPIRAN: KOLEKSI ARSIP SURAT REKOMENDASI RESMI LAMEMBA (THN 0 S.D 4)</span>
+                    <span className="font-mono text-slate-400">Hal. 9</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. NARASI PENGANTAR ANTAR-BAB (BAB I, II, III & PENUTUP) */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-base font-black text-slate-900">
+                        Narasi Pengantar Antar-Bab & Penutup
+                      </h4>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Teks narasi deskriptif pengantar sebelum tabel pada Bab I, Bab II, Bab III (Umum, 3.1, 3.2, 3.3) dan Bab IV Penutup
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {isEditingNarasi ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingNarasi(false)}
+                          disabled={isSavingNarasi}
+                          className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all cursor-pointer"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveNarasi}
+                          disabled={isSavingNarasi}
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                        >
+                          {isSavingNarasi ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>Simpan Seluruh Narasi</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleStartEditNarasi}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs transition-all cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Seluruh Narasi</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {narasiFeedback && (
+                  <div
+                    className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                      narasiFeedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {narasiFeedback.type === "success" ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                    <span>{narasiFeedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingNarasi ? (
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+                      <h5 className="font-black text-slate-900 text-xs flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Narasi Pengantar Bab I (Tindak Lanjut Rekomendasi Asesor)
+                      </h5>
+                      <p className="text-xs text-slate-600 leading-relaxed text-justify">
+                        {dl05.narasiBab1 || "(Narasi belum diisi)"}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+                      <h5 className="font-black text-slate-900 text-xs flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-teal-500"></span>
+                        Narasi Pengantar Bab II (Kemajuan Implementasi Strategi Renstra)
+                      </h5>
+                      <p className="text-xs text-slate-600 leading-relaxed text-justify">
+                        {dl05.narasiBab2 || "(Narasi belum diisi)"}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+                      <h5 className="font-black text-slate-900 text-xs flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+                        Narasi Pengantar Bab III (Evaluasi Kinerja Program Studi - Umum)
+                      </h5>
+                      <p className="text-xs text-slate-600 leading-relaxed text-justify">
+                        {dl05.narasiBab3 || "(Narasi belum diisi)"}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="p-3.5 rounded-xl bg-purple-50/40 border border-purple-200 space-y-1">
+                        <h6 className="font-extrabold text-purple-900 text-[11px]">3.1 Jaminan Pembelajaran</h6>
+                        <p className="text-[11px] text-slate-600 line-clamp-4 leading-relaxed">
+                          {dl05.narasiBab31 || "(Narasi belum diisi)"}
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-amber-50/40 border border-amber-200 space-y-1">
+                        <h6 className="font-extrabold text-amber-900 text-[11px]">3.2 Kecukupan & Kualifikasi Dosen</h6>
+                        <p className="text-[11px] text-slate-600 line-clamp-4 leading-relaxed">
+                          {dl05.narasiBab32 || "(Narasi belum diisi)"}
+                        </p>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-cyan-50/40 border border-cyan-200 space-y-1">
+                        <h6 className="font-extrabold text-cyan-900 text-[11px]">3.3 Luaran Tridharma & Kemahasiswaan</h6>
+                        <p className="text-[11px] text-slate-600 line-clamp-4 leading-relaxed">
+                          {dl05.narasiBab33 || "(Narasi belum diisi)"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-200 space-y-1">
+                      <h5 className="font-black text-emerald-950 text-xs flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        Narasi Bab IV Penutup & Komitmen Peningkatan Mutu Berkelanjutan
+                      </h5>
+                      <p className="text-xs text-slate-700 leading-relaxed text-justify">
+                        {dl05.penutup || "(Narasi belum diisi)"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4 pt-1">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-slate-800 block">
+                        Narasi Pengantar Bab I (Tindak Lanjut Rekomendasi Asesor):
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editingNarasiBab1}
+                        onChange={(e) => setEditingNarasiBab1(e.target.value)}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-slate-800 block">
+                        Narasi Pengantar Bab II (Kemajuan Implementasi Strategi Renstra):
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editingNarasiBab2}
+                        onChange={(e) => setEditingNarasiBab2(e.target.value)}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-slate-800 block">
+                        Narasi Pengantar Bab III (Evaluasi Kinerja Program Studi - Umum):
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editingNarasiBab3}
+                        onChange={(e) => setEditingNarasiBab3(e.target.value)}
+                        className="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-black text-purple-900 block">
+                          Narasi Bab 3.1 Jaminan Pembelajaran:
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={editingNarasiBab31}
+                          onChange={(e) => setEditingNarasiBab31(e.target.value)}
+                          className="w-full p-2 border border-purple-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-black text-amber-900 block">
+                          Narasi Bab 3.2 Kecukupan & Kualifikasi Dosen:
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={editingNarasiBab32}
+                          onChange={(e) => setEditingNarasiBab32(e.target.value)}
+                          className="w-full p-2 border border-amber-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-black text-cyan-900 block">
+                          Narasi Bab 3.3 Luaran Tridharma & Kemahasiswaan:
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={editingNarasiBab33}
+                          onChange={(e) => setEditingNarasiBab33(e.target.value)}
+                          className="w-full p-2 border border-cyan-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-emerald-950 block">
+                        Narasi Bab IV Penutup & Komitmen Mutu:
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={editingPenutup}
+                        onChange={(e) => setEditingPenutup(e.target.value)}
+                        className="w-full p-2.5 border border-emerald-300 rounded-xl text-xs bg-white"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 6. KOLEKSI WAJIB: 1 SURAT REKOMENDASI RESMI LAMEMBA PER TAHUN (TAHUN 0 S.D 4) */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
                   <div className="space-y-1">
@@ -2574,67 +6194,7 @@ export default function AccreditationDashboardPage() {
                 </div>
               </div>
 
-              {/* 2. IDENTITAS TIM PENYUSUN EVALUASI DIRI (6 ANGGOTA TASKFORCE RESMI) */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
-                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
-                        <Award className="w-4 h-4" />
-                      </div>
-                      <h4 className="text-base font-black text-slate-900">
-                        Tim Penyusun Evaluasi Diri Pasca-Akreditasi (Taskforce DL-05)
-                      </h4>
-                    </div>
-                    <p className="text-xs text-slate-500">
-                      Daftar 6 personil pimpinan, penjaminan mutu, program studi, dan dosen penyusun borang resmi sesuai template halaman depan LAMEMBA
-                    </p>
-                  </div>
-
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-800 border border-amber-200">
-                    6 Anggota Resmi
-                  </span>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-slate-200 text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-700">
-                        <th className="border border-slate-200 p-3 text-center w-12 font-black">No</th>
-                        <th className="border border-slate-200 p-3 text-left font-black">Nama Lengkap</th>
-                        <th className="border border-slate-200 p-3 text-left font-black">NIDN / NIK</th>
-                        <th className="border border-slate-200 p-3 text-left font-black">Jabatan Struktural</th>
-                        <th className="border border-slate-200 p-3 text-left font-black">Peran dalam Tim Evaluasi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.timPenyusun || []).map((tp, idx) => (
-                        <tr key={idx} className="align-middle hover:bg-slate-50/60 transition-colors">
-                          <td className="border border-slate-200 p-3 text-center font-bold text-slate-500">
-                            {idx + 1}
-                          </td>
-                          <td className="border border-slate-200 p-3 font-bold text-slate-900">
-                            {tp.nama}
-                          </td>
-                          <td className="border border-slate-200 p-3 font-mono text-slate-600">
-                            {tp.nikNidn}
-                          </td>
-                          <td className="border border-slate-200 p-3 text-slate-700">
-                            {tp.jabatan}
-                          </td>
-                          <td className="border border-slate-200 p-3">
-                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-amber-50 text-amber-900 border border-amber-200">
-                              {tp.peran}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* 3. PUSAT AKSI EKSPOR & CETAK BORANG LENGKAP DL-05 */}
+              {/* 7. PUSAT AKSI EKSPOR & CETAK BORANG LENGKAP DL-05 */}
               <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-sky-950 p-6 sm:p-8 rounded-3xl text-white shadow-lg space-y-4 border border-slate-700">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
@@ -2643,7 +6203,7 @@ export default function AccreditationDashboardPage() {
                       <span>Cetak Borang Lengkap DL-05 (1:1 Format Baku LAMEMBA)</span>
                     </h4>
                     <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-                      Pratinjau mencakup seluruh 13 tabel resmi borang (Rekomendasi Asesor, Strategi Renstra, CPL, Dosen, Kontribusi Intelektual, EWMP, Luaran Riset & PkM, Sitasi, Mahasiswa, Rekonsiliasi PD-Dikti) lengkap dengan Tim Penyusun dan lembar pengesahan 3 pihak.
+                      Pratinjau mencakup Halaman Sampul Resmi dengan Logo, Identitas Pengusul, Tim Penyusun, Kata Pengantar, Daftar Isi, Narasi Antar-Bab, seluruh 13 tabel resmi borang (Rekomendasi Asesor, Strategi Renstra, CPL, Dosen, Kontribusi Intelektual, EWMP, Luaran Riset & PkM, Sitasi, Mahasiswa, Rekonsiliasi PD-Dikti) lengkap dengan lembar pengesahan 3 pihak.
                     </p>
                   </div>
 
@@ -2699,430 +6259,899 @@ export default function AccreditationDashboardPage() {
               </div>
 
               {/* Printable Document Body */}
-              <div className="p-8 sm:p-12 overflow-y-auto space-y-10 bg-white text-slate-900 text-xs">
-                {/* Kop Surat Resmi STIMI YAPMI Makassar */}
-                <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
-                  <div className="flex items-center gap-4">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/logo_stimi.png" alt="Logo STIMI" className="w-16 h-16 object-contain" />
-                    <div>
-                      <h2 className="text-base font-black tracking-tight text-slate-950">
-                        SEKOLAH TINGGI ILMU MANAJEMEN INDONESIA
-                      </h2>
-                      <h3 className="text-sm font-black text-sky-800 tracking-tight">
-                        STIMI YAPMI MAKASSAR
-                      </h3>
-                      <p className="text-[10px] text-slate-600 font-medium">
-                        PROGRAM STUDI S1 MANAJEMEN • TERAKREDITASI LAMEMBA
+              <div className="p-8 sm:p-12 overflow-y-auto space-y-12 bg-white text-slate-900 text-xs print:p-0 print:space-y-8">
+                {/* Embedded Print CSS for true 1:1 page breaks and layout */}
+                <style dangerouslySetInnerHTML={{ __html: `
+                  @media print {
+                    @page {
+                      size: A4 portrait;
+                      margin: 20mm 20mm 20mm 20mm;
+                    }
+                    body {
+                      -webkit-print-color-adjust: exact;
+                      print-color-adjust: exact;
+                    }
+                    .page-break {
+                      page-break-after: always;
+                      break-after: page;
+                    }
+                  }
+                `}} />
+
+                {/* ========================================================
+                    HALAMAN 1: SAMPUL DEPAN (HALAMAN MUKA) SESUAI TEMPLATE WORD
+                    ======================================================== */}
+                <div className="border-4 border-double border-slate-900 p-8 sm:p-12 min-h-[820px] flex flex-col justify-between items-center text-center page-break bg-white shadow-xs">
+                  {/* Bagian Atas Sampul */}
+                  <div className="space-y-3 max-w-xl">
+                    <p className="text-[11px] font-mono tracking-widest text-slate-500 uppercase">
+                      LAMPIRAN DL-05 • INSTRUMEN RESMI LAMEMBA
+                    </p>
+                    <h2 className="text-base sm:text-lg font-black uppercase text-slate-950 tracking-tight leading-snug">
+                      DOKUMEN PEMANTAUAN DAN EVALUASI TAHUN KE-{selectedDl05Year}
+                      <br />
+                      AKREDITASI PROGRAM STUDI
+                    </h2>
+                  </div>
+
+                  {/* Lambang Perguruan Tinggi (Logo Resmi) */}
+                  <div className="my-8 flex flex-col items-center space-y-3">
+                    <div className="w-36 h-36 rounded-2xl p-2 flex items-center justify-center bg-white border border-slate-200 shadow-xs">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={dl05.identitasPengusul?.logoUrl || "/logo_stimi.png"}
+                        alt="Lambang Perguruan Tinggi"
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400 tracking-wider uppercase">
+                      LAMBANG PERGURUAN TINGGI
+                    </span>
+                  </div>
+
+                  {/* Bagian Bawah Sampul */}
+                  <div className="space-y-4 max-w-xl">
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        PROGRAM STUDI:
                       </p>
-                      <p className="text-[9px] text-slate-400">
-                        Jl. Perintis Kemerdekaan KM. 9, Tamalanrea, Kota Makassar, Sulawesi Selatan
+                      <h3 className="text-base sm:text-lg font-black uppercase text-slate-950 tracking-tight">
+                        {dl05.identitasPengusul?.namaProdi || dl05.prodiName}
+                      </h3>
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        PERGURUAN TINGGI:
+                      </p>
+                      <h4 className="text-sm sm:text-base font-black uppercase text-slate-900 tracking-tight">
+                        {dl05.identitasPengusul?.perguruanTinggi || "SEKOLAH TINGGI ILMU MANAJEMEN INDONESIA (STIMI) YAPMI MAKASSAR"}
+                      </h4>
+                      <p className="text-xs font-semibold uppercase text-slate-600">
+                        {dl05.identitasPengusul?.unitPengelola || "JURUSAN MANAJEMEN"}
+                      </p>
+                    </div>
+
+                    <div className="pt-6 border-t-2 border-slate-900/80 space-y-1">
+                      <p className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-950">
+                        {dl05.identitasPengusul?.kota || "MAKASSAR"}
+                      </p>
+                      <p className="text-xs font-black text-slate-800">
+                        TAHUN {dl05.identitasPengusul?.tahunDokumen || "2025"}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right text-[10px] text-slate-500 font-bold">
-                    <span>KODE DOKUMEN:</span>
-                    <br />
-                    <span className="text-emerald-700 font-black">LAMEMBA-DL-05</span>
-                    <br />
-                    <span className="text-[9px] text-slate-400">Peraturan No. 2 Thn 2025</span>
+                </div>
+
+                {/* ========================================================
+                    HALAMAN 2: IDENTITAS PENGUSUL
+                    ======================================================== */}
+                <div className="space-y-6 pt-4 page-break">
+                  <div className="text-center space-y-1 pb-3 border-b-2 border-slate-900">
+                    <h3 className="text-sm font-black uppercase text-slate-950 tracking-wider">
+                      IDENTITAS PENGUSUL
+                    </h3>
+                    <p className="text-[11px] text-slate-600 font-semibold">
+                      Dokumen Pemantauan dan Evaluasi Akreditasi Program Studi (LAMEMBA-DL-05)
+                    </p>
                   </div>
+
+                  <table className="w-full border-collapse border border-slate-300 text-[11px]">
+                    <tbody>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 w-1/3 bg-slate-50">1. Perguruan Tinggi</td>
+                        <td className="p-2.5 font-black text-slate-950">{dl05.identitasPengusul?.perguruanTinggi || "Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">2. Unit Pengelola Program Studi</td>
+                        <td className="p-2.5 text-slate-900 font-semibold">{dl05.identitasPengusul?.unitPengelola || "Jurusan Manajemen / Sekolah Tinggi Ilmu Manajemen Indonesia"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">3. Jenis Program</td>
+                        <td className="p-2.5 text-slate-900">{dl05.identitasPengusul?.jenisProgram || "Sarjana (S1)"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">4. Nama Program Studi</td>
+                        <td className="p-2.5 font-black text-slate-950">{dl05.identitasPengusul?.namaProdi || "Program Studi Sarjana Manajemen"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">5. Alamat Kampus</td>
+                        <td className="p-2.5 text-slate-900">{dl05.identitasPengusul?.alamat || "Jl. Perintis Kemerdekaan KM. 9, Tamalanrea, Kota Makassar, Sulawesi Selatan"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">6. Nomor Telepon</td>
+                        <td className="p-2.5 font-mono text-slate-900">{dl05.identitasPengusul?.telepon || "0411-588123"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">7. E-mail dan Website</td>
+                        <td className="p-2.5 font-mono text-slate-900">{dl05.identitasPengusul?.emailWeb || "info@stimiyapmi.ac.id / www.stimiyapmi.ac.id"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">8. Nomor SK Pendirian PT</td>
+                        <td className="p-2.5 font-mono text-slate-900">{dl05.identitasPengusul?.nomorSkPendirianPt || "SK Mendikbud RI No. 042/D/O/1997"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">9. Tanggal SK Pendirian PT</td>
+                        <td className="p-2.5 text-slate-900">{dl05.identitasPengusul?.tanggalSkPendirianPt || "1997-07-25"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">10. Pejabat Penandatangan SK Pendirian PT</td>
+                        <td className="p-2.5 text-slate-900">{dl05.identitasPengusul?.pejabatSkPendirianPt || "Menteri Pendidikan dan Kebudayaan RI"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">11. Nomor SK Pembukaan PS</td>
+                        <td className="p-2.5 font-mono text-slate-900">{dl05.identitasPengusul?.nomorSkPembukaanPs || "SK Dirjen Dikti No. 219/DIKTI/Kep/1999"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">12. Tanggal SK Pembukaan PS</td>
+                        <td className="p-2.5 text-slate-900">{dl05.identitasPengusul?.tanggalSkPembukaanPs || "1999-05-18"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">13. Pejabat Penandatangan SK Pembukaan PS</td>
+                        <td className="p-2.5 text-slate-900">{dl05.identitasPengusul?.pejabatSkPembukaanPs || "Direktur Jenderal Pendidikan Tinggi"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">14. Tahun Pertama Kali Menerima Mahasiswa</td>
+                        <td className="p-2.5 font-black text-slate-950">{dl05.identitasPengusul?.tahunPertamaMenerimaMhs || "1998"}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">15. Peringkat Terbaru Akreditasi PS</td>
+                        <td className="p-2.5 text-slate-950 font-black">
+                          <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-300 text-xs font-black">
+                            {dl05.identitasPengusul?.peringkatAkreditasiTerbaru || "Baik Sekali"}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border-r border-slate-300 p-2.5 font-bold text-slate-700 bg-slate-50">16. Nomor SK LAMEMBA & Masa Berlaku</td>
+                        <td className="p-2.5 text-slate-900 font-mono text-[11px]">
+                          <strong>{dl05.identitasPengusul?.nomorSkLam || "SK LAMEMBA No. 933/DE/A.5/AR.10/XII/2023"}</strong> (Berlaku s.d {dl05.identitasPengusul?.tanggalKadaluarsa || "2028-12-28"})
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
-                {/* Judul Laporan */}
-                <div className="text-center space-y-1">
-                  <h3 className="text-sm font-black uppercase text-slate-950 underline underline-offset-4">
-                    DOKUMEN PEMANTAUAN DAN EVALUASI TAHUN KE-{selectedDl05Year} AKREDITASI PROGRAM STUDI (DL-05)
-                  </h3>
-                  <p className="text-xs text-slate-600 font-bold">
-                    PROGRAM STUDI SARJANA MANAJEMEN • TAHUN AKADEMIK {dl05.academicYear}
-                  </p>
-                </div>
+                {/* ========================================================
+                    HALAMAN 3: IDENTITAS TIM PENYUSUN DOKUMEN EVALUASI DIRI
+                    ======================================================== */}
+                <div className="space-y-6 pt-4 page-break">
+                  <div className="text-center space-y-1 pb-3 border-b-2 border-slate-900">
+                    <h3 className="text-sm font-black uppercase text-slate-950 tracking-wider">
+                      IDENTITAS TIM PENYUSUN DOKUMEN EVALUASI DIRI
+                    </h3>
+                    <p className="text-[11px] text-slate-600 font-semibold">
+                      Tim Taskforce Pemantauan dan Evaluasi Akreditasi Program Studi (DL-05)
+                    </p>
+                  </div>
 
-                {/* 1. Tim Penyusun Evaluasi Diri (Halaman Muka Word) */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-black text-slate-900 uppercase">
-                    1. Identitas Tim Penyusun Evaluasi Diri Pasca-Akreditasi
-                  </h4>
                   <table className="w-full border-collapse border border-slate-300 text-[11px]">
                     <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-2 text-center w-8">No</th>
-                        <th className="border border-slate-300 p-2 text-left">Nama Lengkap</th>
-                        <th className="border border-slate-300 p-2 text-left">NIDN / NIK</th>
-                        <th className="border border-slate-300 p-2 text-left">Jabatan Struktural</th>
-                        <th className="border border-slate-300 p-2 text-left">Peran dalam Tim</th>
+                      <tr className="bg-slate-100 text-slate-800">
+                        <th className="border border-slate-300 p-2.5 text-center w-8">No</th>
+                        <th className="border border-slate-300 p-2.5 text-left">Nama Lengkap</th>
+                        <th className="border border-slate-300 p-2.5 text-left">NIK / NIDN</th>
+                        <th className="border border-slate-300 p-2.5 text-left">Jabatan Struktural</th>
+                        <th className="border border-slate-300 p-2.5 text-left">Peran dalam Tim</th>
+                        <th className="border border-slate-300 p-2.5 text-center w-28">Tanda Tangan</th>
                       </tr>
                     </thead>
                     <tbody>
                       {(dl05.timPenyusun || []).map((tp, idx) => (
                         <tr key={idx} className="align-middle">
-                          <td className="border border-slate-300 p-2 text-center">{idx + 1}</td>
-                          <td className="border border-slate-300 p-2 font-bold">{tp.nama}</td>
-                          <td className="border border-slate-300 p-2 font-mono text-[10px]">{tp.nikNidn}</td>
-                          <td className="border border-slate-300 p-2">{tp.jabatan}</td>
-                          <td className="border border-slate-300 p-2 font-medium">{tp.peran}</td>
+                          <td className="border border-slate-300 p-2.5 text-center font-bold text-slate-500">{idx + 1}</td>
+                          <td className="border border-slate-300 p-2.5 font-bold text-slate-950">{tp.nama}</td>
+                          <td className="border border-slate-300 p-2.5 font-mono text-[10px] text-slate-700">{tp.nikNidn}</td>
+                          <td className="border border-slate-300 p-2.5 text-slate-800">{tp.jabatan}</td>
+                          <td className="border border-slate-300 p-2.5 font-semibold text-slate-900">{tp.peran}</td>
+                          <td className="border border-slate-300 p-2.5 text-center h-12">
+                            <span className="text-[9px] text-slate-300 block border-b border-dotted border-slate-400 mt-6 mx-2"></span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
 
-                {/* 2. Arsip Surat Rekomendasi Resmi LAM */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-black text-slate-900 uppercase">
-                    2. Arsip Surat Rekomendasi Resmi Dewan Eksekutif LAMEMBA (Tahun 0 s.d 4)
-                  </h4>
+                {/* ========================================================
+                    HALAMAN 4: KATA PENGANTAR
+                    ======================================================== */}
+                <div className="space-y-6 pt-4 page-break">
+                  <div className="text-center space-y-1 pb-3 border-b-2 border-slate-900">
+                    <h3 className="text-sm font-black uppercase text-slate-950 tracking-wider">
+                      KATA PENGANTAR
+                    </h3>
+                  </div>
+
+                  <div className="text-justify leading-relaxed space-y-4 text-xs text-slate-800 whitespace-pre-line px-2">
+                    {dl05.kataPengantar || "(Kata Pengantar belum diisi)"}
+                  </div>
+
+                  <div className="pt-8 flex justify-end">
+                    <div className="text-center space-y-16 w-64 text-xs">
+                      <p>
+                        {dl05.identitasPengusul?.kota || "Makassar"},{" "}
+                        {new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                        <br />
+                        <strong>Ketua Tim Taskforce DL-05,</strong>
+                      </p>
+                      <div>
+                        <p className="font-black underline underline-offset-4">
+                          {(dl05.timPenyusun && dl05.timPenyusun[0]?.nama) || "Drs. H. M. Said, M.Si"}
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-mono">
+                          {(dl05.timPenyusun && dl05.timPenyusun[0]?.nikNidn) || "NIDN. 0918077501"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ========================================================
+                    HALAMAN 5: DAFTAR ISI
+                    ======================================================== */}
+                <div className="space-y-6 pt-4 page-break">
+                  <div className="text-center space-y-1 pb-3 border-b-2 border-slate-900">
+                    <h3 className="text-sm font-black uppercase text-slate-950 tracking-wider">
+                      DAFTAR ISI
+                    </h3>
+                  </div>
+
+                  <div className="space-y-2 text-xs text-slate-900 px-2">
+                    <div className="flex items-end justify-between font-bold">
+                      <span>HALAMAN MUKA (SAMPUL DEPAN)</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">i</span>
+                    </div>
+                    <div className="flex items-end justify-between font-bold">
+                      <span>IDENTITAS PENGUSUL</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">ii</span>
+                    </div>
+                    <div className="flex items-end justify-between font-bold">
+                      <span>IDENTITAS TIM PENYUSUN DOKUMEN EVALUASI DIRI</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">iii</span>
+                    </div>
+                    <div className="flex items-end justify-between font-bold">
+                      <span>KATA PENGANTAR</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">iv</span>
+                    </div>
+                    <div className="flex items-end justify-between font-bold">
+                      <span>DAFTAR ISI</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">v</span>
+                    </div>
+
+                    <div className="pt-3 flex items-end justify-between font-black text-slate-950">
+                      <span>BAB I TINDAK LANJUT REKOMENDASI ASESOR</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">1</span>
+                    </div>
+                    <div className="pl-4 flex items-end justify-between text-slate-700">
+                      <span>Tabel 1.1 Tindak Lanjut Rekomendasi Asesor</span>
+                      <span className="flex-1 border-b border-dotted border-slate-300 mx-2 mb-1"></span>
+                      <span className="font-mono">1</span>
+                    </div>
+
+                    <div className="pt-3 flex items-end justify-between font-black text-slate-950">
+                      <span>BAB II KEMAJUAN IMPLEMENTASI STRATEGI</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">2</span>
+                    </div>
+                    <div className="pl-4 flex items-end justify-between text-slate-700">
+                      <span>Tabel 2.1 Kemajuan Implementasi Strategi</span>
+                      <span className="flex-1 border-b border-dotted border-slate-300 mx-2 mb-1"></span>
+                      <span className="font-mono">2</span>
+                    </div>
+
+                    <div className="pt-3 flex items-end justify-between font-black text-slate-950">
+                      <span>BAB III EVALUASI KINERJA PROGRAM STUDI</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">3</span>
+                    </div>
+                    <div className="pl-4 flex items-end justify-between font-bold text-slate-800">
+                      <span>3.1 Jaminan Pembelajaran</span>
+                      <span className="flex-1 border-b border-dotted border-slate-300 mx-2 mb-1"></span>
+                      <span className="font-mono">3</span>
+                    </div>
+                    <div className="pl-8 flex items-end justify-between text-slate-600 text-[11px]">
+                      <span>Tabel 3.1.1 Jaminan Pembelajaran</span>
+                      <span className="flex-1 border-b border-dotted border-slate-200 mx-2 mb-1"></span>
+                      <span className="font-mono">3</span>
+                    </div>
+
+                    <div className="pl-4 flex items-end justify-between font-bold text-slate-800">
+                      <span>3.2 Kecukupan Dan Kualifikasi Dosen</span>
+                      <span className="flex-1 border-b border-dotted border-slate-300 mx-2 mb-1"></span>
+                      <span className="font-mono">4</span>
+                    </div>
+                    <div className="pl-8 flex items-end justify-between text-slate-600 text-[11px]">
+                      <span>Tabel 3.2.1 Profil Dosen Berdasarkan Status Kepegawaian</span>
+                      <span className="flex-1 border-b border-dotted border-slate-200 mx-2 mb-1"></span>
+                      <span className="font-mono">4</span>
+                    </div>
+                    <div className="pl-8 flex items-end justify-between text-slate-600 text-[11px]">
+                      <span>Tabel 3.2.3 Latar Belakang Keahlian Dosen & BNSP</span>
+                      <span className="flex-1 border-b border-dotted border-slate-200 mx-2 mb-1"></span>
+                      <span className="font-mono">4</span>
+                    </div>
+                    <div className="pl-8 flex items-end justify-between text-slate-600 text-[11px]">
+                      <span>Tabel 3.2.5 Kontribusi Intelektual Dosen (4 Bidang Rekognisi)</span>
+                      <span className="flex-1 border-b border-dotted border-slate-200 mx-2 mb-1"></span>
+                      <span className="font-mono">5</span>
+                    </div>
+                    <div className="pl-8 flex items-end justify-between text-slate-600 text-[11px]">
+                      <span>Tabel 3.2.7 Beban Kerja Dosen (EWMP SKS)</span>
+                      <span className="flex-1 border-b border-dotted border-slate-200 mx-2 mb-1"></span>
+                      <span className="font-mono">5</span>
+                    </div>
+
+                    <div className="pl-4 flex items-end justify-between font-bold text-slate-800">
+                      <span>3.3 Luaran Dan Capaian Tridharma</span>
+                      <span className="flex-1 border-b border-dotted border-slate-300 mx-2 mb-1"></span>
+                      <span className="font-mono">6</span>
+                    </div>
+                    <div className="pl-8 flex items-end justify-between text-slate-600 text-[11px]">
+                      <span>Tabel 3.3.1 s.d 3.3.3 Luaran Penelitian dan PkM Dosen</span>
+                      <span className="flex-1 border-b border-dotted border-slate-200 mx-2 mb-1"></span>
+                      <span className="font-mono">6</span>
+                    </div>
+                    <div className="pl-8 flex items-end justify-between text-slate-600 text-[11px]">
+                      <span>Tabel 3.3.5 Sitasi Dosen</span>
+                      <span className="flex-1 border-b border-dotted border-slate-200 mx-2 mb-1"></span>
+                      <span className="font-mono">6</span>
+                    </div>
+                    <div className="pl-8 flex items-end justify-between text-slate-600 text-[11px]">
+                      <span>Tabel 3.3.7 Luaran yang Dihasilkan Mahasiswa</span>
+                      <span className="flex-1 border-b border-dotted border-slate-200 mx-2 mb-1"></span>
+                      <span className="font-mono">7</span>
+                    </div>
+                    <div className="pl-8 flex items-end justify-between text-slate-600 text-[11px]">
+                      <span>Tabel 3.3.9 Jumlah Mahasiswa Aktif & Rekonsiliasi PD-Dikti</span>
+                      <span className="flex-1 border-b border-dotted border-slate-200 mx-2 mb-1"></span>
+                      <span className="font-mono">7</span>
+                    </div>
+
+                    <div className="pt-3 flex items-end justify-between font-black text-slate-950">
+                      <span>BAB IV PENUTUP & LEMBAR PENGESAHAN 3 PIHAK</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">8</span>
+                    </div>
+
+                    <div className="pt-1 flex items-end justify-between font-black text-emerald-900">
+                      <span>LAMPIRAN: KOLEKSI ARSIP SURAT REKOMENDASI RESMI LAMEMBA (THN 0 S.D 4)</span>
+                      <span className="flex-1 border-b border-dotted border-slate-400 mx-2 mb-1"></span>
+                      <span className="font-mono">9</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ========================================================
+                    BAB I: TINDAK LANJUT REKOMENDASI ASESOR
+                    ======================================================== */}
+                <div className="space-y-4 pt-4 page-break">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-black uppercase text-slate-950 tracking-wider">
+                      BAB I TINDAK LANJUT REKOMENDASI ASESOR
+                    </h3>
+                    <p className="text-justify leading-relaxed text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                      {dl05.narasiBab1 || "Bagian ini memuat penjelasan program studi atas tindak lanjut rekomendasi untuk perbaikan berkelanjutan yang telah disampaikan asesor saat asesmen lapangan, hambatan yang dihadapi, serta solusi dan hasil yang diperoleh."}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-black text-slate-900">
+                      Tabel 1.1 Tindak Lanjut Rekomendasi Asesor
+                    </h4>
+                    <table className="w-full border-collapse border border-slate-300 text-[10px]">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-2 text-center w-8">No</th>
+                          <th className="border border-slate-300 p-2 text-left w-1/4">Rekomendasi Asesor</th>
+                          <th className="border border-slate-300 p-2 text-left">Usaha Dilakukan</th>
+                          <th className="border border-slate-300 p-2 text-left">Hambatan</th>
+                          <th className="border border-slate-300 p-2 text-left">Tindakan CQI</th>
+                          <th className="border border-slate-300 p-2 text-left">Hasil Dicapai</th>
+                          <th className="border border-slate-300 p-2 text-center w-16">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.assessorFollowUpsList || []).map((item) => (
+                          <tr key={item.recommendationNo} className="align-top">
+                            <td className="border border-slate-300 p-1.5 text-center font-bold">{item.recommendationNo}</td>
+                            <td className="border border-slate-300 p-1.5 font-bold">{item.recommendation}</td>
+                            <td className="border border-slate-300 p-1.5">{item.actionTaken}</td>
+                            <td className="border border-slate-300 p-1.5">{item.obstacle || "-"}</td>
+                            <td className="border border-slate-300 p-1.5">{item.cqiSolution || "-"}</td>
+                            <td className="border border-slate-300 p-1.5 font-semibold text-emerald-900">{item.achievement}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-bold">{item.status}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* ========================================================
+                    BAB II: KEMAJUAN IMPLEMENTASI STRATEGI
+                    ======================================================== */}
+                <div className="space-y-4 pt-4 page-break">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-black uppercase text-slate-950 tracking-wider">
+                      BAB II KEMAJUAN IMPLEMENTASI STRATEGI
+                    </h3>
+                    <p className="text-justify leading-relaxed text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                      {dl05.narasiBab2 || "Bagian ini memuat penjelasan program studi tentang capaian implementasi strategi yang tercantum pada Rencana Strategis atau dokumen strategis lainnya, termasuk hambatan dan solusi yang telah dilakukan untuk mencapai visi, misi, tujuan dan strategi."}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-black text-slate-900">
+                      Tabel 2.1 Kemajuan Implementasi Strategi
+                    </h4>
+                    <table className="w-full border-collapse border border-slate-300 text-[10px]">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-2 text-center w-8">No</th>
+                          <th className="border border-slate-300 p-2 text-left w-1/4">Sasaran Strategis & Target Renstra</th>
+                          <th className="border border-slate-300 p-2 text-left">Implementasi / Usaha Dilakukan</th>
+                          <th className="border border-slate-300 p-2 text-left">Hambatan</th>
+                          <th className="border border-slate-300 p-2 text-left">Tindakan CQI</th>
+                          <th className="border border-slate-300 p-2 text-left">Hasil Dicapai</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.renstraProgressList || []).map((item, idx) => (
+                          <tr key={idx} className="align-top">
+                            <td className="border border-slate-300 p-1.5 text-center font-bold">{idx + 1}</td>
+                            <td className="border border-slate-300 p-1.5 font-bold">{item.strategy}</td>
+                            <td className="border border-slate-300 p-1.5">{item.actionTaken}</td>
+                            <td className="border border-slate-300 p-1.5">{item.obstacle || "-"}</td>
+                            <td className="border border-slate-300 p-1.5">{item.cqiSolution || "-"}</td>
+                            <td className="border border-slate-300 p-1.5 font-semibold text-emerald-900">{item.achievement}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* ========================================================
+                    BAB III: EVALUASI KINERJA PROGRAM STUDI
+                    ======================================================== */}
+                <div className="space-y-6 pt-4 page-break">
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-black uppercase text-slate-950 tracking-wider">
+                      BAB III EVALUASI KINERJA PROGRAM STUDI
+                    </h3>
+                    <p className="text-justify leading-relaxed text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                      {dl05.narasiBab3 || "Bagian ini memuat evaluasi pelaksanaan upaya perbaikan berkelanjutan baik perkembangan atau kemajuan yang terjadi pada program studi setiap tahunnya dari 3 (tiga) indikator: (1) Jaminan Pembelajaran, (2) Kecukupan dan Kualifikasi Dosen, dan (3) Luaran dan Capaian Tridharma."}
+                    </p>
+                  </div>
+
+                  {/* 3.1 Jaminan Pembelajaran */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black text-slate-900 uppercase">
+                      3.1 Jaminan Pembelajaran
+                    </h4>
+                    <p className="text-justify leading-relaxed text-slate-700 text-[11px]">
+                      {dl05.narasiBab31 || "Program studi menunjukkan perbaikan-perbaikan yang dilakukan terhadap pencapaian CPL mahasiswa berdasarkan kriteria enam butir 1-4."}
+                    </p>
+
+                    <h5 className="text-[11px] font-bold text-slate-900">
+                      Tabel 3.1.1 Jaminan Pembelajaran
+                    </h5>
+                    <table className="w-full border-collapse border border-slate-300 text-[11px]">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-2 text-center w-8">No</th>
+                          <th className="border border-slate-300 p-2 text-left w-1/3">Indikator Jaminan Pembelajaran</th>
+                          <th className="border border-slate-300 p-2 text-left">Upaya yang Dilakukan (Tahun Ke-{selectedDl05Year})</th>
+                          <th className="border border-slate-300 p-2 text-left">Hasil yang Dicapai (Tahun Ke-{selectedDl05Year})</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.learningAssuranceItems || []).map((item) => (
+                          <tr key={item.nomor} className="align-top">
+                            <td className="border border-slate-300 p-2 text-center font-bold">{item.nomor}</td>
+                            <td className="border border-slate-300 p-2">{item.indikator}</td>
+                            <td className="border border-slate-300 p-2">
+                              {selectedDl05Year === 1 ? item.upayaTahun1 : selectedDl05Year === 2 ? item.upayaTahun2 : selectedDl05Year === 3 ? item.upayaTahun3 : item.upayaTahun4 || "-"}
+                            </td>
+                            <td className="border border-slate-300 p-2 font-semibold">
+                              {selectedDl05Year === 1 ? item.hasilTahun1 : selectedDl05Year === 2 ? item.hasilTahun2 : selectedDl05Year === 3 ? item.hasilTahun3 : item.hasilTahun4 || "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {dl05.perbaikanBerkelanjutanJaminanPembelajaran && (
+                      <p className="text-[10px] text-slate-600 italic pt-1 border-l-2 border-purple-500 pl-2">
+                        <strong>Catatan CQI Jaminan Pembelajaran:</strong> {dl05.perbaikanBerkelanjutanJaminanPembelajaran}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 3.2 Kecukupan Dan Kualifikasi Dosen */}
+                  <div className="space-y-3 pt-4">
+                    <h4 className="text-xs font-black text-slate-900 uppercase">
+                      3.2 Kecukupan Dan Kualifikasi Dosen
+                    </h4>
+                    <p className="text-justify leading-relaxed text-slate-700 text-[11px]">
+                      {dl05.narasiBab32 || "Bagian ini melampirkan pembaharuan data dosen tetap dengan menggunakan data yang berasal dari Dokumen Kinerja Program Studi (DKPS) terakhir dan data PD-Dikti."}
+                    </p>
+
+                    {/* Tabel 3.2.1 Status Kepegawaian */}
+                    <h5 className="text-[11px] font-bold text-slate-900">
+                      Tabel 3.2.1 Profil Dosen Berdasarkan Status Kepegawaian
+                    </h5>
+                    <table className="w-full border-collapse border border-slate-300 text-[10px]">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-1.5 text-left">Nama Dosen</th>
+                          <th className="border border-slate-300 p-1.5 text-center">Status</th>
+                          <th className="border border-slate-300 p-1.5 text-center">NIDN</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Jabatan</th>
+                          <th className="border border-slate-300 p-1.5 text-center">Jalur</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Perusahaan Asal</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.dosenProfiles || []).map((d, idx) => (
+                          <tr key={idx} className="align-middle">
+                            <td className="border border-slate-300 p-1.5 font-bold">{d.name}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{d.status}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-mono">{d.nidn}</td>
+                            <td className="border border-slate-300 p-1.5">{d.jabatanAkademik}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{d.jalur}</td>
+                            <td className="border border-slate-300 p-1.5">{d.namaPerusahaan || "-"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Tabel 3.2.3 Latar Belakang Keahlian & BNSP */}
+                    <h5 className="text-[11px] font-bold text-slate-900 pt-2">
+                      Tabel 3.2.3 Latar Belakang Keahlian Dosen & BNSP
+                    </h5>
+                    <table className="w-full border-collapse border border-slate-300 text-[10px]">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-1.5 text-left">Nama Dosen</th>
+                          <th className="border border-slate-300 p-1.5 text-left">S2 (Magister)</th>
+                          <th className="border border-slate-300 p-1.5 text-left">S3 (Doktor)</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Bidang Keahlian</th>
+                          <th className="border border-slate-300 p-1.5 text-center">Serdos</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Sertifikat Profesi BNSP</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.dosenExpertise || []).map((exp, idx) => (
+                          <tr key={idx} className="align-middle">
+                            <td className="border border-slate-300 p-1.5 font-bold">{exp.name}</td>
+                            <td className="border border-slate-300 p-1.5">{exp.magister}</td>
+                            <td className="border border-slate-300 p-1.5">{exp.doktor || "-"}</td>
+                            <td className="border border-slate-300 p-1.5">{exp.bidangKeahlian}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-mono">{exp.serdos || "-"}</td>
+                            <td className="border border-slate-300 p-1.5 font-semibold text-emerald-900">{exp.sertifikatProfesi || "-"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Tabel 3.2.7 EWMP */}
+                    <h5 className="text-[11px] font-bold text-slate-900 pt-2">
+                      Tabel 3.2.7 Beban Kerja Dosen (EWMP SKS)
+                    </h5>
+                    <table className="w-full border-collapse border border-slate-300 text-[10px] text-center">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-1.5 text-left">Nama Dosen</th>
+                          <th className="border border-slate-300 p-1.5">PS Sendiri</th>
+                          <th className="border border-slate-300 p-1.5">PS Lain PT</th>
+                          <th className="border border-slate-300 p-1.5">Luar PT</th>
+                          <th className="border border-slate-300 p-1.5">Riset</th>
+                          <th className="border border-slate-300 p-1.5">PkM</th>
+                          <th className="border border-slate-300 p-1.5">Tugas Tambahan</th>
+                          <th className="border border-slate-300 p-1.5 font-bold bg-slate-200">Total SKS</th>
+                          <th className="border border-slate-300 p-1.5">Kepatuhan SN-Dikti</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.ewmpList || []).map((ewmp, idx) => (
+                          <tr key={idx}>
+                            <td className="border border-slate-300 p-1.5 text-left font-bold">{ewmp.name}</td>
+                            <td className="border border-slate-300 p-1.5">{ewmp.psAkreditasiSks}</td>
+                            <td className="border border-slate-300 p-1.5">{ewmp.psLainDalamPtSks}</td>
+                            <td className="border border-slate-300 p-1.5">{ewmp.psLainLuarPtSks}</td>
+                            <td className="border border-slate-300 p-1.5">{ewmp.penelitianSks}</td>
+                            <td className="border border-slate-300 p-1.5">{ewmp.pkmSks}</td>
+                            <td className="border border-slate-300 p-1.5">{ewmp.tugasTambahanSks}</td>
+                            <td className="border border-slate-300 p-1.5 font-bold bg-slate-100">{ewmp.totalSks} SKS</td>
+                            <td className="border border-slate-300 p-1.5 font-bold">
+                              {ewmp.totalSks >= 12 && ewmp.totalSks <= 16 ? "MEMENUHI (12-16 SKS)" : "PENYESUAIAN"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {dl05.perbaikanBerkelanjutanDosen && (
+                      <p className="text-[10px] text-slate-600 italic pt-1 border-l-2 border-amber-500 pl-2">
+                        <strong>Catatan CQI Dosen:</strong> {dl05.perbaikanBerkelanjutanDosen}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 3.3 Luaran Dan Capaian Tridharma */}
+                  <div className="space-y-3 pt-4">
+                    <h4 className="text-xs font-black text-slate-900 uppercase">
+                      3.3 Luaran Dan Capaian Tridharma
+                    </h4>
+                    <p className="text-justify leading-relaxed text-slate-700 text-[11px]">
+                      {dl05.narasiBab33 || "Bagian ini memuat pembaruan produktivitas tridharma dosen dan mahasiswa yang mencakup luaran riset dan PkM, sitasi karya ilmiah, prestasi mahasiswa, dan rekonsiliasi data mahasiswa aktif terhadap feeder PD-Dikti."}
+                    </p>
+
+                    {/* Tabel 3.3.1 Luaran Riset & PkM */}
+                    <h5 className="text-[11px] font-bold text-slate-900">
+                      Tabel 3.3.1 s.d 3.3.3 Luaran Penelitian dan PkM Dosen
+                    </h5>
+                    <table className="w-full border-collapse border border-slate-300 text-[10px]">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-1.5 text-center w-8">No</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Judul Luaran Riset / PkM</th>
+                          <th className="border border-slate-300 p-1.5 text-center w-12">Tahun</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Jenis Luaran</th>
+                          <th className="border border-slate-300 p-1.5 text-center">Sumber Biaya</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.researchOutcomes || []).map((res, idx) => (
+                          <tr key={idx}>
+                            <td className="border border-slate-300 p-1.5 text-center">{idx + 1}</td>
+                            <td className="border border-slate-300 p-1.5 font-bold">{res.judul}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-mono">{res.tahun}</td>
+                            <td className="border border-slate-300 p-1.5">{res.jenisLuaran}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-semibold">
+                              {res.sumberBiayaPtMandiri ? "PT / Mandiri" : res.sumberBiayaLuarPt ? "Luar PT / DRTPM" : "Luar Negeri"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Tabel 3.3.5 Sitasi Dosen */}
+                    <h5 className="text-[11px] font-bold text-slate-900 pt-2">
+                      Tabel 3.3.5 Sitasi Dosen
+                    </h5>
+                    <table className="w-full border-collapse border border-slate-300 text-[10px]">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-1.5 text-left">Judul Artikel Disitasi</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Penulis</th>
+                          <th className="border border-slate-300 p-1.5 text-center">TS-2</th>
+                          <th className="border border-slate-300 p-1.5 text-center">TS-1</th>
+                          <th className="border border-slate-300 p-1.5 text-center">TS</th>
+                          <th className="border border-slate-300 p-1.5 text-center font-bold bg-slate-200">Total Sitasi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.citationsList || []).map((cite, idx) => (
+                          <tr key={idx}>
+                            <td className="border border-slate-300 p-1.5 font-bold">{cite.judulArtikel}</td>
+                            <td className="border border-slate-300 p-1.5">{cite.penulis}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-mono">{cite.sitasiTs2}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-mono">{cite.sitasiTs1}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-mono">{cite.sitasiTs}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-bold bg-slate-100">
+                              {(cite.sitasiTs2 || 0) + (cite.sitasiTs1 || 0) + (cite.sitasiTs || 0)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Tabel 3.3.7 Luaran Mahasiswa */}
+                    <h5 className="text-[11px] font-bold text-slate-900 pt-2">
+                      Tabel 3.3.7 Luaran yang Dihasilkan Mahasiswa
+                    </h5>
+                    <table className="w-full border-collapse border border-slate-300 text-[10px]">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-1.5 text-center w-8">No</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Judul Luaran / Prestasi Mahasiswa</th>
+                          <th className="border border-slate-300 p-1.5 text-center w-12">Tahun</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Nama Mahasiswa</th>
+                          <th className="border border-slate-300 p-1.5 text-left">Jenis Luaran</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.studentOutcomes || []).map((so, idx) => (
+                          <tr key={idx}>
+                            <td className="border border-slate-300 p-1.5 text-center">{idx + 1}</td>
+                            <td className="border border-slate-300 p-1.5 font-bold">{so.judulLuaran}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-mono">{so.tahun}</td>
+                            <td className="border border-slate-300 p-1.5">{so.namaMahasiswa}</td>
+                            <td className="border border-slate-300 p-1.5">{so.jenisLuaran}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Tabel 3.3.9 Rekonsiliasi PD-Dikti */}
+                    <h5 className="text-[11px] font-bold text-slate-900 pt-2">
+                      Tabel 3.3.9 Jumlah Mahasiswa Aktif & Rekonsiliasi PD-Dikti
+                    </h5>
+                    <table className="w-full border-collapse border border-slate-300 text-[11px] text-center">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800">
+                          <th className="border border-slate-300 p-2 text-left">Semester</th>
+                          <th className="border border-slate-300 p-2">Mhs Aktif Kampus</th>
+                          <th className="border border-slate-300 p-2">Terdaftar PD-Dikti</th>
+                          <th className="border border-slate-300 p-2">Selisih</th>
+                          <th className="border border-slate-300 p-2">Validitas Data Feeder</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.mahasiswaAktifList || []).map((m, idx) => (
+                          <tr key={idx}>
+                            <td className="border border-slate-300 p-2 text-left font-bold">Semester {m.semester}</td>
+                            <td className="border border-slate-300 p-2">{m.mhsAktif} Orang</td>
+                            <td className="border border-slate-300 p-2">{m.mhsPdDikti} Orang</td>
+                            <td className="border border-slate-300 p-2 font-bold font-mono">{m.selisih}</td>
+                            <td className="border border-slate-300 p-2 font-bold">
+                              {m.selisih === 0 ? "100% SINKRON (VALID)" : "ADA SELISIH DATA"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {(dl05.perbaikanBerkelanjutanTridharma || dl05.perbaikanBerkelanjutanKemahasiswaan) && (
+                      <div className="space-y-1 pt-1">
+                        {dl05.perbaikanBerkelanjutanTridharma && (
+                          <p className="text-[10px] text-slate-600 italic border-l-2 border-sky-500 pl-2">
+                            <strong>Catatan CQI Tridharma:</strong> {dl05.perbaikanBerkelanjutanTridharma}
+                          </p>
+                        )}
+                        {dl05.perbaikanBerkelanjutanKemahasiswaan && (
+                          <p className="text-[10px] text-slate-600 italic border-l-2 border-cyan-500 pl-2">
+                            <strong>Catatan CQI Kemahasiswaan:</strong> {dl05.perbaikanBerkelanjutanKemahasiswaan}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ========================================================
+                    BAB IV: PENUTUP DAN LEMBAR PENGESAHAN 3 PIHAK
+                    ======================================================== */}
+                <div className="space-y-6 pt-4 page-break">
+                  <div className="space-y-1 pb-3 border-b-2 border-slate-900">
+                    <h3 className="text-sm font-black uppercase text-slate-950 tracking-wider">
+                      BAB IV PENUTUP DAN KOMITMEN MUTU
+                    </h3>
+                  </div>
+
+                  <div className="text-justify leading-relaxed space-y-4 text-xs text-slate-800 whitespace-pre-line px-2">
+                    {dl05.penutup || "Dokumen Pemantauan dan Evaluasi Tahunan Akreditasi Program Studi (Lampiran DL-05) ini merefleksikan transparansi dan komitmen terpadu seluruh sivitas akademika dalam menjaga mutu tridharma perguruan tinggi."}
+                  </div>
+
+                  {/* Lembar Pengesahan 3 Pihak Resmi */}
+                  <div className="pt-8 space-y-6">
+                    <p className="text-center font-bold text-xs uppercase tracking-wider text-slate-900">
+                      LEMBAR PENGESAHAN EVALUASI DIRI TAHUNAN AKREDITASI (DL-05)
+                    </p>
+
+                    <div className="grid grid-cols-3 gap-4 pt-4 text-center text-[11px]">
+                      <div className="space-y-16">
+                        <p>
+                          Disusun oleh,
+                          <br />
+                          <strong>Ketua Program Studi S1 Manajemen</strong>
+                        </p>
+                        <div>
+                          <p className="font-black underline underline-offset-4">
+                            {(dl05.timPenyusun && dl05.timPenyusun[0]?.nama) || "Drs. H. M. Said, M.Si"}
+                          </p>
+                          <p className="text-[9px] text-slate-500 font-mono">
+                            {(dl05.timPenyusun && dl05.timPenyusun[0]?.nikNidn) || "NIDN. 0918077501"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-16">
+                        <p>
+                          Diverifikasi oleh,
+                          <br />
+                          <strong>Ketua Lembaga Penjaminan Mutu</strong>
+                        </p>
+                        <div>
+                          <p className="font-black underline underline-offset-4">Dr. Nurul Fadilah, SE., MM</p>
+                          <p className="text-[9px] text-slate-500 font-mono">NIDN. 0915088201</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-16">
+                        <p>
+                          Mengetahui & Menyetujui,
+                          <br />
+                          <strong>Ketua STIMI YAPMI Makassar</strong>
+                        </p>
+                        <div>
+                          <p className="font-black underline underline-offset-4">Dr. Ibrahim Syah, S.E., M.M.</p>
+                          <p className="text-[9px] text-slate-500 font-mono">NIDN. 0920037601</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ========================================================
+                    LAMPIRAN: REKAP ARSIP SURAT REKOMENDASI RESMI LAMEMBA
+                    ======================================================== */}
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-1 pb-3 border-b-2 border-slate-900">
+                    <h3 className="text-sm font-black uppercase text-slate-950 tracking-wider">
+                      LAMPIRAN: ARSIP SURAT REKOMENDASI RESMI DEWAN EKSEKUTIF LAMEMBA
+                    </h3>
+                    <p className="text-[11px] text-slate-600 font-semibold">
+                      Koleksi Wajib 1 Surat Rekomendasi/Keputusan Resmi per Tahun (Tahun 0 s.d 4)
+                    </p>
+                  </div>
+
                   <table className="w-full border-collapse border border-slate-300 text-[11px]">
                     <thead>
-                      <tr className="bg-slate-100 text-slate-700">
+                      <tr className="bg-slate-100 text-slate-800">
                         <th className="border border-slate-300 p-2 text-center w-8">No</th>
                         <th className="border border-slate-300 p-2 text-left">Siklus Pemantauan</th>
                         <th className="border border-slate-300 p-2 text-left">Nomor Surat / Keputusan Resmi</th>
                         <th className="border border-slate-300 p-2 text-center w-28">Tanggal Surat</th>
-                        <th className="border border-slate-300 p-2 text-center w-24">Status Berkas</th>
+                        <th className="border border-slate-300 p-2 text-center w-28">Status Berkas Fisik</th>
                       </tr>
                     </thead>
                     <tbody>
                       {(dl05.annualLetters || []).map((letter, idx) => (
                         <tr key={idx} className="align-middle">
-                          <td className="border border-slate-300 p-2 text-center">{idx + 1}</td>
-                          <td className="border border-slate-300 p-2 font-bold">{letter.yearLabel}</td>
-                          <td className="border border-slate-300 p-2 font-mono">{letter.letterNumber || "-"}</td>
-                          <td className="border border-slate-300 p-2 text-center">
+                          <td className="border border-slate-300 p-2 text-center font-bold text-slate-500">{idx + 1}</td>
+                          <td className="border border-slate-300 p-2 font-bold text-slate-900">{letter.yearLabel}</td>
+                          <td className="border border-slate-300 p-2 font-mono text-slate-700">{letter.letterNumber || "-"}</td>
+                          <td className="border border-slate-300 p-2 text-center text-slate-600">
                             {letter.letterDate ? new Date(letter.letterDate).toLocaleDateString("id-ID") : "-"}
                           </td>
                           <td className="border border-slate-300 p-2 text-center font-bold">
-                            {letter.fileUrl ? "TERUNGGAH" : "BELUM ADA"}
+                            {letter.fileUrl ? (
+                              <span className="text-emerald-700">🟢 TERUNGGAH (SAH)</span>
+                            ) : (
+                              <span className="text-rose-600">🔴 BELUM ADA</span>
+                            )}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                </div>
-
-                {/* 3. Bab I Tindak Lanjut Rekomendasi Asesor (Tabel 1.1) */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-black text-slate-900 uppercase">
-                    3. Bab I: Tindak Lanjut Rekomendasi Asesor (Tabel 1.1)
-                  </h4>
-                  <table className="w-full border-collapse border border-slate-300 text-[10px]">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-2 text-center w-8">No</th>
-                        <th className="border border-slate-300 p-2 text-left w-1/4">Rekomendasi Asesor</th>
-                        <th className="border border-slate-300 p-2 text-left">Usaha Dilakukan</th>
-                        <th className="border border-slate-300 p-2 text-left">Hambatan</th>
-                        <th className="border border-slate-300 p-2 text-left">Tindakan CQI</th>
-                        <th className="border border-slate-300 p-2 text-left">Hasil Dicapai</th>
-                        <th className="border border-slate-300 p-2 text-center w-16">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.assessorFollowUpsList || []).map((item) => (
-                        <tr key={item.recommendationNo} className="align-top">
-                          <td className="border border-slate-300 p-1.5 text-center font-bold">{item.recommendationNo}</td>
-                          <td className="border border-slate-300 p-1.5 font-bold">{item.recommendation}</td>
-                          <td className="border border-slate-300 p-1.5">{item.actionTaken}</td>
-                          <td className="border border-slate-300 p-1.5">{item.obstacle || "-"}</td>
-                          <td className="border border-slate-300 p-1.5">{item.cqiSolution || "-"}</td>
-                          <td className="border border-slate-300 p-1.5 font-semibold text-emerald-900">{item.achievement}</td>
-                          <td className="border border-slate-300 p-1.5 text-center font-bold">{item.status}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* 4. Bab II Kemajuan Implementasi Strategi Renstra (Tabel 2.1) */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-black text-slate-900 uppercase">
-                    4. Bab II: Kemajuan Implementasi Strategi Renstra UPPS (Tabel 2.1)
-                  </h4>
-                  <table className="w-full border-collapse border border-slate-300 text-[10px]">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-2 text-center w-8">No</th>
-                        <th className="border border-slate-300 p-2 text-left w-1/4">Sasaran Strategis & Target Renstra</th>
-                        <th className="border border-slate-300 p-2 text-left">Implementasi / Usaha Dilakukan</th>
-                        <th className="border border-slate-300 p-2 text-left">Hambatan</th>
-                        <th className="border border-slate-300 p-2 text-left">Tindakan CQI</th>
-                        <th className="border border-slate-300 p-2 text-left">Hasil Dicapai</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.renstraProgressList || []).map((item, idx) => (
-                        <tr key={idx} className="align-top">
-                          <td className="border border-slate-300 p-1.5 text-center font-bold">{idx + 1}</td>
-                          <td className="border border-slate-300 p-1.5 font-bold">{item.strategy}</td>
-                          <td className="border border-slate-300 p-1.5">{item.actionTaken}</td>
-                          <td className="border border-slate-300 p-1.5">{item.obstacle || "-"}</td>
-                          <td className="border border-slate-300 p-1.5">{item.cqiSolution || "-"}</td>
-                          <td className="border border-slate-300 p-1.5 font-semibold text-emerald-900">{item.achievement}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* 5. Bab III.1 Jaminan Pembelajaran (Tabel 3.1.1) */}
-                <div className="space-y-2">
-                  <h4 className="text-xs font-black text-slate-900 uppercase">
-                    5. Bab III.1: Jaminan Pembelajaran (Tabel 3.1.1)
-                  </h4>
-                  <table className="w-full border-collapse border border-slate-300 text-[11px]">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-2 text-center w-8">No</th>
-                        <th className="border border-slate-300 p-2 text-left w-1/3">Indikator Jaminan Pembelajaran</th>
-                        <th className="border border-slate-300 p-2 text-left">Upaya yang Dilakukan (Tahun Ke-{selectedDl05Year})</th>
-                        <th className="border border-slate-300 p-2 text-left">Hasil yang Dicapai (Tahun Ke-{selectedDl05Year})</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.learningAssuranceItems || []).map((item) => (
-                        <tr key={item.nomor} className="align-top">
-                          <td className="border border-slate-300 p-2 text-center font-bold">{item.nomor}</td>
-                          <td className="border border-slate-300 p-2">{item.indikator}</td>
-                          <td className="border border-slate-300 p-2">
-                            {selectedDl05Year === 1 ? item.upayaTahun1 : selectedDl05Year === 2 ? item.upayaTahun2 : selectedDl05Year === 3 ? item.upayaTahun3 : item.upayaTahun4 || "-"}
-                          </td>
-                          <td className="border border-slate-300 p-2 font-semibold">
-                            {selectedDl05Year === 1 ? item.hasilTahun1 : selectedDl05Year === 2 ? item.hasilTahun2 : selectedDl05Year === 3 ? item.hasilTahun3 : item.hasilTahun4 || "-"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {dl05.perbaikanBerkelanjutanJaminanPembelajaran && (
-                    <p className="text-[10px] text-slate-600 italic pt-1">
-                      Catatan CQI Pembelajaran: {dl05.perbaikanBerkelanjutanJaminanPembelajaran}
-                    </p>
-                  )}
-                </div>
-
-                {/* 6. Bab III.2 Profil Dosen, Keahlian & EWMP */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-black text-slate-900 uppercase">
-                    6. Bab III.2: Profil Dosen, Latar Belakang Keahlian, Kontribusi & EWMP
-                  </h4>
-                  
-                  {/* Tabel 3.2.1 Status Kepegawaian */}
-                  <table className="w-full border-collapse border border-slate-300 text-[10px]">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-1.5 text-left">Nama Dosen</th>
-                        <th className="border border-slate-300 p-1.5 text-center">Status</th>
-                        <th className="border border-slate-300 p-1.5 text-center">NIDN</th>
-                        <th className="border border-slate-300 p-1.5 text-left">Jabatan</th>
-                        <th className="border border-slate-300 p-1.5 text-center">Jalur</th>
-                        <th className="border border-slate-300 p-1.5 text-left">Perusahaan Asal</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.dosenProfiles || []).map((d, idx) => (
-                        <tr key={idx} className="align-middle">
-                          <td className="border border-slate-300 p-1.5 font-bold">{d.name}</td>
-                          <td className="border border-slate-300 p-1.5 text-center">{d.status}</td>
-                          <td className="border border-slate-300 p-1.5 text-center font-mono">{d.nidn}</td>
-                          <td className="border border-slate-300 p-1.5">{d.jabatanAkademik}</td>
-                          <td className="border border-slate-300 p-1.5 text-center">{d.jalur}</td>
-                          <td className="border border-slate-300 p-1.5">{d.namaPerusahaan || "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {/* Tabel 3.2.3 Latar Belakang Keahlian & BNSP */}
-                  <table className="w-full border-collapse border border-slate-300 text-[10px]">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-1.5 text-left">Nama Dosen</th>
-                        <th className="border border-slate-300 p-1.5 text-left">S2 (Magister)</th>
-                        <th className="border border-slate-300 p-1.5 text-left">S3 (Doktor)</th>
-                        <th className="border border-slate-300 p-1.5 text-left">Bidang Keahlian</th>
-                        <th className="border border-slate-300 p-1.5 text-center">Serdos</th>
-                        <th className="border border-slate-300 p-1.5 text-left">Sertifikat Profesi BNSP</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.dosenExpertise || []).map((exp, idx) => (
-                        <tr key={idx} className="align-middle">
-                          <td className="border border-slate-300 p-1.5 font-bold">{exp.name}</td>
-                          <td className="border border-slate-300 p-1.5">{exp.magister}</td>
-                          <td className="border border-slate-300 p-1.5">{exp.doktor || "-"}</td>
-                          <td className="border border-slate-300 p-1.5">{exp.bidangKeahlian}</td>
-                          <td className="border border-slate-300 p-1.5 text-center font-mono">{exp.serdos || "-"}</td>
-                          <td className="border border-slate-300 p-1.5 font-semibold text-emerald-900">{exp.sertifikatProfesi || "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {/* Tabel 3.2.7 EWMP */}
-                  <table className="w-full border-collapse border border-slate-300 text-[10px] text-center">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-1.5 text-left">Nama Dosen</th>
-                        <th className="border border-slate-300 p-1.5">PS Sendiri</th>
-                        <th className="border border-slate-300 p-1.5">PS Lain PT</th>
-                        <th className="border border-slate-300 p-1.5">Luar PT</th>
-                        <th className="border border-slate-300 p-1.5">Riset</th>
-                        <th className="border border-slate-300 p-1.5">PkM</th>
-                        <th className="border border-slate-300 p-1.5">Tugas Tambahan</th>
-                        <th className="border border-slate-300 p-1.5 font-bold bg-slate-200">Total SKS</th>
-                        <th className="border border-slate-300 p-1.5">Kepatuhan SN-Dikti</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.ewmpList || []).map((ewmp, idx) => (
-                        <tr key={idx}>
-                          <td className="border border-slate-300 p-1.5 text-left font-bold">{ewmp.name}</td>
-                          <td className="border border-slate-300 p-1.5">{ewmp.psAkreditasiSks}</td>
-                          <td className="border border-slate-300 p-1.5">{ewmp.psLainDalamPtSks}</td>
-                          <td className="border border-slate-300 p-1.5">{ewmp.psLainLuarPtSks}</td>
-                          <td className="border border-slate-300 p-1.5">{ewmp.penelitianSks}</td>
-                          <td className="border border-slate-300 p-1.5">{ewmp.pkmSks}</td>
-                          <td className="border border-slate-300 p-1.5">{ewmp.tugasTambahanSks}</td>
-                          <td className="border border-slate-300 p-1.5 font-bold bg-slate-100">{ewmp.totalSks} SKS</td>
-                          <td className="border border-slate-300 p-1.5 font-bold">
-                            {ewmp.totalSks >= 12 && ewmp.totalSks <= 16 ? "MEMENUHI (12-16 SKS)" : "PENYESUAIAN"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {dl05.perbaikanBerkelanjutanDosen && (
-                    <p className="text-[10px] text-slate-600 italic pt-1">
-                      Catatan CQI Dosen: {dl05.perbaikanBerkelanjutanDosen}
-                    </p>
-                  )}
-                </div>
-
-                {/* 7. Bab III.3 Luaran Tridharma, Riset, Sitasi & Rekonsiliasi PD-Dikti */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-black text-slate-900 uppercase">
-                    7. Bab III.3: Luaran Tridharma, Riset, Sitasi, Mahasiswa & Rekonsiliasi PD-Dikti
-                  </h4>
-
-                  {/* Tabel 3.3.1 Luaran Riset & PkM */}
-                  <table className="w-full border-collapse border border-slate-300 text-[10px]">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-1.5 text-center w-8">No</th>
-                        <th className="border border-slate-300 p-1.5 text-left">Judul Luaran Riset / PkM</th>
-                        <th className="border border-slate-300 p-1.5 text-center w-12">Tahun</th>
-                        <th className="border border-slate-300 p-1.5 text-left">Jenis Luaran</th>
-                        <th className="border border-slate-300 p-1.5 text-center">Sumber Biaya</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.researchOutcomes || []).map((res, idx) => (
-                        <tr key={idx}>
-                          <td className="border border-slate-300 p-1.5 text-center">{idx + 1}</td>
-                          <td className="border border-slate-300 p-1.5 font-bold">{res.judul}</td>
-                          <td className="border border-slate-300 p-1.5 text-center font-mono">{res.tahun}</td>
-                          <td className="border border-slate-300 p-1.5">{res.jenisLuaran}</td>
-                          <td className="border border-slate-300 p-1.5 text-center font-semibold">
-                            {res.sumberBiayaPtMandiri ? "PT / Mandiri" : res.sumberBiayaLuarPt ? "Luar PT / DRTPM" : "Luar Negeri"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {/* Tabel 3.3.5 Sitasi Dosen */}
-                  <table className="w-full border-collapse border border-slate-300 text-[10px]">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-1.5 text-left">Judul Artikel Disitasi</th>
-                        <th className="border border-slate-300 p-1.5 text-left">Penulis</th>
-                        <th className="border border-slate-300 p-1.5 text-center">TS-2</th>
-                        <th className="border border-slate-300 p-1.5 text-center">TS-1</th>
-                        <th className="border border-slate-300 p-1.5 text-center">TS</th>
-                        <th className="border border-slate-300 p-1.5 text-center font-bold bg-slate-200">Total Sitasi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.citationsList || []).map((cite, idx) => (
-                        <tr key={idx}>
-                          <td className="border border-slate-300 p-1.5 font-bold">{cite.judulArtikel}</td>
-                          <td className="border border-slate-300 p-1.5">{cite.penulis}</td>
-                          <td className="border border-slate-300 p-1.5 text-center font-mono">{cite.sitasiTs2}</td>
-                          <td className="border border-slate-300 p-1.5 text-center font-mono">{cite.sitasiTs1}</td>
-                          <td className="border border-slate-300 p-1.5 text-center font-mono">{cite.sitasiTs}</td>
-                          <td className="border border-slate-300 p-1.5 text-center font-bold bg-slate-100">
-                            {(cite.sitasiTs2 || 0) + (cite.sitasiTs1 || 0) + (cite.sitasiTs || 0)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {/* Tabel 3.3.9 Rekonsiliasi PD-Dikti */}
-                  <table className="w-full border-collapse border border-slate-300 text-[11px] text-center">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-700">
-                        <th className="border border-slate-300 p-2 text-left">Semester</th>
-                        <th className="border border-slate-300 p-2">Mhs Aktif Kampus</th>
-                        <th className="border border-slate-300 p-2">Terdaftar PD-Dikti</th>
-                        <th className="border border-slate-300 p-2">Selisih</th>
-                        <th className="border border-slate-300 p-2">Validitas Data Feeder</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.mahasiswaAktifList || []).map((m, idx) => (
-                        <tr key={idx}>
-                          <td className="border border-slate-300 p-2 text-left font-bold">Semester {m.semester}</td>
-                          <td className="border border-slate-300 p-2">{m.mhsAktif} Orang</td>
-                          <td className="border border-slate-300 p-2">{m.mhsPdDikti} Orang</td>
-                          <td className="border border-slate-300 p-2 font-bold font-mono">{m.selisih}</td>
-                          <td className="border border-slate-300 p-2 font-bold">
-                            {m.selisih === 0 ? "100% SINKRON (VALID)" : "ADA SELISIH DATA"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Kolom Tanda Tangan Pengesahan 3 Pihak */}
-                <div className="grid grid-cols-3 gap-4 pt-10 text-center text-[11px]">
-                  <div className="space-y-16">
-                    <p>
-                      Disusun oleh,
-                      <br />
-                      <strong>Ketua Program Studi S1 Manajemen</strong>
-                    </p>
-                    <div>
-                      <p className="font-black underline underline-offset-4">Drs. H. M. Said, M.Si</p>
-                      <p className="text-[9px] text-slate-500">NIDN. 0918077501</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-16">
-                    <p>
-                      Diverifikasi oleh,
-                      <br />
-                      <strong>Ketua Lembaga Penjaminan Mutu</strong>
-                    </p>
-                    <div>
-                      <p className="font-black underline underline-offset-4">Dr. Nurul Fadilah, SE., MM</p>
-                      <p className="text-[9px] text-slate-500">NIDN. 0915088201</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-16">
-                    <p>
-                      Mengetahui & Menyetujui,
-                      <br />
-                      <strong>Ketua STIMI YAPMI Makassar</strong>
-                    </p>
-                    <div>
-                      <p className="font-black underline underline-offset-4">Dr. Ibrahim Syah, S.E., M.M.</p>
-                      <p className="text-[9px] text-slate-500">NIDN. 0920037601</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </motion.div>

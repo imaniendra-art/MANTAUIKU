@@ -178,6 +178,30 @@ export interface ILamembaDl05StudentOutcomeItem {
   isChange: boolean;
 }
 
+// Identitas Pengusul Dokumen (Sesuai Halaman Depan LAMEMBA)
+export interface ILamembaDl05IdentitasPengusul {
+  perguruanTinggi?: string;
+  unitPengelola?: string;
+  jenisProgram?: string;
+  namaProdi?: string;
+  alamat?: string;
+  telepon?: string;
+  emailWeb?: string;
+  nomorSkPendirianPt?: string;
+  tanggalSkPendirianPt?: string;
+  pejabatSkPendirianPt?: string;
+  nomorSkPembukaanPs?: string;
+  tanggalSkPembukaanPs?: string;
+  pejabatSkPembukaanPs?: string;
+  tahunPertamaMenerimaMhs?: string;
+  peringkatAkreditasiTerbaru?: string;
+  nomorSkLam?: string;
+  tanggalKadaluarsa?: string;
+  kota?: string;
+  tahunDokumen?: string;
+  logoUrl?: string;
+}
+
 // Tim Penyusun Evaluasi Diri (6 Orang)
 export interface ILamembaDl05TimPenyusunItem {
   nama: string;
@@ -218,8 +242,17 @@ export interface ILamembaDl05 extends Document {
   perbaikanBerkelanjutanTridharma?: string;
   perbaikanBerkelanjutanKemahasiswaan?: string;
 
-  // Sub-Tab 4: Tim Penyusun (6 Orang)
+  // Sub-Tab 4: Sampul, Identitas, Kata Pengantar, Narasi & Penutup
+  identitasPengusul?: ILamembaDl05IdentitasPengusul;
   timPenyusun: ILamembaDl05TimPenyusunItem[];
+  kataPengantar?: string;
+  narasiBab1?: string;
+  narasiBab2?: string;
+  narasiBab3?: string;
+  narasiBab31?: string;
+  narasiBab32?: string;
+  narasiBab33?: string;
+  penutup?: string;
 
   // Legacy fallback fields for backward compatibility
   assessorFollowUps: Array<{
@@ -474,7 +507,29 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
     perbaikanBerkelanjutanTridharma: { type: String, default: '' },
     perbaikanBerkelanjutanKemahasiswaan: { type: String, default: '' },
 
-    // Sub-Tab 4: Tim Penyusun (6 Orang)
+    // Sub-Tab 4: Sampul, Identitas, Kata Pengantar, Narasi & Penutup
+    identitasPengusul: {
+      perguruanTinggi: { type: String, default: 'Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar' },
+      unitPengelola: { type: String, default: 'Jurusan Manajemen / Sekolah Tinggi Ilmu Manajemen Indonesia' },
+      jenisProgram: { type: String, default: 'Sarjana (S1)' },
+      namaProdi: { type: String, default: 'Program Studi Sarjana Manajemen' },
+      alamat: { type: String, default: 'Jl. Perintis Kemerdekaan KM. 9, Tamalanrea, Kota Makassar, Sulawesi Selatan' },
+      telepon: { type: String, default: '0411-588123' },
+      emailWeb: { type: String, default: 'info@stimiyapmi.ac.id / www.stimiyapmi.ac.id' },
+      nomorSkPendirianPt: { type: String, default: 'SK Mendikbud RI No. 042/D/O/1997' },
+      tanggalSkPendirianPt: { type: String, default: '1997-07-25' },
+      pejabatSkPendirianPt: { type: String, default: 'Menteri Pendidikan dan Kebudayaan RI' },
+      nomorSkPembukaanPs: { type: String, default: 'SK Dirjen Dikti No. 219/DIKTI/Kep/1999' },
+      tanggalSkPembukaanPs: { type: String, default: '1999-05-18' },
+      pejabatSkPembukaanPs: { type: String, default: 'Direktur Jenderal Pendidikan Tinggi' },
+      tahunPertamaMenerimaMhs: { type: String, default: '1998' },
+      peringkatAkreditasiTerbaru: { type: String, default: 'Baik Sekali' },
+      nomorSkLam: { type: String, default: 'SK LAMEMBA No. 933/DE/A.5/AR.10/XII/2023' },
+      tanggalKadaluarsa: { type: String, default: '2028-12-28' },
+      kota: { type: String, default: 'Makassar' },
+      tahunDokumen: { type: String, default: '2025' },
+      logoUrl: { type: String, default: '/logo_stimi.png' },
+    },
     timPenyusun: [
       {
         nama: { type: String, required: true },
@@ -483,6 +538,14 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
         peran: { type: String, default: '' },
       },
     ],
+    kataPengantar: { type: String, default: '' },
+    narasiBab1: { type: String, default: '' },
+    narasiBab2: { type: String, default: '' },
+    narasiBab3: { type: String, default: '' },
+    narasiBab31: { type: String, default: '' },
+    narasiBab32: { type: String, default: '' },
+    narasiBab33: { type: String, default: '' },
+    penutup: { type: String, default: '' },
 
     // Legacy fields
     assessorFollowUps: [
