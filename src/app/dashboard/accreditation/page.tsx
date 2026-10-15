@@ -28,6 +28,9 @@ import {
   Check,
   AlertTriangle,
   Layers,
+  Edit3,
+  Save,
+  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Iapt41DashboardWidget, { IIapt41Summary } from "@/components/dashboard/Iapt41DashboardWidget";
@@ -314,6 +317,18 @@ export default function AccreditationDashboardPage() {
   const [isUploadingLetter, setIsUploadingLetter] = useState(false);
   const [letterModalMessage, setLetterModalMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  // Sub-Tab 1: Edit State for Tabel 1.1 (Tindak Lanjut Rekomendasi Asesor)
+  const [isEditingTable1, setIsEditingTable1] = useState(false);
+  const [editingAssessorList, setEditingAssessorList] = useState<ILamembaDl05AssessorFollowUp[]>([]);
+  const [isSavingTable1, setIsSavingTable1] = useState(false);
+  const [table1Feedback, setTable1Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 1: Edit State for Tabel 2.1 (Kemajuan Implementasi Renstra)
+  const [isEditingTable2, setIsEditingTable2] = useState(false);
+  const [editingRenstraList, setEditingRenstraList] = useState<ILamembaDl05RenstraItem[]>([]);
+  const [isSavingTable2, setIsSavingTable2] = useState(false);
+  const [table2Feedback, setTable2Feedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   // Modals
   const [isPrintDl05ModalOpen, setIsPrintDl05ModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
@@ -590,6 +605,177 @@ export default function AccreditationDashboardPage() {
     } catch (err) {
       console.error("Gagal menghapus surat rekomendasi:", err);
       alert("Gagal menghapus surat rekomendasi.");
+    }
+  };
+
+  // Sub-Tab 1: Handlers for Tabel 1.1 (Tindak Lanjut Rekomendasi Asesor)
+  const handleStartEditTable1 = () => {
+    const initialList = (dl05?.assessorFollowUpsList && dl05.assessorFollowUpsList.length > 0)
+      ? JSON.parse(JSON.stringify(dl05.assessorFollowUpsList))
+      : [
+          {
+            recommendationNo: 1,
+            recommendation: "",
+            yearIndex: 1,
+            actionTaken: "",
+            obstacle: "",
+            cqiSolution: "",
+            achievement: "",
+            status: "SEDANG_BERJALAN" as const,
+            evidenceUrl: "",
+          }
+        ];
+    setEditingAssessorList(initialList);
+    setIsEditingTable1(true);
+    setTable1Feedback(null);
+  };
+
+  const handleCancelEditTable1 = () => {
+    setIsEditingTable1(false);
+    setTable1Feedback(null);
+  };
+
+  const handleAddRowTable1 = () => {
+    setEditingAssessorList(prev => [
+      ...prev,
+      {
+        recommendationNo: prev.length + 1,
+        recommendation: "",
+        yearIndex: 1,
+        actionTaken: "",
+        obstacle: "",
+        cqiSolution: "",
+        achievement: "",
+        status: "SEDANG_BERJALAN" as const,
+        evidenceUrl: "",
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable1 = (idx: number) => {
+    setEditingAssessorList(prev => {
+      const updated = prev.filter((_, i) => i !== idx);
+      return updated.map((item, i) => ({ ...item, recommendationNo: i + 1 }));
+    });
+  };
+
+  const handleUpdateRowTable1 = (idx: number, field: keyof ILamembaDl05AssessorFollowUp, value: any) => {
+    setEditingAssessorList(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveTable1 = async () => {
+    if (!dl05) return;
+    setIsSavingTable1(true);
+    setTable1Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          assessorFollowUpsList: editingAssessorList,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable1Feedback({ type: "success", text: "Perubahan data Tabel 1.1 Tindak Lanjut Rekomendasi Asesor berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable1(false);
+          setTable1Feedback(null);
+        }, 1200);
+      } else {
+        setTable1Feedback({ type: "error", text: data.error || "Gagal menyimpan perubahan Tabel 1.1." });
+      }
+    } catch {
+      setTable1Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 1.1." });
+    } finally {
+      setIsSavingTable1(false);
+    }
+  };
+
+  // Sub-Tab 1: Handlers for Tabel 2.1 (Kemajuan Implementasi Renstra)
+  const handleStartEditTable2 = () => {
+    const initialList = (dl05?.renstraProgressList && dl05.renstraProgressList.length > 0)
+      ? JSON.parse(JSON.stringify(dl05.renstraProgressList))
+      : [
+          {
+            yearIndex: 1,
+            strategy: "",
+            actionTaken: "",
+            obstacle: "",
+            cqiSolution: "",
+            achievement: "",
+          }
+        ];
+    setEditingRenstraList(initialList);
+    setIsEditingTable2(true);
+    setTable2Feedback(null);
+  };
+
+  const handleCancelEditTable2 = () => {
+    setIsEditingTable2(false);
+    setTable2Feedback(null);
+  };
+
+  const handleAddRowTable2 = () => {
+    setEditingRenstraList(prev => [
+      ...prev,
+      {
+        yearIndex: 1,
+        strategy: "",
+        actionTaken: "",
+        obstacle: "",
+        cqiSolution: "",
+        achievement: "",
+      }
+    ]);
+  };
+
+  const handleRemoveRowTable2 = (idx: number) => {
+    setEditingRenstraList(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateRowTable2 = (idx: number, field: keyof ILamembaDl05RenstraItem, value: any) => {
+    setEditingRenstraList(prev => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: value };
+      return updated;
+    });
+  };
+
+  const handleSaveTable2 = async () => {
+    if (!dl05) return;
+    setIsSavingTable2(true);
+    setTable2Feedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          renstraProgressList: editingRenstraList,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTable2Feedback({ type: "success", text: "Perubahan data Tabel 2.1 Kemajuan Strategi Renstra berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingTable2(false);
+          setTable2Feedback(null);
+        }, 1200);
+      } else {
+        setTable2Feedback({ type: "error", text: data.error || "Gagal menyimpan perubahan Tabel 2.1." });
+      }
+    } catch {
+      setTable2Feedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan Tabel 2.1." });
+    } finally {
+      setIsSavingTable2(false);
     }
   };
 
@@ -964,7 +1150,7 @@ export default function AccreditationDashboardPage() {
             <div className="space-y-8">
               {/* BAB I: TINDAK LANJUT REKOMENDASI ASESOR (TABEL 1.1) */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
-                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
@@ -979,92 +1165,287 @@ export default function AccreditationDashboardPage() {
                     </p>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200">
-                    Tabel 1.1 Standar LAMEMBA
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      Tabel 1.1 Standar LAMEMBA
+                    </span>
+                    {!isEditingTable1 ? (
+                      <button
+                        onClick={handleStartEditTable1}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 1.1</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable1}
+                          disabled={isSavingTable1}
+                          className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable1}
+                          disabled={isSavingTable1}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable1 ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Save className="w-3.5 h-3.5" />
+                          )}
+                          <span>{isSavingTable1 ? "Menyimpan..." : "Simpan Perubahan"}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-slate-200 text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-700">
-                        <th className="border border-slate-200 p-3 text-center w-12 font-black">No</th>
-                        <th className="border border-slate-200 p-3 text-left w-1/4 font-black">
-                          Rekomendasi Asesor (Asesmen Lapangan Terakhir)
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black">
-                          Usaha yang Dilakukan
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black bg-amber-50/50 text-amber-950">
-                          Hambatan yang Dihadapi
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black bg-sky-50/50 text-sky-950">
-                          Tindakan CQI untuk Mengatasi Hambatan
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black text-emerald-950">
-                          Hasil yang Dicapai
-                        </th>
-                        <th className="border border-slate-200 p-3 text-center w-24 font-black">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.assessorFollowUpsList || []).length > 0 ? (
-                        dl05.assessorFollowUpsList!.map((item) => (
-                          <tr key={item.recommendationNo} className="align-top hover:bg-slate-50/60 transition-colors">
-                            <td className="border border-slate-200 p-3 text-center font-bold text-slate-500">
-                              {item.recommendationNo}
-                            </td>
-                            <td className="border border-slate-200 p-3 font-bold text-slate-900 leading-relaxed">
-                              {item.recommendation}
-                            </td>
-                            <td className="border border-slate-200 p-3 text-slate-700 leading-relaxed">
-                              {item.actionTaken}
-                            </td>
-                            <td className="border border-slate-200 p-3 text-amber-900 bg-amber-50/20 leading-relaxed">
-                              {item.obstacle || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-3 text-sky-900 bg-sky-50/20 leading-relaxed">
-                              {item.cqiSolution || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-3 font-semibold text-emerald-900 leading-relaxed">
-                              {item.achievement}
-                            </td>
-                            <td className="border border-slate-200 p-3 text-center">
-                              <span
-                                className={`px-2 py-1 rounded-full text-[10px] font-black inline-block whitespace-nowrap ${
-                                  item.status === "SELESAI"
-                                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                {table1Feedback && (
+                  <div
+                    className={`p-3.5 rounded-2xl text-xs flex items-center gap-2.5 ${
+                      table1Feedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {table1Feedback.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{table1Feedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingTable1 ? (
+                  /* VIEW MODE TABEL 1.1 */
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-slate-200 text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 text-slate-700">
+                          <th className="border border-slate-200 p-3 text-center w-12 font-black">No</th>
+                          <th className="border border-slate-200 p-3 text-left w-1/4 font-black">
+                            Rekomendasi Asesor (Asesmen Lapangan Terakhir)
+                          </th>
+                          <th className="border border-slate-200 p-3 text-left font-black">
+                            Usaha yang Dilakukan
+                          </th>
+                          <th className="border border-slate-200 p-3 text-left font-black bg-amber-50/50 text-amber-950">
+                            Hambatan yang Dihadapi
+                          </th>
+                          <th className="border border-slate-200 p-3 text-left font-black bg-sky-50/50 text-sky-950">
+                            Tindakan CQI untuk Mengatasi Hambatan
+                          </th>
+                          <th className="border border-slate-200 p-3 text-left font-black text-emerald-950">
+                            Hasil yang Dicapai
+                          </th>
+                          <th className="border border-slate-200 p-3 text-center w-24 font-black">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.assessorFollowUpsList || []).length > 0 ? (
+                          dl05.assessorFollowUpsList!.map((item) => (
+                            <tr key={item.recommendationNo} className="align-top hover:bg-slate-50/60 transition-colors">
+                              <td className="border border-slate-200 p-3 text-center font-bold text-slate-500">
+                                {item.recommendationNo}
+                              </td>
+                              <td className="border border-slate-200 p-3 font-bold text-slate-900 leading-relaxed">
+                                {item.recommendation}
+                              </td>
+                              <td className="border border-slate-200 p-3 text-slate-700 leading-relaxed">
+                                {item.actionTaken}
+                              </td>
+                              <td className="border border-slate-200 p-3 text-amber-900 bg-amber-50/20 leading-relaxed">
+                                {item.obstacle || "-"}
+                              </td>
+                              <td className="border border-slate-200 p-3 text-sky-900 bg-sky-50/20 leading-relaxed">
+                                {item.cqiSolution || "-"}
+                              </td>
+                              <td className="border border-slate-200 p-3 font-semibold text-emerald-900 leading-relaxed">
+                                {item.achievement}
+                              </td>
+                              <td className="border border-slate-200 p-3 text-center">
+                                <span
+                                  className={`px-2 py-1 rounded-full text-[10px] font-black inline-block whitespace-nowrap ${
+                                    item.status === "SELESAI"
+                                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                      : item.status === "SEDANG_BERJALAN"
+                                      ? "bg-amber-100 text-amber-800 border border-amber-300"
+                                      : "bg-rose-100 text-rose-800 border border-rose-300"
+                                  }`}
+                                >
+                                  {item.status === "SELESAI"
+                                    ? "🟢 Selesai"
                                     : item.status === "SEDANG_BERJALAN"
-                                    ? "bg-amber-100 text-amber-800 border border-amber-300"
-                                    : "bg-rose-100 text-rose-800 border border-rose-300"
-                                }`}
-                              >
-                                {item.status === "SELESAI"
-                                  ? "🟢 Selesai"
-                                  : item.status === "SEDANG_BERJALAN"
-                                  ? "🟡 Berjalan"
-                                  : "🔴 Belum"}
-                              </span>
+                                    ? "🟡 Berjalan"
+                                    : "🔴 Belum"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={7} className="p-6 text-center text-slate-400 italic">
+                              Belum ada data tindak lanjut rekomendasi asesor. Klik tombol &quot;Edit Tabel 1.1&quot; untuk menambahkan data.
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={7} className="p-6 text-center text-slate-400 italic">
-                            Belum ada data tindak lanjut rekomendasi asesor.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  /* EDIT MODE TABEL 1.1 */
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700">
+                            <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
+                            <th className="border border-slate-200 p-2.5 text-left w-1/4 font-black">
+                              Rekomendasi Asesor (Asesmen Lapangan)
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">
+                              Usaha yang Dilakukan
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black bg-amber-50 text-amber-950">
+                              Hambatan yang Dihadapi
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black bg-sky-50 text-sky-950">
+                              Tindakan CQI untuk Mengatasi Hambatan
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black text-emerald-950">
+                              Hasil yang Dicapai
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-center w-28 font-black">
+                              Status
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-center w-12 font-black">
+                              Hapus
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {editingAssessorList.map((item, idx) => (
+                            <tr key={idx} className="align-top hover:bg-slate-50/40">
+                              <td className="border border-slate-200 p-2 text-center font-bold text-slate-500 pt-3">
+                                {item.recommendationNo}
+                              </td>
+                              <td className="border border-slate-200 p-2">
+                                <textarea
+                                  rows={3}
+                                  value={item.recommendation}
+                                  onChange={(e) => handleUpdateRowTable1(idx, "recommendation", e.target.value)}
+                                  placeholder="Tulis rekomendasi asesor..."
+                                  className="w-full p-2 border border-slate-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2">
+                                <textarea
+                                  rows={3}
+                                  value={item.actionTaken}
+                                  onChange={(e) => handleUpdateRowTable1(idx, "actionTaken", e.target.value)}
+                                  placeholder="Usaha / langkah tindak lanjut..."
+                                  className="w-full p-2 border border-slate-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2 bg-amber-50/20">
+                                <textarea
+                                  rows={3}
+                                  value={item.obstacle || ""}
+                                  onChange={(e) => handleUpdateRowTable1(idx, "obstacle", e.target.value)}
+                                  placeholder="Hambatan yang dihadapi..."
+                                  className="w-full p-2 border border-amber-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2 bg-sky-50/20">
+                                <textarea
+                                  rows={3}
+                                  value={item.cqiSolution || ""}
+                                  onChange={(e) => handleUpdateRowTable1(idx, "cqiSolution", e.target.value)}
+                                  placeholder="Tindakan solusi CQI..."
+                                  className="w-full p-2 border border-sky-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2 bg-emerald-50/20">
+                                <textarea
+                                  rows={3}
+                                  value={item.achievement}
+                                  onChange={(e) => handleUpdateRowTable1(idx, "achievement", e.target.value)}
+                                  placeholder="Hasil konkret yang dicapai..."
+                                  className="w-full p-2 border border-emerald-300 rounded-lg text-xs font-semibold leading-relaxed focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2 text-center pt-3">
+                                <select
+                                  value={item.status}
+                                  onChange={(e) => handleUpdateRowTable1(idx, "status", e.target.value as any)}
+                                  className="p-1.5 border border-slate-300 rounded-lg text-xs font-bold bg-white focus:ring-2 focus:ring-emerald-500"
+                                >
+                                  <option value="SELESAI">🟢 Selesai</option>
+                                  <option value="SEDANG_BERJALAN">🟡 Berjalan</option>
+                                  <option value="BELUM">🔴 Belum</option>
+                                </select>
+                              </td>
+                              <td className="border border-slate-200 p-2 text-center pt-3">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveRowTable1(idx)}
+                                  className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                                  title="Hapus Baris"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={handleAddRowTable1}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/60 hover:bg-emerald-100/70 text-emerald-800 font-bold text-xs transition-colors cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Tambah Baris Rekomendasi Asesor</span>
+                      </button>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable1}
+                          disabled={isSavingTable1}
+                          className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable1}
+                          disabled={isSavingTable1}
+                          className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable1 ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                          <span>{isSavingTable1 ? "Menyimpan..." : "Simpan Perubahan Tabel 1.1"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* BAB II: KEMAJUAN IMPLEMENTASI STRATEGI RENSTRA (TABEL 2.1) */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
-                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-sky-100 text-sky-800 flex items-center justify-center font-bold">
@@ -1079,67 +1460,248 @@ export default function AccreditationDashboardPage() {
                     </p>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full text-xs font-black bg-sky-50 text-sky-800 border border-sky-200">
-                    Tabel 2.1 Standar LAMEMBA
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-black bg-sky-50 text-sky-800 border border-sky-200">
+                      Tabel 2.1 Standar LAMEMBA
+                    </span>
+                    {!isEditingTable2 ? (
+                      <button
+                        onClick={handleStartEditTable2}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Tabel 2.1</span>
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable2}
+                          disabled={isSavingTable2}
+                          className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable2}
+                          disabled={isSavingTable2}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable2 ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Save className="w-3.5 h-3.5" />
+                          )}
+                          <span>{isSavingTable2 ? "Menyimpan..." : "Simpan Perubahan"}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-slate-200 text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-700">
-                        <th className="border border-slate-200 p-3 text-center w-12 font-black">No</th>
-                        <th className="border border-slate-200 p-3 text-left w-1/4 font-black">
-                          Sasaran Strategis & Target Renstra UPPS
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black">
-                          Implementasi / Usaha yang Dilakukan
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black bg-amber-50/50 text-amber-950">
-                          Hambatan yang Dihadapi
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black bg-sky-50/50 text-sky-950">
-                          Tindakan CQI untuk Mengatasi Hambatan
-                        </th>
-                        <th className="border border-slate-200 p-3 text-left font-black text-emerald-950">
-                          Hasil yang Dicapai
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dl05.renstraProgressList || []).length > 0 ? (
-                        dl05.renstraProgressList!.map((item, idx) => (
-                          <tr key={idx} className="align-top hover:bg-slate-50/60 transition-colors">
-                            <td className="border border-slate-200 p-3 text-center font-bold text-slate-500">
-                              {idx + 1}
-                            </td>
-                            <td className="border border-slate-200 p-3 font-bold text-slate-900 leading-relaxed">
-                              {item.strategy}
-                            </td>
-                            <td className="border border-slate-200 p-3 text-slate-700 leading-relaxed">
-                              {item.actionTaken}
-                            </td>
-                            <td className="border border-slate-200 p-3 text-amber-900 bg-amber-50/20 leading-relaxed">
-                              {item.obstacle || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-3 text-sky-900 bg-sky-50/20 leading-relaxed">
-                              {item.cqiSolution || "-"}
-                            </td>
-                            <td className="border border-slate-200 p-3 font-semibold text-emerald-900 leading-relaxed">
-                              {item.achievement}
+                {table2Feedback && (
+                  <div
+                    className={`p-3.5 rounded-2xl text-xs flex items-center gap-2.5 ${
+                      table2Feedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {table2Feedback.type === "success" ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{table2Feedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingTable2 ? (
+                  /* VIEW MODE TABEL 2.1 */
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-slate-200 text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 text-slate-700">
+                          <th className="border border-slate-200 p-3 text-center w-12 font-black">No</th>
+                          <th className="border border-slate-200 p-3 text-left w-1/4 font-black">
+                            Sasaran Strategis & Target Renstra UPPS
+                          </th>
+                          <th className="border border-slate-200 p-3 text-left font-black">
+                            Implementasi / Usaha yang Dilakukan
+                          </th>
+                          <th className="border border-slate-200 p-3 text-left font-black bg-amber-50/50 text-amber-950">
+                            Hambatan yang Dihadapi
+                          </th>
+                          <th className="border border-slate-200 p-3 text-left font-black bg-sky-50/50 text-sky-950">
+                            Tindakan CQI untuk Mengatasi Hambatan
+                          </th>
+                          <th className="border border-slate-200 p-3 text-left font-black text-emerald-950">
+                            Hasil yang Dicapai
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dl05.renstraProgressList || []).length > 0 ? (
+                          dl05.renstraProgressList!.map((item, idx) => (
+                            <tr key={idx} className="align-top hover:bg-slate-50/60 transition-colors">
+                              <td className="border border-slate-200 p-3 text-center font-bold text-slate-500">
+                                {idx + 1}
+                              </td>
+                              <td className="border border-slate-200 p-3 font-bold text-slate-900 leading-relaxed">
+                                {item.strategy}
+                              </td>
+                              <td className="border border-slate-200 p-3 text-slate-700 leading-relaxed">
+                                {item.actionTaken}
+                              </td>
+                              <td className="border border-slate-200 p-3 text-amber-900 bg-amber-50/20 leading-relaxed">
+                                {item.obstacle || "-"}
+                              </td>
+                              <td className="border border-slate-200 p-3 text-sky-900 bg-sky-50/20 leading-relaxed">
+                                {item.cqiSolution || "-"}
+                              </td>
+                              <td className="border border-slate-200 p-3 font-semibold text-emerald-900 leading-relaxed">
+                                {item.achievement}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={6} className="p-6 text-center text-slate-400 italic">
+                              Belum ada data kemajuan implementasi Renstra. Klik tombol &quot;Edit Tabel 2.1&quot; untuk menambahkan data.
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={6} className="p-6 text-center text-slate-400 italic">
-                            Belum ada data kemajuan implementasi Renstra.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  /* EDIT MODE TABEL 2.1 */
+                  <div className="space-y-4">
+                    <div className="overflow-x-auto">
+                      <table className="w-full border-collapse border border-slate-200 text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700">
+                            <th className="border border-slate-200 p-2.5 text-center w-10 font-black">No</th>
+                            <th className="border border-slate-200 p-2.5 text-left w-1/4 font-black">
+                              Sasaran Strategis & Target Renstra UPPS
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black">
+                              Implementasi / Usaha yang Dilakukan
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black bg-amber-50 text-amber-950">
+                              Hambatan yang Dihadapi
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black bg-sky-50 text-sky-950">
+                              Tindakan CQI untuk Mengatasi Hambatan
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-left font-black text-emerald-950">
+                              Hasil yang Dicapai
+                            </th>
+                            <th className="border border-slate-200 p-2.5 text-center w-12 font-black">
+                              Hapus
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {editingRenstraList.map((item, idx) => (
+                            <tr key={idx} className="align-top hover:bg-slate-50/40">
+                              <td className="border border-slate-200 p-2 text-center font-bold text-slate-500 pt-3">
+                                {idx + 1}
+                              </td>
+                              <td className="border border-slate-200 p-2">
+                                <textarea
+                                  rows={3}
+                                  value={item.strategy}
+                                  onChange={(e) => handleUpdateRowTable2(idx, "strategy", e.target.value)}
+                                  placeholder="Sasaran strategis & target renstra..."
+                                  className="w-full p-2 border border-slate-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2">
+                                <textarea
+                                  rows={3}
+                                  value={item.actionTaken}
+                                  onChange={(e) => handleUpdateRowTable2(idx, "actionTaken", e.target.value)}
+                                  placeholder="Implementasi program / usaha..."
+                                  className="w-full p-2 border border-slate-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2 bg-amber-50/20">
+                                <textarea
+                                  rows={3}
+                                  value={item.obstacle || ""}
+                                  onChange={(e) => handleUpdateRowTable2(idx, "obstacle", e.target.value)}
+                                  placeholder="Hambatan yang dihadapi..."
+                                  className="w-full p-2 border border-amber-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2 bg-sky-50/20">
+                                <textarea
+                                  rows={3}
+                                  value={item.cqiSolution || ""}
+                                  onChange={(e) => handleUpdateRowTable2(idx, "cqiSolution", e.target.value)}
+                                  placeholder="Tindakan solusi penjaminan mutu CQI..."
+                                  className="w-full p-2 border border-sky-300 rounded-lg text-xs leading-relaxed focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2 bg-emerald-50/20">
+                                <textarea
+                                  rows={3}
+                                  value={item.achievement}
+                                  onChange={(e) => handleUpdateRowTable2(idx, "achievement", e.target.value)}
+                                  placeholder="Hasil konkret yang dicapai..."
+                                  className="w-full p-2 border border-emerald-300 rounded-lg text-xs font-semibold leading-relaxed focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+                                />
+                              </td>
+                              <td className="border border-slate-200 p-2 text-center pt-3">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveRowTable2(idx)}
+                                  className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                                  title="Hapus Baris"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={handleAddRowTable2}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-dashed border-sky-300 bg-sky-50/60 hover:bg-sky-100/70 text-sky-800 font-bold text-xs transition-colors cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Tambah Baris Sasaran Renstra</span>
+                      </button>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCancelEditTable2}
+                          disabled={isSavingTable2}
+                          className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveTable2}
+                          disabled={isSavingTable2}
+                          className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs shadow-sm transition-all hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+                        >
+                          {isSavingTable2 ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                          <span>{isSavingTable2 ? "Menyimpan..." : "Simpan Perubahan Tabel 2.1"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
