@@ -97,6 +97,95 @@ export interface ILamembaDl05StudentItem {
   isChange: boolean;
 }
 
+// Bab I: Tindak Lanjut Rekomendasi Asesor (Tabel 1.1)
+export interface ILamembaDl05AssessorFollowUp {
+  recommendationNo?: number;
+  recommendation: string;
+  yearIndex: number;           // 1 s.d 4
+  actionTaken: string;        // Usaha yang dilakukan
+  obstacle?: string;          // Hambatan
+  cqiSolution: string;        // Solusi atas hambatan
+  achievement: string;        // Hasil
+  status: 'SELESAI' | 'SEDANG_BERJALAN' | 'BELUM';
+  evidenceUrl?: string;
+}
+
+// Bab II: Kemajuan Implementasi Strategi Renstra (Tabel 2.1)
+export interface ILamembaDl05RenstraItem {
+  yearIndex: number;           // 1 s.d 4
+  strategy: string;           // Sasaran Strategi Renstra
+  actionTaken: string;        // Implementasi Strategi
+  obstacle?: string;          // Hambatan
+  cqiSolution: string;        // Solusi atas hambatan
+  achievement: string;        // Hasil
+}
+
+// Bab III.2: Profil Dosen Berdasarkan Latar Belakang Keahlian (Tabel 3.2.3)
+export interface ILamembaDl05FacultyExpertiseItem {
+  name: string;
+  magister: string;           // Magister S2
+  doktor?: string;            // Doktor S3
+  bidangKeahlian: string;     // Bidang Keahlian
+  serdos?: string;            // Nomor Sertifikat Pendidik Profesional
+  sertifikatProfesi?: string; // Sertifikat Kompetensi/Profesi BNSP/Industri
+  isChange: boolean;
+}
+
+// Bab III.3: Luaran Penelitian dan PkM Dosen (Tabel 3.3.1 s.d 3.3.3)
+export interface ILamembaDl05ResearchOutcomeItem {
+  judul: string;
+  tahun: number;
+  jenisLuaran: string; // HKI: Paten/Hak Cipta, Buku ber-ISBN, Book Chapter, Publikasi Ilmiah
+  sumberBiayaPtMandiri: number;
+  sumberBiayaLuarPt: number;
+  sumberBiayaLuarNegeri: number;
+  publikasiTidakTerakreditasi: number;
+  publikasiNasionalTerakreditasi: number; // SINTA
+  publikasiInternasional: number;
+  publikasiInternasionalBereputasi: number; // Scopus/WoS
+  seminarWilayah: number;
+  seminarNasional: number;
+  seminarInternasional: number;
+  tulisanMediaWilayah: number;
+  tulisanMediaNasional: number;
+  tulisanMediaInternasional: number;
+  pagelaranWilayah: number;
+  pagelaranNasional: number;
+  pagelaranInternasional: number;
+  isChange: boolean;
+}
+
+// Bab III.3: Sitasi Dosen (Tabel 3.3.5)
+export interface ILamembaDl05CitationItem {
+  judulArtikel: string;
+  tahunTerbit: number;
+  penulis: string;
+  jenisPublikasi: string;
+  sitasiTs2: number;
+  sitasiTs1: number;
+  sitasiTs: number;
+  linkArtikel: string;
+  isChange: boolean;
+}
+
+// Bab III.3: Luaran yang Dihasilkan Mahasiswa (Tabel 3.3.7)
+export interface ILamembaDl05StudentOutcomeItem {
+  judulLuaran: string;
+  tahun: number;
+  namaMahasiswa: string;
+  jenisLuaran: string;
+  buktiLuaran: string;
+  isChange: boolean;
+}
+
+// Tim Penyusun Evaluasi Diri (6 Orang)
+export interface ILamembaDl05TimPenyusunItem {
+  nama: string;
+  nikNidn: string;
+  jabatan: string;
+  peran: string;
+}
+
 export interface ILamembaDl05 extends Document {
   academicYear: string;       // e.g. "2025/2026"
   prodiName: string;          // "Program Studi S1 Manajemen"
@@ -107,22 +196,30 @@ export interface ILamembaDl05 extends Document {
   // Koleksi Wajib: 1 Surat Rekomendasi/Keputusan Resmi LAMEMBA per Tahun (Tahun 0 s.d 4)
   annualLetters: ILamembaDl05AnnualLetter[];
 
-  // Bab I: Jaminan Pembelajaran (Tabel 1.1)
+  // Sub-Tab 1: Rekomendasi Asesor & Renstra (Bab I & II)
+  assessorFollowUpsList: ILamembaDl05AssessorFollowUp[];
+  renstraProgressList: ILamembaDl05RenstraItem[];
+
+  // Sub-Tab 2: Jaminan Pembelajaran & SDM Dosen (Bab III.1 & III.2)
   learningAssuranceItems: ILamembaDl05LearningItem[];
   perbaikanBerkelanjutanJaminanPembelajaran?: string;
 
-  // Bab II: Kecukupan dan Kualifikasi Dosen (Tabel 2.1 & 2.3)
   dosenProfiles: ILamembaDl05FacultyItem[];
+  dosenExpertise: ILamembaDl05FacultyExpertiseItem[];
+  kontribusiIntelektualDosen: ILamembaDl05IntellectualItem[];
   ewmpList: ILamembaDl05EwmpItem[];
   perbaikanBerkelanjutanDosen?: string;
 
-  // Bab III: Luaran dan Capaian Tridharma (Tabel 3.1)
-  kontribusiIntelektualDosen: ILamembaDl05IntellectualItem[];
-  perbaikanBerkelanjutanTridharma?: string;
-
-  // Bab IV: Kemahasiswaan & Sinkronisasi PD-Dikti (Tabel 4.1)
+  // Sub-Tab 3: Tridharma, Riset, Sitasi, Mahasiswa & PD-Dikti (Bab III.3)
+  researchOutcomes: ILamembaDl05ResearchOutcomeItem[];
+  citationsList: ILamembaDl05CitationItem[];
+  studentOutcomes: ILamembaDl05StudentOutcomeItem[];
   mahasiswaAktifList: ILamembaDl05StudentItem[];
+  perbaikanBerkelanjutanTridharma?: string;
   perbaikanBerkelanjutanKemahasiswaan?: string;
+
+  // Sub-Tab 4: Tim Penyusun (6 Orang)
+  timPenyusun: ILamembaDl05TimPenyusunItem[];
 
   // Legacy fallback fields for backward compatibility
   assessorFollowUps: Array<{
@@ -224,7 +321,32 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
       },
     ],
 
-    // Bab I: Jaminan Pembelajaran (Tabel 1.1)
+    // Sub-Tab 1: Rekomendasi Asesor & Renstra (Bab I & II)
+    assessorFollowUpsList: [
+      {
+        recommendationNo: { type: Number },
+        recommendation: { type: String, required: true },
+        yearIndex: { type: Number, required: true },
+        actionTaken: { type: String, default: '' },
+        obstacle: { type: String, default: '' },
+        cqiSolution: { type: String, default: '' },
+        achievement: { type: String, default: '' },
+        status: { type: String, enum: ['SELESAI', 'SEDANG_BERJALAN', 'BELUM'], default: 'SEDANG_BERJALAN' },
+        evidenceUrl: { type: String },
+      },
+    ],
+    renstraProgressList: [
+      {
+        yearIndex: { type: Number, required: true },
+        strategy: { type: String, required: true },
+        actionTaken: { type: String, default: '' },
+        obstacle: { type: String, default: '' },
+        cqiSolution: { type: String, default: '' },
+        achievement: { type: String, default: '' },
+      },
+    ],
+
+    // Sub-Tab 2: Jaminan Pembelajaran (Tabel 3.1.1)
     learningAssuranceItems: [
       {
         nomor: { type: Number, required: true },
@@ -241,7 +363,7 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
     ],
     perbaikanBerkelanjutanJaminanPembelajaran: { type: String, default: '' },
 
-    // Bab II: Kecukupan dan Kualifikasi Dosen (Tabel 2.1 & 2.3)
+    // Sub-Tab 2: SDM Dosen (Tabel 3.2.1, 3.2.3, 3.2.5, 3.2.7)
     dosenProfiles: [
       {
         name: { type: String, required: true },
@@ -253,6 +375,27 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
         catatan: { type: String, default: '' },
         isChange: { type: Boolean, default: false },
         isKeluar: { type: Boolean, default: false },
+      },
+    ],
+    dosenExpertise: [
+      {
+        name: { type: String, required: true },
+        magister: { type: String, default: '' },
+        doktor: { type: String, default: '' },
+        bidangKeahlian: { type: String, default: '' },
+        serdos: { type: String, default: '' },
+        sertifikatProfesi: { type: String, default: '' },
+        isChange: { type: Boolean, default: false },
+      },
+    ],
+    kontribusiIntelektualDosen: [
+      {
+        name: { type: String, required: true },
+        rekognisiPendidikan: { type: String, default: '' },
+        rekognisiPraktik: { type: String, default: '' },
+        rekognisiPenelitian: { type: String, default: '' },
+        rekognisiSosial: { type: String, default: '' },
+        isChange: { type: Boolean, default: false },
       },
     ],
     ewmpList: [
@@ -271,20 +414,54 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
     ],
     perbaikanBerkelanjutanDosen: { type: String, default: '' },
 
-    // Bab III: Luaran dan Capaian Tridharma (Tabel 3.1)
-    kontribusiIntelektualDosen: [
+    // Sub-Tab 3: Tridharma, Riset, Sitasi, Mahasiswa & PD-Dikti (Bab III.3)
+    researchOutcomes: [
       {
-        name: { type: String, required: true },
-        rekognisiPendidikan: { type: String, default: '' },
-        rekognisiPraktik: { type: String, default: '' },
-        rekognisiPenelitian: { type: String, default: '' },
-        rekognisiSosial: { type: String, default: '' },
+        judul: { type: String, required: true },
+        tahun: { type: Number, default: 2024 },
+        jenisLuaran: { type: String, default: 'Jurnal Ilmiah' },
+        sumberBiayaPtMandiri: { type: Number, default: 0 },
+        sumberBiayaLuarPt: { type: Number, default: 0 },
+        sumberBiayaLuarNegeri: { type: Number, default: 0 },
+        publikasiTidakTerakreditasi: { type: Number, default: 0 },
+        publikasiNasionalTerakreditasi: { type: Number, default: 0 },
+        publikasiInternasional: { type: Number, default: 0 },
+        publikasiInternasionalBereputasi: { type: Number, default: 0 },
+        seminarWilayah: { type: Number, default: 0 },
+        seminarNasional: { type: Number, default: 0 },
+        seminarInternasional: { type: Number, default: 0 },
+        tulisanMediaWilayah: { type: Number, default: 0 },
+        tulisanMediaNasional: { type: Number, default: 0 },
+        tulisanMediaInternasional: { type: Number, default: 0 },
+        pagelaranWilayah: { type: Number, default: 0 },
+        pagelaranNasional: { type: Number, default: 0 },
+        pagelaranInternasional: { type: Number, default: 0 },
         isChange: { type: Boolean, default: false },
       },
     ],
-    perbaikanBerkelanjutanTridharma: { type: String, default: '' },
-
-    // Bab IV: Kemahasiswaan & Sinkronisasi PD-Dikti (Tabel 4.1)
+    citationsList: [
+      {
+        judulArtikel: { type: String, required: true },
+        tahunTerbit: { type: Number, default: 2023 },
+        penulis: { type: String, default: '' },
+        jenisPublikasi: { type: String, default: 'Jurnal Nasional' },
+        sitasiTs2: { type: Number, default: 0 },
+        sitasiTs1: { type: Number, default: 0 },
+        sitasiTs: { type: Number, default: 0 },
+        linkArtikel: { type: String, default: '' },
+        isChange: { type: Boolean, default: false },
+      },
+    ],
+    studentOutcomes: [
+      {
+        judulLuaran: { type: String, required: true },
+        tahun: { type: Number, default: 2024 },
+        namaMahasiswa: { type: String, default: '' },
+        jenisLuaran: { type: String, default: 'Karya Ilmiah / Prestasi' },
+        buktiLuaran: { type: String, default: '' },
+        isChange: { type: Boolean, default: false },
+      },
+    ],
     mahasiswaAktifList: [
       {
         semester: { type: String, enum: ['Ganjil', 'Genap'], required: true },
@@ -294,7 +471,18 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
         isChange: { type: Boolean, default: false },
       },
     ],
+    perbaikanBerkelanjutanTridharma: { type: String, default: '' },
     perbaikanBerkelanjutanKemahasiswaan: { type: String, default: '' },
+
+    // Sub-Tab 4: Tim Penyusun (6 Orang)
+    timPenyusun: [
+      {
+        nama: { type: String, required: true },
+        nikNidn: { type: String, default: '' },
+        jabatan: { type: String, default: '' },
+        peran: { type: String, default: '' },
+      },
+    ],
 
     // Legacy fields
     assessorFollowUps: [
