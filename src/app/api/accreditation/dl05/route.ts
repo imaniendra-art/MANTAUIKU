@@ -824,8 +824,28 @@ export async function GET(req: Request) {
     if (dl05.penutup === undefined || dl05.penutup === null) {
       dl05.penutup = DEFAULT_PENUTUP;
     }
-    if (dl05.lembarPengesahan === undefined || dl05.lembarPengesahan === null) {
+    if (!dl05.lembarPengesahan) {
       dl05.lembarPengesahan = DEFAULT_LEMBAR_PENGESAHAN as any;
+    } else {
+      dl05.lembarPengesahan = {
+        kota: dl05.lembarPengesahan.kota || DEFAULT_LEMBAR_PENGESAHAN.kota,
+        tanggal: dl05.lembarPengesahan.tanggal || DEFAULT_LEMBAR_PENGESAHAN.tanggal,
+        kaprodi: {
+          jabatan: dl05.lembarPengesahan.kaprodi?.jabatan || DEFAULT_LEMBAR_PENGESAHAN.kaprodi.jabatan,
+          nama: dl05.lembarPengesahan.kaprodi?.nama || DEFAULT_LEMBAR_PENGESAHAN.kaprodi.nama,
+          nikNidn: dl05.lembarPengesahan.kaprodi?.nikNidn || DEFAULT_LEMBAR_PENGESAHAN.kaprodi.nikNidn,
+        },
+        ketuaLpm: {
+          jabatan: dl05.lembarPengesahan.ketuaLpm?.jabatan || DEFAULT_LEMBAR_PENGESAHAN.ketuaLpm.jabatan,
+          nama: dl05.lembarPengesahan.ketuaLpm?.nama || DEFAULT_LEMBAR_PENGESAHAN.ketuaLpm.nama,
+          nikNidn: dl05.lembarPengesahan.ketuaLpm?.nikNidn || DEFAULT_LEMBAR_PENGESAHAN.ketuaLpm.nikNidn,
+        },
+        ketuaPt: {
+          jabatan: dl05.lembarPengesahan.ketuaPt?.jabatan || DEFAULT_LEMBAR_PENGESAHAN.ketuaPt.jabatan,
+          nama: dl05.lembarPengesahan.ketuaPt?.nama || DEFAULT_LEMBAR_PENGESAHAN.ketuaPt.nama,
+          nikNidn: dl05.lembarPengesahan.ketuaPt?.nikNidn || DEFAULT_LEMBAR_PENGESAHAN.ketuaPt.nikNidn,
+        },
+      };
     }
 
     // Sinkronisasi otomatis file bukti digital ke annualLetters
@@ -895,107 +915,65 @@ export async function POST(req: Request) {
       tridharmaOutcomes,
     } = body;
 
-    await connectToDatabase();
-    let dl05 = await LamembaDl05.findOne({ academicYear: academicYear || '2025/2026' });
+    const updatePayload: Record<string, any> = {};
 
-    if (!dl05) {
-      dl05 = new LamembaDl05({
-        academicYear: academicYear || '2025/2026',
-        prodiName: 'Program Studi S1 Manajemen',
-        submissionDate: new Date(),
-        status: status || 'SUBMITTED',
-      });
-    }
-
-    if (selectedYearIndex !== undefined) dl05.selectedYearIndex = selectedYearIndex;
-    if (annualLetters !== undefined) {
-      dl05.annualLetters = annualLetters;
-      dl05.markModified('annualLetters');
-    }
-    if (assessorFollowUpsList !== undefined) {
-      dl05.assessorFollowUpsList = assessorFollowUpsList;
-      dl05.markModified('assessorFollowUpsList');
-    }
-    if (renstraProgressList !== undefined) {
-      dl05.renstraProgressList = renstraProgressList;
-      dl05.markModified('renstraProgressList');
-    }
-    if (learningAssuranceItems !== undefined) {
-      dl05.learningAssuranceItems = learningAssuranceItems;
-      dl05.markModified('learningAssuranceItems');
-    }
+    if (selectedYearIndex !== undefined) updatePayload.selectedYearIndex = selectedYearIndex;
+    if (annualLetters !== undefined) updatePayload.annualLetters = annualLetters;
+    if (assessorFollowUpsList !== undefined) updatePayload.assessorFollowUpsList = assessorFollowUpsList;
+    if (renstraProgressList !== undefined) updatePayload.renstraProgressList = renstraProgressList;
+    if (learningAssuranceItems !== undefined) updatePayload.learningAssuranceItems = learningAssuranceItems;
     if (perbaikanBerkelanjutanJaminanPembelajaran !== undefined)
-      dl05.perbaikanBerkelanjutanJaminanPembelajaran = perbaikanBerkelanjutanJaminanPembelajaran;
-    if (dosenProfiles !== undefined) {
-      dl05.dosenProfiles = dosenProfiles;
-      dl05.markModified('dosenProfiles');
-    }
-    if (dosenExpertise !== undefined) {
-      dl05.dosenExpertise = dosenExpertise;
-      dl05.markModified('dosenExpertise');
-    }
-    if (kontribusiIntelektualDosen !== undefined) {
-      dl05.kontribusiIntelektualDosen = kontribusiIntelektualDosen;
-      dl05.markModified('kontribusiIntelektualDosen');
-    }
-    if (ewmpList !== undefined) {
-      dl05.ewmpList = ewmpList;
-      dl05.markModified('ewmpList');
-    }
+      updatePayload.perbaikanBerkelanjutanJaminanPembelajaran = perbaikanBerkelanjutanJaminanPembelajaran;
+    if (dosenProfiles !== undefined) updatePayload.dosenProfiles = dosenProfiles;
+    if (dosenExpertise !== undefined) updatePayload.dosenExpertise = dosenExpertise;
+    if (kontribusiIntelektualDosen !== undefined) updatePayload.kontribusiIntelektualDosen = kontribusiIntelektualDosen;
+    if (ewmpList !== undefined) updatePayload.ewmpList = ewmpList;
     if (perbaikanBerkelanjutanDosen !== undefined)
-      dl05.perbaikanBerkelanjutanDosen = perbaikanBerkelanjutanDosen;
-    if (researchOutcomes !== undefined) {
-      dl05.researchOutcomes = researchOutcomes;
-      dl05.markModified('researchOutcomes');
-    }
-    if (citationsList !== undefined) {
-      dl05.citationsList = citationsList;
-      dl05.markModified('citationsList');
-    }
-    if (studentOutcomes !== undefined) {
-      dl05.studentOutcomes = studentOutcomes;
-      dl05.markModified('studentOutcomes');
-    }
-    if (mahasiswaAktifList !== undefined) {
-      dl05.mahasiswaAktifList = mahasiswaAktifList;
-      dl05.markModified('mahasiswaAktifList');
-    }
+      updatePayload.perbaikanBerkelanjutanDosen = perbaikanBerkelanjutanDosen;
+    if (researchOutcomes !== undefined) updatePayload.researchOutcomes = researchOutcomes;
+    if (citationsList !== undefined) updatePayload.citationsList = citationsList;
+    if (studentOutcomes !== undefined) updatePayload.studentOutcomes = studentOutcomes;
+    if (mahasiswaAktifList !== undefined) updatePayload.mahasiswaAktifList = mahasiswaAktifList;
     if (perbaikanBerkelanjutanTridharma !== undefined)
-      dl05.perbaikanBerkelanjutanTridharma = perbaikanBerkelanjutanTridharma;
+      updatePayload.perbaikanBerkelanjutanTridharma = perbaikanBerkelanjutanTridharma;
     if (perbaikanBerkelanjutanKemahasiswaan !== undefined)
-      dl05.perbaikanBerkelanjutanKemahasiswaan = perbaikanBerkelanjutanKemahasiswaan;
-    if (timPenyusun !== undefined) {
-      dl05.timPenyusun = timPenyusun;
-      dl05.markModified('timPenyusun');
-    }
-    if (identitasPengusul !== undefined) {
-      dl05.identitasPengusul = identitasPengusul;
-      dl05.markModified('identitasPengusul');
-    }
-    if (lembarPengesahan !== undefined) {
-      dl05.lembarPengesahan = lembarPengesahan;
-      dl05.markModified('lembarPengesahan');
-    }
-    if (kataPengantar !== undefined) dl05.kataPengantar = kataPengantar;
-    if (narasiBab1 !== undefined) dl05.narasiBab1 = narasiBab1;
-    if (narasiBab2 !== undefined) dl05.narasiBab2 = narasiBab2;
-    if (narasiBab3 !== undefined) dl05.narasiBab3 = narasiBab3;
-    if (narasiBab31 !== undefined) dl05.narasiBab31 = narasiBab31;
-    if (narasiBab32 !== undefined) dl05.narasiBab32 = narasiBab32;
-    if (narasiBab33 !== undefined) dl05.narasiBab33 = narasiBab33;
-    if (penutup !== undefined) dl05.penutup = penutup;
-    if (status !== undefined) dl05.status = status;
+      updatePayload.perbaikanBerkelanjutanKemahasiswaan = perbaikanBerkelanjutanKemahasiswaan;
+    if (timPenyusun !== undefined) updatePayload.timPenyusun = timPenyusun;
+    if (identitasPengusul !== undefined) updatePayload.identitasPengusul = identitasPengusul;
+    if (lembarPengesahan !== undefined) updatePayload.lembarPengesahan = lembarPengesahan;
+    if (kataPengantar !== undefined) updatePayload.kataPengantar = kataPengantar;
+    if (narasiBab1 !== undefined) updatePayload.narasiBab1 = narasiBab1;
+    if (narasiBab2 !== undefined) updatePayload.narasiBab2 = narasiBab2;
+    if (narasiBab3 !== undefined) updatePayload.narasiBab3 = narasiBab3;
+    if (narasiBab31 !== undefined) updatePayload.narasiBab31 = narasiBab31;
+    if (narasiBab32 !== undefined) updatePayload.narasiBab32 = narasiBab32;
+    if (narasiBab33 !== undefined) updatePayload.narasiBab33 = narasiBab33;
+    if (penutup !== undefined) updatePayload.penutup = penutup;
+    if (status !== undefined) updatePayload.status = status;
 
     // Legacy fields update
-    if (assessorFollowUps) dl05.assessorFollowUps = assessorFollowUps;
-    if (renstraProgress) dl05.renstraProgress = renstraProgress;
-    if (learningAssurance) dl05.learningAssurance = learningAssurance;
-    if (facultySufficiency) dl05.facultySufficiency = facultySufficiency;
-    if (tridharmaOutcomes) dl05.tridharmaOutcomes = tridharmaOutcomes;
+    if (assessorFollowUps !== undefined) updatePayload.assessorFollowUps = assessorFollowUps;
+    if (renstraProgress !== undefined) updatePayload.renstraProgress = renstraProgress;
+    if (learningAssurance !== undefined) updatePayload.learningAssurance = learningAssurance;
+    if (facultySufficiency !== undefined) updatePayload.facultySufficiency = facultySufficiency;
+    if (tridharmaOutcomes !== undefined) updatePayload.tridharmaOutcomes = tridharmaOutcomes;
 
-    await dl05.save();
+    await connectToDatabase();
 
-    return NextResponse.json({ success: true, data: dl05 });
+    const updatedDl05 = await LamembaDl05.findOneAndUpdate(
+      { academicYear: academicYear || '2025/2026' },
+      {
+        $set: updatePayload,
+        $setOnInsert: {
+          academicYear: academicYear || '2025/2026',
+          prodiName: 'Program Studi S1 Manajemen',
+          submissionDate: new Date(),
+        },
+      },
+      { returnDocument: 'after', new: true, upsert: true, runValidators: false, lean: true }
+    );
+
+    return NextResponse.json({ success: true, data: updatedDl05 });
   } catch (error: unknown) {
     const err = error as Error;
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
@@ -1005,3 +983,4 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   return POST(req);
 }
+

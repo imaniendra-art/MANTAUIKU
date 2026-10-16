@@ -620,7 +620,7 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
       description: { type: String },
     },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 // 4. Evaluasi Mandiri IAPT 4.1 BAN-PT (Peraturan No. 35 Tahun 2025)
@@ -654,8 +654,12 @@ export const LamembaCriteria: Model<ILamembaCriteria> =
   mongoose.models.LamembaCriteria ||
   mongoose.model<ILamembaCriteria>('LamembaCriteria', LamembaCriteriaSchema);
 
+if (mongoose.models.LamembaDl05 && !mongoose.models.LamembaDl05.schema.paths['lembarPengesahan']) {
+  delete (mongoose.models as any).LamembaDl05;
+}
+
 export const LamembaDl05: Model<ILamembaDl05> =
-  mongoose.models.LamembaDl05 ||
+  (mongoose.models.LamembaDl05 as Model<ILamembaDl05>) ||
   mongoose.model<ILamembaDl05>('LamembaDl05', LamembaDl05Schema);
 
 export const Iapt41Evaluation: Model<IIapt41Evaluation> =

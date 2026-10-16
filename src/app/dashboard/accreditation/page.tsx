@@ -1734,27 +1734,46 @@ export default function AccreditationDashboardPage() {
 
   // Sub-Tab 4 Handlers: Lembar Pengesahan (Penandatangan 3 Pihak)
   const handleStartEditPengesahan = () => {
-    setEditingPengesahan(
-      dl05?.lembarPengesahan || {
-        kota: "Makassar",
-        tanggal: "15 Januari 2026",
-        kaprodi: {
-          jabatan: "Ketua Program Studi S1 Manajemen",
-          nama: (dl05?.timPenyusun && dl05.timPenyusun[0]?.nama) || "Drs. H. M. Said, M.Si",
-          nikNidn: (dl05?.timPenyusun && dl05.timPenyusun[0]?.nikNidn) || "NIDN. 0918077501",
-        },
-        ketuaLpm: {
-          jabatan: "Ketua Lembaga Penjaminan Mutu",
-          nama: "Dr. Nurul Fadilah, SE., MM",
-          nikNidn: "NIDN. 0915088201",
-        },
-        ketuaPt: {
-          jabatan: "Ketua STIMI YAPMI Makassar",
-          nama: "Dr. Ibrahim Syah, S.E., M.M.",
-          nikNidn: "NIDN. 0920037601",
-        },
-      }
-    );
+    const defaultData: ILamembaDl05LembarPengesahan = {
+      kota: "Makassar",
+      tanggal: "15 Januari 2026",
+      kaprodi: {
+        jabatan: "Ketua Program Studi S1 Manajemen",
+        nama: (dl05?.timPenyusun && dl05.timPenyusun[0]?.nama) || "Drs. H. M. Said, M.Si",
+        nikNidn: (dl05?.timPenyusun && dl05.timPenyusun[0]?.nikNidn) || "NIDN. 0918077501",
+      },
+      ketuaLpm: {
+        jabatan: "Ketua Lembaga Penjaminan Mutu",
+        nama: "Dr. Nurul Fadilah, SE., MM",
+        nikNidn: "NIDN. 0915088201",
+      },
+      ketuaPt: {
+        jabatan: "Ketua STIMI YAPMI Makassar",
+        nama: "Dr. Ibrahim Syah, S.E., M.M.",
+        nikNidn: "NIDN. 0920037601",
+      },
+    };
+
+    const current = dl05?.lembarPengesahan;
+    setEditingPengesahan({
+      kota: current?.kota ?? defaultData.kota,
+      tanggal: current?.tanggal ?? defaultData.tanggal,
+      kaprodi: {
+        jabatan: current?.kaprodi?.jabatan ?? defaultData.kaprodi?.jabatan ?? "",
+        nama: current?.kaprodi?.nama ?? defaultData.kaprodi?.nama ?? "",
+        nikNidn: current?.kaprodi?.nikNidn ?? defaultData.kaprodi?.nikNidn ?? "",
+      },
+      ketuaLpm: {
+        jabatan: current?.ketuaLpm?.jabatan ?? defaultData.ketuaLpm?.jabatan ?? "",
+        nama: current?.ketuaLpm?.nama ?? defaultData.ketuaLpm?.nama ?? "",
+        nikNidn: current?.ketuaLpm?.nikNidn ?? defaultData.ketuaLpm?.nikNidn ?? "",
+      },
+      ketuaPt: {
+        jabatan: current?.ketuaPt?.jabatan ?? defaultData.ketuaPt?.jabatan ?? "",
+        nama: current?.ketuaPt?.nama ?? defaultData.ketuaPt?.nama ?? "",
+        nikNidn: current?.ketuaPt?.nikNidn ?? defaultData.ketuaPt?.nikNidn ?? "",
+      },
+    });
     setIsEditingPengesahan(true);
     setPengesahanFeedback(null);
   };
@@ -1794,8 +1813,9 @@ export default function AccreditationDashboardPage() {
         }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.data) {
         setPengesahanFeedback({ type: "success", text: "Pengaturan Penandatangan Lembar Pengesahan berhasil disimpan!" });
+        setDl05(data.data);
         await loadData();
         setTimeout(() => {
           setIsEditingPengesahan(false);
