@@ -21,6 +21,7 @@ interface ProfileItem {
   daysRemaining: number;
   monthsRemaining: number;
   certificateUrl?: string;
+  skDocUrl?: string;
   notes?: string;
 }
 
@@ -139,19 +140,39 @@ export default function AccreditationWidget() {
                 </div>
               </div>
 
-              {/* Certificate Download Link */}
-              {p.certificateUrl && (
-                <div className="pt-1 flex items-center justify-between text-xs">
+              {/* Certificate & SK Download Links */}
+              {(p.certificateUrl || p.skDocUrl) && (
+                <div className="pt-2 border-t border-slate-200/40 flex flex-wrap items-center justify-between gap-2 text-xs">
                   <span className="text-slate-400">Verifikasi Dokumen:</span>
-                  <a
-                    href={p.certificateUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sky-600 hover:text-sky-700 font-bold hover:underline"
-                  >
-                    <span>Sertifikat Resmi PDF</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                  <div className="flex items-center gap-2">
+                    {p.certificateUrl && (
+                      <a
+                        href={p.certificateUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-sky-600 hover:text-sky-700 font-bold hover:underline"
+                        title="Unduh Sertifikat Resmi PDF"
+                      >
+                        <span>Sertifikat PDF</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                    {p.certificateUrl && p.skDocUrl && (
+                      <span className="text-slate-300">•</span>
+                    )}
+                    {p.skDocUrl && (
+                      <a
+                        href={p.skDocUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700 font-bold hover:underline"
+                        title="Unduh Surat Keputusan (SK) Resmi PDF"
+                      >
+                        <span>SK Akreditasi PDF</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               )}
             </motion.div>

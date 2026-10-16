@@ -47,6 +47,7 @@ interface IProfile {
   validFrom: string;
   validUntil: string;
   certificateUrl?: string;
+  skDocUrl?: string;
   notes?: string;
   daysRemaining: number;
   monthsRemaining: number;
@@ -483,9 +484,11 @@ export default function AccreditationDashboardPage() {
     validFrom: "",
     validUntil: "",
     certificateUrl: "",
+    skDocUrl: "",
     notes: "",
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedCertFile, setSelectedCertFile] = useState<File | null>(null);
+  const [selectedSkFile, setSelectedSkFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [modalMessage, setModalMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -537,9 +540,11 @@ export default function AccreditationDashboardPage() {
       validFrom: profile.validFrom ? new Date(profile.validFrom).toISOString().split("T")[0] : "",
       validUntil: profile.validUntil ? new Date(profile.validUntil).toISOString().split("T")[0] : "",
       certificateUrl: profile.certificateUrl || "",
+      skDocUrl: profile.skDocUrl || "",
       notes: profile.notes || "",
     });
-    setSelectedFile(null);
+    setSelectedCertFile(null);
+    setSelectedSkFile(null);
     setModalMessage(null);
     setIsEditProfileModalOpen(true);
   };
@@ -553,23 +558,24 @@ export default function AccreditationDashboardPage() {
 
     try {
       let finalCertificateUrl = editFormData.certificateUrl;
+      let finalSkDocUrl = editFormData.skDocUrl;
 
-      // Unggah file PDF jika ada file baru yang dipilih
-      if (selectedFile) {
+      // 1. Unggah Sertifikat PDF jika ada file baru yang dipilih
+      if (selectedCertFile) {
         setIsUploading(true);
-        const uploadData = new FormData();
-        uploadData.append("file", selectedFile);
-        uploadData.append("entityType", selectedProfile.entityType);
+        const certUploadData = new FormData();
+        certUploadData.append("file", selectedCertFile);
+        certUploadData.append("entityType", selectedProfile.entityType);
+        certUploadData.append("docCategory", "CERTIFICATE");
 
         const uploadRes = await fetch("/api/accreditation/upload", {
           method: "POST",
-          body: uploadData,
+          body: certUploadData,
         });
 
         const uploadJson = await uploadRes.json();
-        setIsUploading(false);
-
         if (!uploadJson.success) {
+          setIsUploading(false);
           setModalMessage({ type: "error", text: uploadJson.error || "Gagal mengunggah file PDF sertifikat." });
           setIsSaving(false);
           return;
@@ -577,6 +583,32 @@ export default function AccreditationDashboardPage() {
 
         finalCertificateUrl = uploadJson.fileUrl;
       }
+
+      // 2. Unggah SK Akreditasi PDF jika ada file baru yang dipilih
+      if (selectedSkFile) {
+        setIsUploading(true);
+        const skUploadData = new FormData();
+        skUploadData.append("file", selectedSkFile);
+        skUploadData.append("entityType", selectedProfile.entityType);
+        skUploadData.append("docCategory", "SK");
+
+        const uploadRes = await fetch("/api/accreditation/upload", {
+          method: "POST",
+          body: skUploadData,
+        });
+
+        const uploadJson = await uploadRes.json();
+        if (!uploadJson.success) {
+          setIsUploading(false);
+          setModalMessage({ type: "error", text: uploadJson.error || "Gagal mengunggah file PDF SK Akreditasi." });
+          setIsSaving(false);
+          return;
+        }
+
+        finalSkDocUrl = uploadJson.fileUrl;
+      }
+
+      setIsUploading(false);
 
       // Kirim pembaruan ke API PUT /api/accreditation/profiles
       const res = await fetch("/api/accreditation/profiles", {
@@ -589,13 +621,14 @@ export default function AccreditationDashboardPage() {
           validFrom: editFormData.validFrom,
           validUntil: editFormData.validUntil,
           certificateUrl: finalCertificateUrl,
+          skDocUrl: finalSkDocUrl,
           notes: editFormData.notes,
         }),
       });
 
       const json = await res.json();
       if (json.success) {
-        setModalMessage({ type: "success", text: "Data profil akreditasi & sertifikat resmi berhasil diperbarui!" });
+        setModalMessage({ type: "success", text: "Data profil akreditasi, berkas sertifikat & SK resmi berhasil diperbarui!" });
         await loadData();
         setTimeout(() => {
           setIsEditProfileModalOpen(false);
@@ -2089,23 +2122,42 @@ export default function AccreditationDashboardPage() {
                     </span>
                   </div>
 
-                  {/* Action Row: Sertifikat & Kelola LPM */}
+                  {/* Action Row: Berkas SK, Sertifikat & Kelola LPM */}
                   <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    <div>
+                    <div className="flex flex-wrap items-center gap-2">
                       {p.certificateUrl ? (
                         <a
                           href={p.certificateUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold transition-colors"
+                          title="Unduh Dokumen Sertifikat Resmi PDF"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           <span>Unduh Sertifikat PDF</span>
                         </a>
                       ) : (
-                        <span className="text-amber-600 font-semibold flex items-center gap-1.5">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          <span>Belum ada dokumen sertifikat PDF</span>
+                        <span className="text-slate-400 font-semibold flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-150">
+                          <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Belum ada sertifikat</span>
+                        </span>
+                      )}
+
+                      {p.skDocUrl ? (
+                        <a
+                          href={p.skDocUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold transition-colors"
+                          title="Unduh Salinan SK Akreditasi Resmi PDF"
+                        >
+                          <FileCheck2 className="w-3.5 h-3.5" />
+                          <span>Unduh Salinan SK PDF</span>
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 font-semibold flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-150">
+                          <AlertCircle className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Belum ada file SK</span>
                         </span>
                       )}
                     </div>
@@ -2116,7 +2168,7 @@ export default function AccreditationDashboardPage() {
                         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-extrabold shadow-sm transition-all hover:scale-[1.02] cursor-pointer"
                       >
                         <FileUp className="w-3.5 h-3.5" />
-                        <span>Kelola / Upload Sertifikat PDF</span>
+                        <span>Kelola / Upload Berkas & SK</span>
                       </button>
                     )}
                   </div>
@@ -7812,10 +7864,10 @@ export default function AccreditationDashboardPage() {
                     <span>Lembaga Penjaminan Mutu (LPM)</span>
                   </div>
                   <h3 className="text-lg font-black text-slate-900">
-                    Kelola Profil & Sertifikat: {selectedProfile.name}
+                    Kelola Profil & Berkas SK: {selectedProfile.name}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Perbarui data SK akreditasi resmi dan unggah salinan sertifikat digital format PDF.
+                    Perbarui data SK akreditasi resmi dan unggah salinan dokumen sertifikat serta SK format PDF.
                   </p>
                 </div>
                 <button
@@ -7939,7 +7991,7 @@ export default function AccreditationDashboardPage() {
                       accept=".pdf,application/pdf"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
-                          setSelectedFile(e.target.files[0]);
+                          setSelectedCertFile(e.target.files[0]);
                         }
                       }}
                       className="hidden"
@@ -7952,17 +8004,17 @@ export default function AccreditationDashboardPage() {
                         <Upload className="w-5 h-5" />
                       </div>
                       <span className="text-xs font-bold text-sky-800">
-                        {selectedFile ? selectedFile.name : "Klik untuk Pilih File PDF dari Komputer"}
+                        {selectedCertFile ? selectedCertFile.name : "Klik untuk Pilih File PDF Sertifikat"}
                       </span>
                       <span className="text-[11px] text-slate-500">
-                        {selectedFile
-                          ? `Ukuran: ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB (Siap diunggah)`
-                          : "Format resmi PDF berkop BAN-PT / LAMEMBA"}
+                        {selectedCertFile
+                          ? `Ukuran: ${(selectedCertFile.size / 1024 / 1024).toFixed(2)} MB (Siap diunggah)`
+                          : "Format resmi PDF berkop sertifikat BAN-PT / LAMEMBA"}
                       </span>
                     </label>
                   </div>
 
-                  {/* Manual / Existing URL alternative */}
+                  {/* Manual / Existing URL alternative for Certificate */}
                   <div className="space-y-1 pt-1">
                     <span className="text-[11px] font-semibold text-slate-500">
                       Atau Tautan File Sertifikat (Google Drive / Cloud Institusi):
@@ -7987,6 +8039,74 @@ export default function AccreditationDashboardPage() {
                           className="underline truncate max-w-xs"
                         >
                           {editFormData.certificateUrl}
+                        </a>
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Upload Dokumen Salinan SK Akreditasi */}
+                <div className="space-y-2 pt-3 border-t border-slate-100">
+                  <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                    <span>File Dokumen Salinan SK Akreditasi (.PDF)</span>
+                    <span className="text-[11px] text-slate-400 font-normal">Maks. 25 MB</span>
+                  </label>
+
+                  <div className="p-4 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 hover:bg-indigo-50/70 transition-colors text-center space-y-2">
+                    <input
+                      type="file"
+                      id="sk-file-input"
+                      accept=".pdf,application/pdf"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setSelectedSkFile(e.target.files[0]);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="sk-file-input"
+                      className="cursor-pointer flex flex-col items-center justify-center gap-1.5"
+                    >
+                      <div className="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center shadow-xs">
+                        <FileCheck2 className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs font-bold text-indigo-900">
+                        {selectedSkFile ? selectedSkFile.name : "Klik untuk Pilih File PDF SK Akreditasi"}
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        {selectedSkFile
+                          ? `Ukuran: ${(selectedSkFile.size / 1024 / 1024).toFixed(2)} MB (Siap diunggah)`
+                          : "Salinan SK Penetapan Akreditasi resmi dari BAN-PT / LAMEMBA"}
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Manual / Existing URL alternative for SK */}
+                  <div className="space-y-1 pt-1">
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      Atau Tautan File SK Akreditasi (Google Drive / Cloud Institusi):
+                    </span>
+                    <input
+                      type="url"
+                      value={editFormData.skDocUrl}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, skDocUrl: e.target.value })
+                      }
+                      placeholder="https://drive.google.com/... atau /uploads/sk/..."
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    {editFormData.skDocUrl && (
+                      <p className="text-[11px] text-indigo-700 flex items-center gap-1 font-medium">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Dokumen SK terpasang:</span>
+                        <a
+                          href={editFormData.skDocUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline truncate max-w-xs"
+                        >
+                          {editFormData.skDocUrl}
                         </a>
                       </p>
                     )}
@@ -8025,7 +8145,7 @@ export default function AccreditationDashboardPage() {
                     {isUploading ? (
                       <>
                         <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Mengunggah PDF...</span>
+                        <span>Mengunggah Berkas PDF...</span>
                       </>
                     ) : isSaving ? (
                       <>
@@ -8035,7 +8155,7 @@ export default function AccreditationDashboardPage() {
                     ) : (
                       <>
                         <CheckCircle2 className="w-4 h-4" />
-                        <span>Simpan Profil & Sertifikat</span>
+                        <span>Simpan Profil & Berkas SK</span>
                       </>
                     )}
                   </button>

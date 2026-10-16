@@ -11,6 +11,7 @@ export interface IAccreditationProfile extends Document {
   validFrom: Date;
   validUntil: Date;
   certificateUrl?: string;
+  skDocUrl?: string;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -324,6 +325,7 @@ const AccreditationProfileSchema = new Schema<IAccreditationProfile>(
     validFrom: { type: Date, required: true },
     validUntil: { type: Date, required: true },
     certificateUrl: { type: String },
+    skDocUrl: { type: String },
     notes: { type: String },
   },
   { timestamps: true }
@@ -646,8 +648,12 @@ const Iapt41EvaluationSchema = new Schema<IIapt41Evaluation>(
   { timestamps: true }
 );
 
+if (mongoose.models.AccreditationProfile && !mongoose.models.AccreditationProfile.schema.paths['skDocUrl']) {
+  delete (mongoose.models as any).AccreditationProfile;
+}
+
 export const AccreditationProfile: Model<IAccreditationProfile> =
-  mongoose.models.AccreditationProfile ||
+  (mongoose.models.AccreditationProfile as Model<IAccreditationProfile>) ||
   mongoose.model<IAccreditationProfile>('AccreditationProfile', AccreditationProfileSchema);
 
 export const LamembaCriteria: Model<ILamembaCriteria> =

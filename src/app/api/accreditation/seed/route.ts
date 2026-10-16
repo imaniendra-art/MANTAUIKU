@@ -24,6 +24,7 @@ export async function POST() {
           validFrom: new Date('2023-08-15'),
           validUntil: new Date('2028-08-15'),
           certificateUrl: 'https://stimi.ac.id/dokumen/sertifikat-akreditasi-institusi-2023.pdf',
+          skDocUrl: 'https://stimi.ac.id/dokumen/sk-akreditasi-institusi-banpt-2023.pdf',
           notes: 'Terakreditasi Baik Sekali oleh BAN-PT dengan masa berlaku hingga Agustus 2028.',
         },
         {
@@ -36,6 +37,7 @@ export async function POST() {
           validFrom: new Date('2023-07-20'),
           validUntil: new Date('2028-07-20'),
           certificateUrl: 'https://stimi.ac.id/dokumen/sertifikat-akreditasi-s1-manajemen-lamemba.pdf',
+          skDocUrl: 'https://stimi.ac.id/dokumen/sk-akreditasi-s1-manajemen-lamemba-2023.pdf',
           notes: 'Terakreditasi Baik Sekali oleh Lembaga Akreditasi Mandiri Ekonomi Manajemen Bisnis dan Akuntansi (LAMEMBA).',
         },
       ]);

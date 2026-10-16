@@ -36,6 +36,7 @@ export async function GET() {
         daysRemaining,
         monthsRemaining,
         certificateUrl: p.certificateUrl,
+        skDocUrl: p.skDocUrl,
         notes: p.notes,
       };
     });

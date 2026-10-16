@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     const entityType = formData.get('entityType') as string | null;
+    const docCategory = ((formData.get('docCategory') as string | null) || (formData.get('docType') as string | null) || 'CERTIFICATE').toUpperCase();
 
     if (!file) {
       return NextResponse.json({ success: false, error: 'File PDF wajib dilampirkan.' }, { status: 400 });
@@ -43,17 +44,21 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'certificates');
+    const isSk = docCategory === 'SK';
+    const folderName = isSk ? 'sk' : 'certificates';
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', folderName);
     await mkdir(uploadDir, { recursive: true });
 
-    const safePrefix = entityType === 'PRODI' ? 'sertifikat-aps-lamemba' : 'sertifikat-apt-banpt';
+    const safePrefix = isSk
+      ? (entityType === 'PRODI' ? 'sk-aps-lamemba' : 'sk-apt-banpt')
+      : (entityType === 'PRODI' ? 'sertifikat-aps-lamemba' : 'sertifikat-apt-banpt');
     const timestamp = Date.now();
     const cleanFileName = `${safePrefix}-${timestamp}.pdf`;
     const fullPath = path.join(uploadDir, cleanFileName);
 
     await writeFile(fullPath, buffer);
 
-    const fileUrl = `/uploads/certificates/${cleanFileName}`;
+    const fileUrl = `/uploads/${folderName}/${cleanFileName}`;
 
     return NextResponse.json({
       success: true,

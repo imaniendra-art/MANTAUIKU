@@ -51,7 +51,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, grade, skNumber, validFrom, validUntil, certificateUrl, notes } = body;
+    const { id, grade, skNumber, validFrom, validUntil, certificateUrl, skDocUrl, notes } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'ID profil akreditasi wajib disertakan.' }, { status: 400 });
@@ -66,6 +66,7 @@ export async function PUT(req: Request) {
         validFrom: validFrom ? new Date(validFrom) : undefined,
         validUntil: validUntil ? new Date(validUntil) : undefined,
         certificateUrl,
+        skDocUrl,
         notes,
       },
       { new: true }
