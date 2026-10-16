@@ -238,6 +238,20 @@ export interface ILamembaDl05TimPenyusunItem {
   peran: string;
 }
 
+export interface ILamembaDl05LembarPengesahanPihak {
+  jabatan: string;
+  nama: string;
+  nikNidn: string;
+}
+
+export interface ILamembaDl05LembarPengesahan {
+  kota?: string;
+  tanggal?: string;
+  kaprodi?: ILamembaDl05LembarPengesahanPihak;
+  ketuaLpm?: ILamembaDl05LembarPengesahanPihak;
+  ketuaPt?: ILamembaDl05LembarPengesahanPihak;
+}
+
 interface IDl05 {
   _id: string;
   academicYear: string;
@@ -274,6 +288,7 @@ interface IDl05 {
   // Sub-Tab 4: Sampul, Identitas, Kata Pengantar, Narasi & Penutup
   identitasPengusul?: ILamembaDl05IdentitasPengusul;
   timPenyusun?: ILamembaDl05TimPenyusunItem[];
+  lembarPengesahan?: ILamembaDl05LembarPengesahan;
   kataPengantar?: string;
   narasiBab1?: string;
   narasiBab2?: string;
@@ -431,6 +446,12 @@ export default function AccreditationDashboardPage() {
   const [editingTimPenyusun, setEditingTimPenyusun] = useState<ILamembaDl05TimPenyusunItem[]>([]);
   const [isSavingTimPenyusun, setIsSavingTimPenyusun] = useState(false);
   const [timPenyusunFeedback, setTimPenyusunFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sub-Tab 4: Edit State for Lembar Pengesahan (Penandatangan 3 Pihak)
+  const [isEditingPengesahan, setIsEditingPengesahan] = useState(false);
+  const [editingPengesahan, setEditingPengesahan] = useState<ILamembaDl05LembarPengesahan>({});
+  const [isSavingPengesahan, setIsSavingPengesahan] = useState(false);
+  const [pengesahanFeedback, setPengesahanFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Sub-Tab 4: Edit State for Kata Pengantar
   const [isEditingKataPengantar, setIsEditingKataPengantar] = useState(false);
@@ -1711,6 +1732,85 @@ export default function AccreditationDashboardPage() {
     }
   };
 
+  // Sub-Tab 4 Handlers: Lembar Pengesahan (Penandatangan 3 Pihak)
+  const handleStartEditPengesahan = () => {
+    setEditingPengesahan(
+      dl05?.lembarPengesahan || {
+        kota: "Makassar",
+        tanggal: "15 Januari 2026",
+        kaprodi: {
+          jabatan: "Ketua Program Studi S1 Manajemen",
+          nama: (dl05?.timPenyusun && dl05.timPenyusun[0]?.nama) || "Drs. H. M. Said, M.Si",
+          nikNidn: (dl05?.timPenyusun && dl05.timPenyusun[0]?.nikNidn) || "NIDN. 0918077501",
+        },
+        ketuaLpm: {
+          jabatan: "Ketua Lembaga Penjaminan Mutu",
+          nama: "Dr. Nurul Fadilah, SE., MM",
+          nikNidn: "NIDN. 0915088201",
+        },
+        ketuaPt: {
+          jabatan: "Ketua STIMI YAPMI Makassar",
+          nama: "Dr. Ibrahim Syah, S.E., M.M.",
+          nikNidn: "NIDN. 0920037601",
+        },
+      }
+    );
+    setIsEditingPengesahan(true);
+    setPengesahanFeedback(null);
+  };
+
+  const handleUpdatePengesahanPihak = (
+    pihak: "kaprodi" | "ketuaLpm" | "ketuaPt",
+    field: "jabatan" | "nama" | "nikNidn",
+    value: string
+  ) => {
+    setEditingPengesahan((prev) => ({
+      ...prev,
+      [pihak]: {
+        ...(prev[pihak] || { jabatan: "", nama: "", nikNidn: "" }),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleUpdatePengesahanMeta = (field: "kota" | "tanggal", value: string) => {
+    setEditingPengesahan((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSavePengesahan = async () => {
+    if (!dl05) return;
+    setIsSavingPengesahan(true);
+    setPengesahanFeedback(null);
+    try {
+      const res = await fetch("/api/accreditation/dl05", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          academicYear: dl05.academicYear,
+          lembarPengesahan: editingPengesahan,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPengesahanFeedback({ type: "success", text: "Pengaturan Penandatangan Lembar Pengesahan berhasil disimpan!" });
+        await loadData();
+        setTimeout(() => {
+          setIsEditingPengesahan(false);
+          setPengesahanFeedback(null);
+        }, 1200);
+      } else {
+        setPengesahanFeedback({ type: "error", text: data.error || "Gagal menyimpan lembar pengesahan." });
+      }
+    } catch {
+      setPengesahanFeedback({ type: "error", text: "Terjadi gangguan jaringan saat menyimpan lembar pengesahan." });
+    } finally {
+      setIsSavingPengesahan(false);
+    }
+  };
+
   // Sub-Tab 4 Handlers: Kata Pengantar
   const handleStartEditKataPengantar = () => {
     setEditingKataPengantar(dl05?.kataPengantar || "");
@@ -2062,27 +2162,45 @@ export default function AccreditationDashboardPage() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-400/20 text-emerald-200 text-xs font-semibold backdrop-blur-md border border-emerald-400/30">
                 <FileCheck2 className="w-3.5 h-3.5 text-emerald-300" />
-                <span>Format Baku Lampiran DL-05 • Sesuai Template Resmi Word LAMEMBA</span>
+                <span>Format Baku Lampiran DL-05 • Standar Regulasi LAMEMBA</span>
               </div>
               <span className="text-[11px] font-mono text-emerald-300/80 px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-800">
                 Kode Dokumen: LAMEMBA-DL-05
               </span>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="space-y-1.5 max-w-3xl">
-                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                  Dokumen Pemantauan & Evaluasi Tahunan Pasca-Akreditasi (DL-05)
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+              <div className="space-y-2 max-w-3xl">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-emerald-300 font-bold">
+                  <span>{dl05.prodiName}</span>
+                  <span>•</span>
+                  <span>Tahun Akademik {dl05.academicYear}</span>
+                  <span>•</span>
+                  <span className="text-emerald-200/90 font-medium">Siklus Pemantauan Pasca-Akreditasi</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
+                  Dokumen Pemantauan & Evaluasi Tahunan <span className="whitespace-nowrap">(DL-05)</span>
                 </h3>
-                <p className="text-xs sm:text-sm text-emerald-100/85 leading-relaxed">
-                  Program Studi: <strong className="text-white">{dl05.prodiName}</strong> • Tahun Akademik: <strong className="text-white">{dl05.academicYear}</strong>. Instrumen baku pemantauan 100% memuat seluruh bab evaluasi diri LAMEMBA (Rekomendasi Asesor, Strategi Renstra, CPL, Profil Dosen, Luaran Riset & PkM, Sitasi, Prestasi Mahasiswa, dan Rekonsiliasi PD-Dikti) serta kewajiban mengoleksi <strong>1 surat rekomendasi resmi LAMEMBA setiap tahun</strong>.
+                <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed text-justify">
+                  Borang resmi penjaminan mutu berkala untuk merekam tindak lanjut rekomendasi asesor, pencapaian sasaran Renstra, jaminan pembelajaran (CPL), profil kualifikasi dosen, luaran Tridharma, hingga pengarsipan surat keputusan rekomendasi tahunan dari Dewan Eksekutif LAMEMBA.
                 </p>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/10 text-emerald-200 text-[11px] font-semibold border border-white/10">
+                    <Check className="w-3 h-3 text-emerald-300" /> 4 Bab Format Baku Word
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/10 text-emerald-200 text-[11px] font-semibold border border-white/10">
+                    <Check className="w-3 h-3 text-emerald-300" /> Rekonsiliasi PD-Dikti Feeder
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/10 text-emerald-200 text-[11px] font-semibold border border-white/10">
+                    <Check className="w-3 h-3 text-emerald-300" /> Koleksi 1 SK Rekomendasi/Tahun
+                  </span>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                 <button
                   onClick={() => setIsPrintDl05ModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-md border border-white/20 transition-all hover:scale-[1.02] cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-md border border-white/20 transition-all hover:scale-[1.02] cursor-pointer shadow-sm"
                 >
                   <Printer className="w-4 h-4 text-emerald-300" />
                   <span>Pratinjau Dokumen Cetak DL-05</span>
@@ -5675,7 +5793,302 @@ export default function AccreditationDashboardPage() {
                 )}
               </div>
 
-              {/* 3. KATA PENGANTAR */}
+              {/* 3. PENGATURAN LEMBAR PENGESAHAN & PENANDATANGAN RESMI (3 PIHAK) */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
+                <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center font-bold">
+                        <FileCheck2 className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-base font-black text-slate-900">
+                        Pengaturan Penandatangan Lembar Pengesahan (3 Pihak)
+                      </h4>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Konfigurasi resmi penandatangan Dokumen DL-05 (Kaprodi, Ketua LPM, dan Ketua Perguruan Tinggi) yang tercetak pada lembar pengesahan borang
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {isEditingPengesahan ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingPengesahan(false)}
+                          disabled={isSavingPengesahan}
+                          className="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all cursor-pointer"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSavePengesahan}
+                          disabled={isSavingPengesahan}
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                        >
+                          {isSavingPengesahan ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                          <span>Simpan Penandatangan</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleStartEditPengesahan}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-bold text-xs transition-all cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit Penandatangan</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {pengesahanFeedback && (
+                  <div
+                    className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
+                      pengesahanFeedback.type === "success"
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border border-rose-200"
+                    }`}
+                  >
+                    {pengesahanFeedback.type === "success" ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                    <span>{pengesahanFeedback.text}</span>
+                  </div>
+                )}
+
+                {!isEditingPengesahan ? (
+                  <div className="space-y-4">
+                    {/* Lokasi & Tanggal Pengesahan Header */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 text-xs">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-teal-600" />
+                        <span className="font-bold text-slate-700">Tempat & Tanggal Pengesahan:</span>
+                        <strong className="text-slate-900 font-black">
+                          {dl05.lembarPengesahan?.kota || "Makassar"}, {dl05.lembarPengesahan?.tanggal || "15 Januari 2026"}
+                        </strong>
+                      </div>
+                      <span className="text-[11px] font-mono text-slate-500 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                        Format Cetak: Lembar 3 Kolom
+                      </span>
+                    </div>
+
+                    {/* 3 Kartu Penandatangan */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Pihak 1: Kaprodi */}
+                      <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-50 to-teal-50/20 border border-teal-200/70 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-teal-800 px-2 py-0.5 rounded-md bg-teal-100">
+                            Pihak I • Penyusun
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-bold text-slate-500 uppercase">
+                            {dl05.lembarPengesahan?.kaprodi?.jabatan || "Ketua Program Studi S1 Manajemen"}
+                          </p>
+                          <p className="text-sm font-black text-slate-900 underline underline-offset-2">
+                            {dl05.lembarPengesahan?.kaprodi?.nama || (dl05.timPenyusun && dl05.timPenyusun[0]?.nama) || "Drs. H. M. Said, M.Si"}
+                          </p>
+                          <p className="text-[11px] font-mono text-slate-600">
+                            {dl05.lembarPengesahan?.kaprodi?.nikNidn || (dl05.timPenyusun && dl05.timPenyusun[0]?.nikNidn) || "NIDN. 0918077501"}
+                          </p>
+                        </div>
+                        <div className="pt-2 border-t border-teal-200/50 text-[10px] text-slate-400">
+                          Penanggung jawab penyusunan borang DL-05
+                        </div>
+                      </div>
+
+                      {/* Pihak 2: LPM */}
+                      <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-50 to-sky-50/20 border border-sky-200/70 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-sky-800 px-2 py-0.5 rounded-md bg-sky-100">
+                            Pihak II • Verifikator
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-bold text-slate-500 uppercase">
+                            {dl05.lembarPengesahan?.ketuaLpm?.jabatan || "Ketua Lembaga Penjaminan Mutu"}
+                          </p>
+                          <p className="text-sm font-black text-slate-900 underline underline-offset-2">
+                            {dl05.lembarPengesahan?.ketuaLpm?.nama || "Dr. Nurul Fadilah, SE., MM"}
+                          </p>
+                          <p className="text-[11px] font-mono text-slate-600">
+                            {dl05.lembarPengesahan?.ketuaLpm?.nikNidn || "NIDN. 0915088201"}
+                          </p>
+                        </div>
+                        <div className="pt-2 border-t border-sky-200/50 text-[10px] text-slate-400">
+                          Audit & verifikasi siklus PPEPP penjaminan mutu
+                        </div>
+                      </div>
+
+                      {/* Pihak 3: Ketua STIMI */}
+                      <div className="p-4 rounded-2xl bg-gradient-to-b from-slate-50 to-indigo-50/20 border border-indigo-200/70 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-indigo-800 px-2 py-0.5 rounded-md bg-indigo-100">
+                            Pihak III • Menyetujui
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[11px] font-bold text-slate-500 uppercase">
+                            {dl05.lembarPengesahan?.ketuaPt?.jabatan || "Ketua STIMI YAPMI Makassar"}
+                          </p>
+                          <p className="text-sm font-black text-slate-900 underline underline-offset-2">
+                            {dl05.lembarPengesahan?.ketuaPt?.nama || "Dr. Ibrahim Syah, S.E., M.M."}
+                          </p>
+                          <p className="text-[11px] font-mono text-slate-600">
+                            {dl05.lembarPengesahan?.ketuaPt?.nikNidn || "NIDN. 0920037601"}
+                          </p>
+                        </div>
+                        <div className="pt-2 border-t border-indigo-200/50 text-[10px] text-slate-400">
+                          Pengesahan pimpinan perguruan tinggi pengusul
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-5 pt-1">
+                    {/* Form Edit Tempat & Tanggal */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Kota Pengesahan</label>
+                        <input
+                          type="text"
+                          value={editingPengesahan.kota || ""}
+                          onChange={(e) => handleUpdatePengesahanMeta("kota", e.target.value)}
+                          placeholder="Makassar"
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-700 block">Tanggal Pengesahan Dokumen</label>
+                        <input
+                          type="text"
+                          value={editingPengesahan.tanggal || ""}
+                          onChange={(e) => handleUpdatePengesahanMeta("tanggal", e.target.value)}
+                          placeholder="15 Januari 2026"
+                          className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Form Edit 3 Pihak */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      {/* Pihak 1: Kaprodi */}
+                      <div className="p-4 rounded-2xl bg-teal-50/30 border border-teal-200 space-y-3">
+                        <div className="text-xs font-black text-teal-900 pb-1 border-b border-teal-200">
+                          Pihak I (Penyusun / Kaprodi)
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-600 block">Jabatan Resmi</label>
+                          <input
+                            type="text"
+                            value={editingPengesahan.kaprodi?.jabatan || ""}
+                            onChange={(e) => handleUpdatePengesahanPihak("kaprodi", "jabatan", e.target.value)}
+                            placeholder="Ketua Program Studi S1 Manajemen"
+                            className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-600 block">Nama Lengkap & Gelar</label>
+                          <input
+                            type="text"
+                            value={editingPengesahan.kaprodi?.nama || ""}
+                            onChange={(e) => handleUpdatePengesahanPihak("kaprodi", "nama", e.target.value)}
+                            placeholder="Drs. H. M. Said, M.Si"
+                            className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-bold"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-600 block">NIDN / NIK</label>
+                          <input
+                            type="text"
+                            value={editingPengesahan.kaprodi?.nikNidn || ""}
+                            onChange={(e) => handleUpdatePengesahanPihak("kaprodi", "nikNidn", e.target.value)}
+                            placeholder="NIDN. 0918077501"
+                            className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Pihak 2: LPM */}
+                      <div className="p-4 rounded-2xl bg-sky-50/30 border border-sky-200 space-y-3">
+                        <div className="text-xs font-black text-sky-900 pb-1 border-b border-sky-200">
+                          Pihak II (Verifikator / Ketua LPM)
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-600 block">Jabatan Resmi</label>
+                          <input
+                            type="text"
+                            value={editingPengesahan.ketuaLpm?.jabatan || ""}
+                            onChange={(e) => handleUpdatePengesahanPihak("ketuaLpm", "jabatan", e.target.value)}
+                            placeholder="Ketua Lembaga Penjaminan Mutu"
+                            className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-600 block">Nama Lengkap & Gelar</label>
+                          <input
+                            type="text"
+                            value={editingPengesahan.ketuaLpm?.nama || ""}
+                            onChange={(e) => handleUpdatePengesahanPihak("ketuaLpm", "nama", e.target.value)}
+                            placeholder="Dr. Nurul Fadilah, SE., MM"
+                            className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-bold"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-600 block">NIDN / NIK</label>
+                          <input
+                            type="text"
+                            value={editingPengesahan.ketuaLpm?.nikNidn || ""}
+                            onChange={(e) => handleUpdatePengesahanPihak("ketuaLpm", "nikNidn", e.target.value)}
+                            placeholder="NIDN. 0915088201"
+                            className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Pihak 3: Ketua STIMI */}
+                      <div className="p-4 rounded-2xl bg-indigo-50/30 border border-indigo-200 space-y-3">
+                        <div className="text-xs font-black text-indigo-900 pb-1 border-b border-indigo-200">
+                          Pihak III (Pimpinan PT / Menyetujui)
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-600 block">Jabatan Resmi</label>
+                          <input
+                            type="text"
+                            value={editingPengesahan.ketuaPt?.jabatan || ""}
+                            onChange={(e) => handleUpdatePengesahanPihak("ketuaPt", "jabatan", e.target.value)}
+                            placeholder="Ketua STIMI YAPMI Makassar"
+                            className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-600 block">Nama Lengkap & Gelar</label>
+                          <input
+                            type="text"
+                            value={editingPengesahan.ketuaPt?.nama || ""}
+                            onChange={(e) => handleUpdatePengesahanPihak("ketuaPt", "nama", e.target.value)}
+                            placeholder="Dr. Ibrahim Syah, S.E., M.M."
+                            className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-bold"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-slate-600 block">NIDN / NIK</label>
+                          <input
+                            type="text"
+                            value={editingPengesahan.ketuaPt?.nikNidn || ""}
+                            onChange={(e) => handleUpdatePengesahanPihak("ketuaPt", "nikNidn", e.target.value)}
+                            placeholder="NIDN. 0920037601"
+                            className="w-full p-2 border border-slate-300 rounded-xl text-xs bg-white font-mono"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 4. KATA PENGANTAR */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-5">
                 <div className="border-b border-slate-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-0.5">
@@ -7065,19 +7478,32 @@ export default function AccreditationDashboardPage() {
                       LEMBAR PENGESAHAN EVALUASI DIRI TAHUNAN AKREDITASI (DL-05)
                     </p>
 
-                    <div className="grid grid-cols-3 gap-4 pt-4 text-center text-[11px]">
+                    <div className="flex justify-end text-[11px] font-semibold text-slate-800 pr-2">
+                      <p>
+                        {dl05.lembarPengesahan?.kota || "Makassar"},{" "}
+                        {dl05.lembarPengesahan?.tanggal || "15 Januari 2026"}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 pt-2 text-center text-[11px]">
                       <div className="space-y-16">
                         <p>
                           Disusun oleh,
                           <br />
-                          <strong>Ketua Program Studi S1 Manajemen</strong>
+                          <strong>
+                            {dl05.lembarPengesahan?.kaprodi?.jabatan || "Ketua Program Studi S1 Manajemen"}
+                          </strong>
                         </p>
                         <div>
                           <p className="font-black underline underline-offset-4">
-                            {(dl05.timPenyusun && dl05.timPenyusun[0]?.nama) || "Drs. H. M. Said, M.Si"}
+                            {dl05.lembarPengesahan?.kaprodi?.nama ||
+                              (dl05.timPenyusun && dl05.timPenyusun[0]?.nama) ||
+                              "Drs. H. M. Said, M.Si"}
                           </p>
                           <p className="text-[9px] text-slate-500 font-mono">
-                            {(dl05.timPenyusun && dl05.timPenyusun[0]?.nikNidn) || "NIDN. 0918077501"}
+                            {dl05.lembarPengesahan?.kaprodi?.nikNidn ||
+                              (dl05.timPenyusun && dl05.timPenyusun[0]?.nikNidn) ||
+                              "NIDN. 0918077501"}
                           </p>
                         </div>
                       </div>
@@ -7086,11 +7512,17 @@ export default function AccreditationDashboardPage() {
                         <p>
                           Diverifikasi oleh,
                           <br />
-                          <strong>Ketua Lembaga Penjaminan Mutu</strong>
+                          <strong>
+                            {dl05.lembarPengesahan?.ketuaLpm?.jabatan || "Ketua Lembaga Penjaminan Mutu"}
+                          </strong>
                         </p>
                         <div>
-                          <p className="font-black underline underline-offset-4">Dr. Nurul Fadilah, SE., MM</p>
-                          <p className="text-[9px] text-slate-500 font-mono">NIDN. 0915088201</p>
+                          <p className="font-black underline underline-offset-4">
+                            {dl05.lembarPengesahan?.ketuaLpm?.nama || "Dr. Nurul Fadilah, SE., MM"}
+                          </p>
+                          <p className="text-[9px] text-slate-500 font-mono">
+                            {dl05.lembarPengesahan?.ketuaLpm?.nikNidn || "NIDN. 0915088201"}
+                          </p>
                         </div>
                       </div>
 
@@ -7098,11 +7530,17 @@ export default function AccreditationDashboardPage() {
                         <p>
                           Mengetahui & Menyetujui,
                           <br />
-                          <strong>Ketua STIMI YAPMI Makassar</strong>
+                          <strong>
+                            {dl05.lembarPengesahan?.ketuaPt?.jabatan || "Ketua STIMI YAPMI Makassar"}
+                          </strong>
                         </p>
                         <div>
-                          <p className="font-black underline underline-offset-4">Dr. Ibrahim Syah, S.E., M.M.</p>
-                          <p className="text-[9px] text-slate-500 font-mono">NIDN. 0920037601</p>
+                          <p className="font-black underline underline-offset-4">
+                            {dl05.lembarPengesahan?.ketuaPt?.nama || "Dr. Ibrahim Syah, S.E., M.M."}
+                          </p>
+                          <p className="text-[9px] text-slate-500 font-mono">
+                            {dl05.lembarPengesahan?.ketuaPt?.nikNidn || "NIDN. 0920037601"}
+                          </p>
                         </div>
                       </div>
                     </div>

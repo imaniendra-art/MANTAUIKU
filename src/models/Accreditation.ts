@@ -210,6 +210,21 @@ export interface ILamembaDl05TimPenyusunItem {
   peran: string;
 }
 
+// Lembar Pengesahan Resmi 3 Pihak Dokumen DL-05
+export interface ILamembaDl05LembarPengesahanPihak {
+  jabatan: string;
+  nama: string;
+  nikNidn: string;
+}
+
+export interface ILamembaDl05LembarPengesahan {
+  kota?: string;
+  tanggal?: string;
+  kaprodi?: ILamembaDl05LembarPengesahanPihak;
+  ketuaLpm?: ILamembaDl05LembarPengesahanPihak;
+  ketuaPt?: ILamembaDl05LembarPengesahanPihak;
+}
+
 export interface ILamembaDl05 extends Document {
   academicYear: string;       // e.g. "2025/2026"
   prodiName: string;          // "Program Studi S1 Manajemen"
@@ -245,6 +260,7 @@ export interface ILamembaDl05 extends Document {
   // Sub-Tab 4: Sampul, Identitas, Kata Pengantar, Narasi & Penutup
   identitasPengusul?: ILamembaDl05IdentitasPengusul;
   timPenyusun: ILamembaDl05TimPenyusunItem[];
+  lembarPengesahan?: ILamembaDl05LembarPengesahan;
   kataPengantar?: string;
   narasiBab1?: string;
   narasiBab2?: string;
@@ -538,6 +554,25 @@ const LamembaDl05Schema = new Schema<ILamembaDl05>(
         peran: { type: String, default: '' },
       },
     ],
+    lembarPengesahan: {
+      kota: { type: String, default: 'Makassar' },
+      tanggal: { type: String, default: '15 Januari 2026' },
+      kaprodi: {
+        jabatan: { type: String, default: 'Ketua Program Studi S1 Manajemen' },
+        nama: { type: String, default: 'Drs. H. M. Said, M.Si' },
+        nikNidn: { type: String, default: 'NIDN. 0918077501' },
+      },
+      ketuaLpm: {
+        jabatan: { type: String, default: 'Ketua Lembaga Penjaminan Mutu' },
+        nama: { type: String, default: 'Dr. Nurul Fadilah, SE., MM' },
+        nikNidn: { type: String, default: 'NIDN. 0915088201' },
+      },
+      ketuaPt: {
+        jabatan: { type: String, default: 'Ketua STIMI YAPMI Makassar' },
+        nama: { type: String, default: 'Dr. Ibrahim Syah, S.E., M.M.' },
+        nikNidn: { type: String, default: 'NIDN. 0920037601' },
+      },
+    },
     kataPengantar: { type: String, default: '' },
     narasiBab1: { type: String, default: '' },
     narasiBab2: { type: String, default: '' },

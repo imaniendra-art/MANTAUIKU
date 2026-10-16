@@ -672,6 +672,27 @@ const DEFAULT_NARASI_BAB_33 =
 const DEFAULT_PENUTUP =
   'Dokumen Pemantauan dan Evaluasi Tahunan Akreditasi Program Studi (Lampiran DL-05) ini merefleksikan transparansi dan komitmen terpadu seluruh sivitas akademika Program Studi Sarjana Manajemen STIMI YAPMI Makassar dalam menjaga mutu tridharma perguruan tinggi. Seluruh capaian, kendala, dan rekomendasi tindak lanjut yang telah dipetakan akan menjadi dasar perbaikan berkala pada siklus penjaminan mutu berikutnya guna memastikan ketercapaian peringkat akreditasi Unggul.';
 
+// 23. Sub-Tab 4: Lembar Pengesahan Resmi 3 Pihak Dokumen DL-05
+const DEFAULT_LEMBAR_PENGESAHAN = {
+  kota: 'Makassar',
+  tanggal: '15 Januari 2026',
+  kaprodi: {
+    jabatan: 'Ketua Program Studi S1 Manajemen',
+    nama: 'Drs. H. M. Said, M.Si',
+    nikNidn: 'NIDN. 0918077501',
+  },
+  ketuaLpm: {
+    jabatan: 'Ketua Lembaga Penjaminan Mutu',
+    nama: 'Dr. Nurul Fadilah, SE., MM',
+    nikNidn: 'NIDN. 0915088201',
+  },
+  ketuaPt: {
+    jabatan: 'Ketua STIMI YAPMI Makassar',
+    nama: 'Dr. Ibrahim Syah, S.E., M.M.',
+    nikNidn: 'NIDN. 0920037601',
+  },
+};
+
 export async function GET(req: Request) {
   try {
     await connectToDatabase();
@@ -723,6 +744,7 @@ export async function GET(req: Request) {
         narasiBab32: DEFAULT_NARASI_BAB_32,
         narasiBab33: DEFAULT_NARASI_BAB_33,
         penutup: DEFAULT_PENUTUP,
+        lembarPengesahan: DEFAULT_LEMBAR_PENGESAHAN,
         perbaikanBerkelanjutanJaminanPembelajaran:
           'Evaluasi berkala siklus PPEPP jaminan pembelajaran telah menghasilkan pembaruan kurikulum berbasis OBE terstandar dan peningkatan ketercapaian kompetensi lulusan di atas 85%.',
         perbaikanBerkelanjutanDosen:
@@ -802,6 +824,9 @@ export async function GET(req: Request) {
     if (dl05.penutup === undefined || dl05.penutup === null) {
       dl05.penutup = DEFAULT_PENUTUP;
     }
+    if (dl05.lembarPengesahan === undefined || dl05.lembarPengesahan === null) {
+      dl05.lembarPengesahan = DEFAULT_LEMBAR_PENGESAHAN as any;
+    }
 
     // Sinkronisasi otomatis file bukti digital ke annualLetters
     if (Array.isArray(dl05.annualLetters)) {
@@ -852,6 +877,7 @@ export async function POST(req: Request) {
       perbaikanBerkelanjutanKemahasiswaan,
       timPenyusun,
       identitasPengusul,
+      lembarPengesahan,
       kataPengantar,
       narasiBab1,
       narasiBab2,
@@ -945,6 +971,10 @@ export async function POST(req: Request) {
     if (identitasPengusul !== undefined) {
       dl05.identitasPengusul = identitasPengusul;
       dl05.markModified('identitasPengusul');
+    }
+    if (lembarPengesahan !== undefined) {
+      dl05.lembarPengesahan = lembarPengesahan;
+      dl05.markModified('lembarPengesahan');
     }
     if (kataPengantar !== undefined) dl05.kataPengantar = kataPengantar;
     if (narasiBab1 !== undefined) dl05.narasiBab1 = narasiBab1;
