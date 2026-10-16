@@ -2204,13 +2204,6 @@ export default function AccreditationDashboardPage() {
 
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
               <div className="space-y-2 max-w-3xl">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-emerald-300 font-bold">
-                  <span>{dl05.prodiName}</span>
-                  <span>•</span>
-                  <span>Tahun Akademik {dl05.academicYear}</span>
-                  <span>•</span>
-                  <span className="text-emerald-200/90 font-medium">Siklus Pemantauan Pasca-Akreditasi</span>
-                </div>
                 <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
                   Dokumen Pemantauan & Evaluasi Tahunan <span className="whitespace-nowrap">(DL-05)</span>
                 </h3>
