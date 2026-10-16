@@ -1655,6 +1655,7 @@ export default function AccreditationDashboardPage() {
       const data = await res.json();
       if (data.success) {
         setIdentitasFeedback({ type: "success", text: "Identitas Pengusul & Sampul berhasil disimpan!" });
+        if (data.data) setDl05(data.data);
         await loadData();
         setTimeout(() => {
           setIsEditingIdentitas(false);
@@ -1672,7 +1673,16 @@ export default function AccreditationDashboardPage() {
 
   // Sub-Tab 4 Handlers: Tim Penyusun
   const handleStartEditTimPenyusun = () => {
-    setEditingTimPenyusun(dl05?.timPenyusun ? JSON.parse(JSON.stringify(dl05.timPenyusun)) : []);
+    const initial = dl05?.timPenyusun ? JSON.parse(JSON.stringify(dl05.timPenyusun)) : [];
+    // Jika anggota 1 masih default atau kosong, sinkronkan dengan nama kaprodi yang telah disimpan
+    if (initial.length > 0 && dl05?.lembarPengesahan?.kaprodi?.nama) {
+      if (!initial[0].nama || initial[0].nama === "Drs. H. M. Said, M.Si") {
+        initial[0].nama = dl05.lembarPengesahan.kaprodi.nama;
+        if (dl05.lembarPengesahan.kaprodi.nikNidn) initial[0].nikNidn = dl05.lembarPengesahan.kaprodi.nikNidn;
+        if (dl05.lembarPengesahan.kaprodi.jabatan) initial[0].jabatan = dl05.lembarPengesahan.kaprodi.jabatan;
+      }
+    }
+    setEditingTimPenyusun(initial);
     setIsEditingTimPenyusun(true);
     setTimPenyusunFeedback(null);
   };
@@ -1717,6 +1727,7 @@ export default function AccreditationDashboardPage() {
       const data = await res.json();
       if (data.success) {
         setTimPenyusunFeedback({ type: "success", text: "Daftar Tim Penyusun berhasil disimpan!" });
+        if (data.data) setDl05(data.data);
         await loadData();
         setTimeout(() => {
           setIsEditingTimPenyusun(false);
@@ -1854,6 +1865,7 @@ export default function AccreditationDashboardPage() {
       const data = await res.json();
       if (data.success) {
         setKataPengantarFeedback({ type: "success", text: "Kata Pengantar berhasil diperbarui!" });
+        if (data.data) setDl05(data.data);
         await loadData();
         setTimeout(() => {
           setIsEditingKataPengantar(false);
@@ -1904,6 +1916,7 @@ export default function AccreditationDashboardPage() {
       const data = await res.json();
       if (data.success) {
         setNarasiFeedback({ type: "success", text: "Seluruh Narasi Pengantar Bab & Penutup berhasil disimpan!" });
+        if (data.data) setDl05(data.data);
         await loadData();
         setTimeout(() => {
           setIsEditingNarasi(false);
@@ -5697,13 +5710,13 @@ export default function AccreditationDashboardPage() {
                               {idx + 1}
                             </td>
                             <td className="border border-slate-200 p-3 font-bold text-slate-900">
-                              {tp.nama}
+                              {idx === 0 && dl05.lembarPengesahan?.kaprodi?.nama ? dl05.lembarPengesahan.kaprodi.nama : tp.nama}
                             </td>
                             <td className="border border-slate-200 p-3 font-mono text-slate-600">
-                              {tp.nikNidn}
+                              {idx === 0 && dl05.lembarPengesahan?.kaprodi?.nikNidn ? dl05.lembarPengesahan.kaprodi.nikNidn : tp.nikNidn}
                             </td>
                             <td className="border border-slate-200 p-3 text-slate-700">
-                              {tp.jabatan}
+                              {idx === 0 && dl05.lembarPengesahan?.kaprodi?.jabatan ? dl05.lembarPengesahan.kaprodi.jabatan : tp.jabatan}
                             </td>
                             <td className="border border-slate-200 p-3">
                               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-sky-50 text-sky-900 border border-sky-200">
@@ -6893,9 +6906,15 @@ export default function AccreditationDashboardPage() {
                       {(dl05.timPenyusun || []).map((tp, idx) => (
                         <tr key={idx} className="align-middle">
                           <td className="border border-slate-300 p-2.5 text-center font-bold text-slate-500">{idx + 1}</td>
-                          <td className="border border-slate-300 p-2.5 font-bold text-slate-950">{tp.nama}</td>
-                          <td className="border border-slate-300 p-2.5 font-mono text-[10px] text-slate-700">{tp.nikNidn}</td>
-                          <td className="border border-slate-300 p-2.5 text-slate-800">{tp.jabatan}</td>
+                          <td className="border border-slate-300 p-2.5 font-bold text-slate-950">
+                            {idx === 0 && dl05.lembarPengesahan?.kaprodi?.nama ? dl05.lembarPengesahan.kaprodi.nama : tp.nama}
+                          </td>
+                          <td className="border border-slate-300 p-2.5 font-mono text-[10px] text-slate-700">
+                            {idx === 0 && dl05.lembarPengesahan?.kaprodi?.nikNidn ? dl05.lembarPengesahan.kaprodi.nikNidn : tp.nikNidn}
+                          </td>
+                          <td className="border border-slate-300 p-2.5 text-slate-800">
+                            {idx === 0 && dl05.lembarPengesahan?.kaprodi?.jabatan ? dl05.lembarPengesahan.kaprodi.jabatan : tp.jabatan}
+                          </td>
                           <td className="border border-slate-300 p-2.5 font-semibold text-slate-900">{tp.peran}</td>
                           <td className="border border-slate-300 p-2.5 text-center h-12">
                             <span className="text-[9px] text-slate-300 block border-b border-dotted border-slate-400 mt-6 mx-2"></span>
@@ -6923,17 +6942,17 @@ export default function AccreditationDashboardPage() {
                   <div className="pt-8 flex justify-end">
                     <div className="text-center space-y-16 w-64 text-xs">
                       <p>
-                        {dl05.identitasPengusul?.kota || "Makassar"},{" "}
-                        {new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                        {dl05.lembarPengesahan?.kota || dl05.identitasPengusul?.kota || "Makassar"},{" "}
+                        {dl05.lembarPengesahan?.tanggal || "15 Januari 2026"}
                         <br />
                         <strong>Ketua Tim Taskforce DL-05,</strong>
                       </p>
                       <div>
                         <p className="font-black underline underline-offset-4">
-                          {(dl05.timPenyusun && dl05.timPenyusun[0]?.nama) || "Drs. H. M. Said, M.Si"}
+                          {dl05.lembarPengesahan?.kaprodi?.nama || (dl05.timPenyusun && dl05.timPenyusun[0]?.nama) || "Drs. H. M. Said, M.Si"}
                         </p>
                         <p className="text-[10px] text-slate-500 font-mono">
-                          {(dl05.timPenyusun && dl05.timPenyusun[0]?.nikNidn) || "NIDN. 0918077501"}
+                          {dl05.lembarPengesahan?.kaprodi?.nikNidn || (dl05.timPenyusun && dl05.timPenyusun[0]?.nikNidn) || "NIDN. 0918077501"}
                         </p>
                       </div>
                     </div>
