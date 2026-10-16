@@ -1993,7 +1993,7 @@ export default function AccreditationDashboardPage() {
           }`}
         >
           <FileCheck2 className="w-4 h-4 text-emerald-600" />
-          <span>Pemantauan Wajib DL-05</span>
+          <span>Pemantauan & Evaluasi</span>
         </button>
       </div>
 
