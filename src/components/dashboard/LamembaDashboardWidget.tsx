@@ -34,6 +34,8 @@ import {
   FileSpreadsheet,
   Star,
   CheckSquare,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IAssessorVerificationCheckItem, ISmartEvidenceCriteria } from "@/app/api/accreditation/criteria/route";
@@ -115,18 +117,21 @@ interface LamembaDashboardWidgetProps {
   data: ILamembaSummaryData;
   isLpm: boolean;
   onRefresh: () => Promise<void>;
+  onSwitchTab?: (tab: "profiles" | "iapt41" | "criteria" | "dl05") => void;
 }
 
 export default function LamembaDashboardWidget({
   data,
   isLpm,
   onRefresh,
+  onSwitchTab,
 }: LamembaDashboardWidgetProps) {
   // Dual Mode Target Switcher: 'BAIK_SEKALI' (DL-05) vs 'UNGGUL' (DL-09 IAU)
   const [targetMode, setTargetMode] = useState<"BAIK_SEKALI" | "UNGGUL">("BAIK_SEKALI");
+  const [showDownloadCenter, setShowDownloadCenter] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSpecial, setFilterSpecial] = useState<
-    "ALL" | "SYARAT_PERLU" | "SYARAT_UNGGUL" | "PERLU_TINDAKAN" | "ENAM_DIMENSI" | "LIMA_BELAS_DIMENSI" | "SYARAT_DOSEN"
+    "ALL" | "SYARAT_PERLU" | "SYARAT_UNGGUL" | "PERLU_TINDAKAN" | "BUKTI_TERSEDIA" | "ENAM_DIMENSI" | "LIMA_BELAS_DIMENSI" | "SYARAT_DOSEN"
   >("ALL");
 
   // LPM Edit Modal State
@@ -185,6 +190,9 @@ export default function LamembaDashboardWidget({
     if (filterSpecial === "PERLU_TINDAKAN") {
       return c.smartEvidence?.digitalEvidenceStatus === "PERLU_TINDAKAN" || c.smartEvidence?.digitalEvidenceStatus === "KOSONG";
     }
+    if (filterSpecial === "BUKTI_TERSEDIA") {
+      return c.smartEvidence?.digitalEvidenceStatus === "TERSEDIA";
+    }
 
     return true;
   });
@@ -213,6 +221,9 @@ export default function LamembaDashboardWidget({
     }
     if (filterSpecial === "PERLU_TINDAKAN") {
       return c.indicators.some((ind) => !ind.verified);
+    }
+    if (filterSpecial === "BUKTI_TERSEDIA") {
+      return c.indicators.every((ind) => ind.verified);
     }
 
     return true;
@@ -462,7 +473,173 @@ export default function LamembaDashboardWidget({
         </div>
       </div>
 
-      {/* 2. CARD MONITORING KELAYAKAN SESUAI MODE YANG DIPILIH */}
+      {/* 2. BAR KONTROL & PUSAT UNDUH DOKUMEN (RINGKAS & HEMAT TEMPAT) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2 rounded-2xl bg-slate-100 border border-slate-200">
+        <div className="flex items-center gap-2 px-2 text-xs font-bold text-slate-700">
+          <GraduationCap className="w-4 h-4 text-sky-600" />
+          <span>Instrumen Evaluasi S1 Manajemen: <strong>{isModeBaikSekali ? "5 Kriteria SN-Dikti (DL-05)" : "7 Kriteria Unggul IAU (DL-09)"}</strong></span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {onSwitchTab && (
+            <button
+              type="button"
+              onClick={() => onSwitchTab("dl05")}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 hover:text-emerald-800 hover:bg-emerald-50 border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Buka Pemantauan DL-05 (Tab 4)</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setShowDownloadCenter(!showDownloadCenter)}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              showDownloadCenter
+                ? "bg-sky-900 text-white shadow-sm"
+                : "bg-white text-slate-700 hover:text-sky-900 hover:bg-sky-50 border border-slate-200"
+            }`}
+          >
+            <Download className="w-3.5 h-3.5 text-sky-600" />
+            <span>Unduh Panduan & Template (4 Berkas)</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showDownloadCenter ? "rotate-180" : ""}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* Collapsible Pusat Unduh Dokumen Panduan & Template */}
+      <AnimatePresence>
+        {showDownloadCenter && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 text-white border border-sky-800/50 shadow-lg space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">
+                    Arsip Resmi LAMEMBA Edisi Terbaru
+                  </span>
+                  <span className="text-xs font-bold text-sky-200">Rujukan & Template Kinerja S1 Manajemen</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowDownloadCenter(false)}
+                  className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 cursor-pointer"
+                  title="Tutup"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-1 text-xs">
+                {/* 1. Panduan Penilaian Akreditasi Unggul DL-09 */}
+                <a
+                  href="/uploads/accreditation/templates/Panduan_Penilaian_Akreditasi_Unggul_DL09_LAMEMBA.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/30 hover:border-amber-400/60 transition-all flex flex-col justify-between gap-2.5 group"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-amber-300 font-bold text-[11px]">
+                      <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span>Instrumen Unggul DL-09 (PDF)</span>
+                    </div>
+                    <strong className="block text-white font-extrabold text-xs group-hover:text-amber-200 transition-colors">
+                      Buku Panduan Akreditasi Unggul LAMEMBA
+                    </strong>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      7 Kriteria, 21 Dimensi, 58 Indikator, 6 Dimensi Kunci, & Syarat Dosen S1 (Tabel 7).
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 text-amber-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-amber-200">
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Buka PDF (552 KB)</span>
+                  </div>
+                </a>
+
+                {/* 2. Panduan Penilaian Status Terakreditasi LAMEMBA 2026 (DL-05) */}
+                <a
+                  href="/uploads/accreditation/templates/Buku_Panduan_Penilaian_Instrumen_LAMEMBA_2026.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 transition-all flex flex-col justify-between gap-2.5 group"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-cyan-300 font-bold text-[11px]">
+                      <FileText className="w-4 h-4 text-cyan-400 shrink-0" />
+                      <span>Panduan Terakreditasi DL-05 (PDF)</span>
+                    </div>
+                    <strong className="block text-white font-extrabold text-xs group-hover:text-cyan-200 transition-colors">
+                      Panduan Penilaian Terakreditasi DL-05
+                    </strong>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      5 Kriteria SN-Dikti, 12 Dimensi, 29 Indikator, dan 15 Indikator Syarat Perlu.
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 text-cyan-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-cyan-200">
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Buka PDF (2.3 MB)</span>
+                  </div>
+                </a>
+
+                {/* 3. Template DKPS Tabel 1 s.d. 8 */}
+                <a
+                  href="/uploads/accreditation/templates/Template_Resmi_DKPS_Tabel_1_sd_8_LAMEMBA_2026.xlsx"
+                  download
+                  className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-400/50 transition-all flex flex-col justify-between gap-2.5 group"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-emerald-300 font-bold text-[11px]">
+                      <FileSpreadsheet className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>Template DKPS Excel</span>
+                    </div>
+                    <strong className="block text-white font-extrabold text-xs group-hover:text-emerald-200 transition-colors">
+                      DKPS Tabel 1 s.d. 8 LAMEMBA 2026
+                    </strong>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      Format resmi Dosen Tetap, EWMP, Tendik, Keuangan TS-2 s.d TS, & Luaran Riset.
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 text-emerald-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-emerald-200">
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Unduh Excel (210 KB)</span>
+                  </div>
+                </a>
+
+                {/* 4. Formulir Surat Permohonan */}
+                <a
+                  href="/uploads/accreditation/templates/Formulir_Permohonan_Akreditasi_LAMEMBA_2026.docx"
+                  download
+                  className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-400/50 transition-all flex flex-col justify-between gap-2.5 group"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-amber-300 font-bold text-[11px]">
+                      <FileUp className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span>Surat Permohonan (Word)</span>
+                    </div>
+                    <strong className="block text-white font-extrabold text-xs group-hover:text-amber-200 transition-colors">
+                      Surat Pengajuan Akreditasi LAMEMBA
+                    </strong>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      Format baku surat pengantar permohonan ke Dewan Eksekutif LAMEMBA.
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 text-amber-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-amber-200">
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Unduh Word (11 KB)</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 3. CARD MONITORING KELAYAKAN SESUAI MODE YANG DIPILIH */}
       {isModeBaikSekali ? (
         // Mode Baik Sekali: Monitoring SN-Dikti 29 Indikator & 15 Syarat Perlu (DL-05)
         snDikti && (
@@ -722,207 +899,7 @@ export default function LamembaDashboardWidget({
         )
       )}
 
-      {/* 3. PUSAT UNDUH DOKUMEN & TEMPLATE RESMI LAMEMBA (DL-05 & DL-09 UNGGUL) */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 text-white border border-sky-800/50 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 shrink-0">
-              <Download className="w-6 h-6 text-cyan-300" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">
-                  Arsip Resmi LAMEMBA Edisi Terbaru
-                </span>
-                <span className="text-xs font-bold text-sky-200">Rujukan & Template Baku</span>
-              </div>
-              <h3 className="text-base font-black text-white mt-1">
-                Pusat Unduh Dokumen Panduan & Template Kinerja Prodi
-              </h3>
-              <p className="text-xs text-sky-200/80">
-                Gunakan template resmi di bawah ini untuk menyiapkan bukti dokumen fisik per butir kriteria akreditasi S1 Manajemen.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-1 text-xs">
-          {/* 1. Panduan Penilaian Akreditasi Unggul DL-09 (BARU) */}
-          <a
-            href="/uploads/accreditation/templates/Panduan_Penilaian_Akreditasi_Unggul_DL09_LAMEMBA.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-4 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/30 hover:border-amber-400/60 transition-all flex flex-col justify-between gap-3 group"
-          >
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-amber-300 font-bold text-[11px]">
-                <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Instrumen Unggul DL-09 (PDF)</span>
-              </div>
-              <strong className="block text-white font-extrabold text-xs group-hover:text-amber-200 transition-colors">
-                Buku Panduan Penilaian Akreditasi Unggul (DL-09) LAMEMBA 2025
-              </strong>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Memuat 7 Kriteria, 21 Dimensi, 58 Indikator, 6 Dimensi Kunci, & Syarat Kualifikasi Dosen S1 (Tabel 7).
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-1.5 text-amber-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-amber-200">
-              <Download className="w-3.5 h-3.5" />
-              <span>Buka / Unduh PDF (552 KB)</span>
-            </div>
-          </a>
-
-          {/* 2. Panduan Penilaian Status Terakreditasi LAMEMBA 2026 (DL-05) */}
-          <a
-            href="/uploads/accreditation/templates/Buku_Panduan_Penilaian_Instrumen_LAMEMBA_2026.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 transition-all flex flex-col justify-between gap-3 group"
-          >
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-cyan-300 font-bold text-[11px]">
-                <FileText className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span>Panduan Penilaian Standar (PDF)</span>
-              </div>
-              <strong className="block text-white font-extrabold text-xs group-hover:text-cyan-200 transition-colors">
-                Buku Panduan Penilaian Instrumen Terakreditasi DL-05
-              </strong>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Memuat 5 Kriteria SN-Dikti, 12 Dimensi, 29 Indikator, dan 15 Indikator Syarat Perlu Terakreditasi.
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-1.5 text-cyan-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-cyan-200">
-              <Download className="w-3.5 h-3.5" />
-              <span>Buka / Unduh PDF (2.3 MB)</span>
-            </div>
-          </a>
-
-          {/* 3. Template DKPS Tabel 1 s.d. 8 */}
-          <a
-            href="/uploads/accreditation/templates/Template_Resmi_DKPS_Tabel_1_sd_8_LAMEMBA_2026.xlsx"
-            download
-            className="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-400/50 transition-all flex flex-col justify-between gap-3 group"
-          >
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-emerald-300 font-bold text-[11px]">
-                <FileSpreadsheet className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Template Kinerja Prodi (Excel)</span>
-              </div>
-              <strong className="block text-white font-extrabold text-xs group-hover:text-emerald-200 transition-colors">
-                Template DKPS Tabel 1 s.d. Tabel 8 LAMEMBA 2026
-              </strong>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Format resmi Tabel Dosen Tetap, EWMP, Tendik, Keuangan TS-2 s.d TS, Mahasiswa, & Luaran Riset/PkM.
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-1.5 text-emerald-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-emerald-200">
-              <Download className="w-3.5 h-3.5" />
-              <span>Unduh Template Excel (210 KB)</span>
-            </div>
-          </a>
-
-          {/* 4. Formulir Surat Permohonan */}
-          <a
-            href="/uploads/accreditation/templates/Formulir_Permohonan_Akreditasi_LAMEMBA_2026.docx"
-            download
-            className="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-400/50 transition-all flex flex-col justify-between gap-3 group"
-          >
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-amber-300 font-bold text-[11px]">
-                <FileUp className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Surat Pengajuan (Word)</span>
-              </div>
-              <strong className="block text-white font-extrabold text-xs group-hover:text-amber-200 transition-colors">
-                Formulir Surat Permohonan Pengajuan Akreditasi LAMEMBA
-              </strong>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Format baku surat pengantar permohonan akreditasi prodi ke Dewan Eksekutif LAMEMBA.
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-1.5 text-amber-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-amber-200">
-              <Download className="w-3.5 h-3.5" />
-              <span>Unduh Format Word (11 KB)</span>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      {/* 4. Banner Status Kepatuhan: Sesuai Kelayakan Riil Dokumen */}
-      {isTargetPassed ? (
-        <motion.div
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-3xl bg-gradient-to-r from-emerald-950/90 via-teal-950/90 to-slate-900 border-2 border-emerald-500/60 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-        >
-          <div className="flex items-start gap-3.5">
-            <div className="p-3 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 shrink-0">
-              <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500 text-slate-950">
-                  Zona Kepatuhan Terverifikasi
-                </span>
-                <span className="text-xs font-bold text-emerald-200">
-                  {isModeBaikSekali
-                    ? `Status Terakreditasi BAIK SEKALI Aman & Terpelihara (${data.prodiProfile.skNumber})`
-                    : "Status Terakreditasi UNGGUL Terpenuhi Sah (DL-09)"}
-                </span>
-              </div>
-              <p className="text-xs text-emerald-100/90 leading-relaxed max-w-3xl">
-                {isModeBaikSekali
-                  ? "Program Studi S1 Manajemen memenuhi seluruh persyaratan operasional mempertahankan peringkat. Seluruh berkas pendukung fisik digital telah terverifikasi sah."
-                  : "Program Studi S1 Manajemen telah memenuhi seluruh 7 Kriteria, 58 Indikator, 6 Dimensi Kunci, dan Syarat Dosen S1 IAU LAMEMBA."}
-              </p>
-            </div>
-          </div>
-
-          <Link
-            href="/dashboard/accreditation"
-            className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shrink-0 transition-all shadow-md flex items-center gap-1.5"
-          >
-            <span>Cek Pemantauan DL-05</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-3xl bg-gradient-to-r from-red-950/90 via-slate-900 to-stone-950 border-2 border-red-500/60 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-        >
-          <div className="flex items-start gap-3.5">
-            <div className="p-3 rounded-2xl bg-red-500/20 border border-red-400/40 text-red-300 shrink-0">
-              <AlertCircle className="w-6 h-6 text-red-400" />
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-600 text-white">
-                  Pangkalan Data Baru: Belum Ada Dokumen
-                </span>
-                <span className="text-xs font-bold text-red-200">
-                  Skor: {activeScore.toFixed(1)} / 100 • Belum Memenuhi Ambang {isModeBaikSekali ? "Terakreditasi (DL-05)" : "Akreditasi Unggul (DL-09)"}
-                </span>
-              </div>
-              <p className="text-xs text-red-100/90 leading-relaxed max-w-3xl">
-                {isModeBaikSekali
-                  ? "Aplikasi berstatus baru dan pangkalan data pembuktian masih kosong (Strict Realism). Seluruh 29 Indikator dan 15 Syarat Perlu berstatus merah hingga berkas fisik diunggah melalui tombol [+ Upload Dokumen / PDF] pada butir indikator."
-                  : "Aplikasi berstatus baru dan pangkalan data pembuktian masih kosong (Strict Realism). Seluruh 58 Indikator, 6 Dimensi Kunci, dan Syarat Dosen S1 berstatus merah hingga berkas fisik diunggah melalui tombol [+ Upload Dokumen / PDF] pada masing-masing indikator."}
-              </p>
-            </div>
-          </div>
-
-          <a
-            href="#indikator-list"
-            className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs shrink-0 transition-all shadow-md flex items-center gap-1.5"
-          >
-            <span>Mulai Unggah Berkas</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
-        </motion.div>
-      )}
-
-      {/* 5. Filter Bar & Search */}
+      {/* 4. Filter Bar & Search */}
       <div id="indikator-list" className="bg-white p-4 rounded-2xl border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
@@ -952,8 +929,9 @@ export default function LamembaDashboardWidget({
         <div className="flex flex-wrap items-center gap-2">
           {isModeBaikSekali ? (
             // Filters for DL-05
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs flex-wrap">
               <button
+                type="button"
                 onClick={() => setFilterSpecial("ALL")}
                 className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                   filterSpecial === "ALL"
@@ -965,6 +943,7 @@ export default function LamembaDashboardWidget({
               </button>
 
               <button
+                type="button"
                 onClick={() => setFilterSpecial("SYARAT_PERLU")}
                 className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1 cursor-pointer ${
                   filterSpecial === "SYARAT_PERLU"
@@ -977,10 +956,24 @@ export default function LamembaDashboardWidget({
               </button>
 
               <button
+                type="button"
+                onClick={() => setFilterSpecial("BUKTI_TERSEDIA")}
+                className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                  filterSpecial === "BUKTI_TERSEDIA"
+                    ? "bg-emerald-100 text-emerald-900 shadow-xs font-black"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                <span>Bukti Lengkap</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setFilterSpecial("PERLU_TINDAKAN")}
                 className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1 cursor-pointer ${
                   filterSpecial === "PERLU_TINDAKAN"
-                    ? "bg-red-100 text-red-900 shadow-xs"
+                    ? "bg-red-100 text-red-900 shadow-xs font-black"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -992,6 +985,7 @@ export default function LamembaDashboardWidget({
             // Filters for DL-09 IAU
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs flex-wrap">
               <button
+                type="button"
                 onClick={() => setFilterSpecial("ALL")}
                 className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                   filterSpecial === "ALL"
@@ -1003,6 +997,7 @@ export default function LamembaDashboardWidget({
               </button>
 
               <button
+                type="button"
                 onClick={() => setFilterSpecial("ENAM_DIMENSI")}
                 className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1 cursor-pointer ${
                   filterSpecial === "ENAM_DIMENSI"
@@ -1015,6 +1010,7 @@ export default function LamembaDashboardWidget({
               </button>
 
               <button
+                type="button"
                 onClick={() => setFilterSpecial("LIMA_BELAS_DIMENSI")}
                 className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1 cursor-pointer ${
                   filterSpecial === "LIMA_BELAS_DIMENSI"
@@ -1027,6 +1023,7 @@ export default function LamembaDashboardWidget({
               </button>
 
               <button
+                type="button"
                 onClick={() => setFilterSpecial("SYARAT_DOSEN")}
                 className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1 cursor-pointer ${
                   filterSpecial === "SYARAT_DOSEN"
@@ -1039,6 +1036,20 @@ export default function LamembaDashboardWidget({
               </button>
 
               <button
+                type="button"
+                onClick={() => setFilterSpecial("BUKTI_TERSEDIA")}
+                className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                  filterSpecial === "BUKTI_TERSEDIA"
+                    ? "bg-emerald-100 text-emerald-900 shadow-xs font-black"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                <span>Bukti Lengkap</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setFilterSpecial("PERLU_TINDAKAN")}
                 className={`px-3 py-1 rounded-lg font-bold transition-all flex items-center gap-1 cursor-pointer ${
                   filterSpecial === "PERLU_TINDAKAN"
@@ -1053,6 +1064,7 @@ export default function LamembaDashboardWidget({
           )}
         </div>
       </div>
+
 
       {/* 6. GRID KRITERIA SESUAI MODE */}
       {isModeBaikSekali ? (
@@ -1248,6 +1260,37 @@ export default function LamembaDashboardWidget({
                                   </span>
                                   {chk.evidenceDoc}
                                 </div>
+
+                                {/* Kotak Hibrida Sinkronisasi Sistem (Opsi B) */}
+                                {chk.systemSourceData && (
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-sky-50/90 border border-sky-200/90 text-[11px] text-sky-950 shadow-2xs">
+                                    <div className="flex items-center gap-2">
+                                      <div className="p-1.5 rounded-lg bg-sky-600/10 text-sky-700 shrink-0">
+                                        <Database className="w-3.5 h-3.5" />
+                                      </div>
+                                      <div>
+                                        <div className="flex items-center gap-1.5">
+                                          <span className="font-extrabold text-sky-900">{chk.systemSourceData.title}</span>
+                                          {chk.systemSourceData.badge && (
+                                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-sky-200/70 text-sky-800">
+                                              {chk.systemSourceData.badge}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <p className="text-[10px] text-slate-600 font-medium">
+                                          {chk.systemSourceData.countText}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <Link
+                                      href={chk.systemSourceData.href}
+                                      className="inline-flex items-center gap-1 text-[11px] font-black text-sky-700 hover:text-sky-950 hover:underline shrink-0 bg-white px-2.5 py-1 rounded-lg border border-sky-200/60 shadow-2xs"
+                                    >
+                                      <span>{chk.systemSourceData.actionLabel}</span>
+                                      <ExternalLink className="w-3 h-3 text-sky-600" />
+                                    </Link>
+                                  </div>
+                                )}
 
                                 {chk.verified && chk.fileUrl && (
                                   <div className="flex items-center gap-3 pt-1 text-[11px] text-emerald-800">
@@ -1508,6 +1551,37 @@ export default function LamembaDashboardWidget({
                                 </span>
                                 {ind.evidenceDoc}
                               </div>
+
+                              {/* Kotak Hibrida Sinkronisasi Sistem (Opsi B) */}
+                              {ind.systemSourceData && (
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-sky-50/90 border border-sky-200/90 text-[11px] text-sky-950 shadow-2xs">
+                                  <div className="flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-sky-600/10 text-sky-700 shrink-0">
+                                      <Database className="w-3.5 h-3.5" />
+                                    </div>
+                                    <div>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="font-extrabold text-sky-900">{ind.systemSourceData.title}</span>
+                                        {ind.systemSourceData.badge && (
+                                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-sky-200/70 text-sky-800">
+                                            {ind.systemSourceData.badge}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-[10px] text-slate-600 font-medium">
+                                        {ind.systemSourceData.countText}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <Link
+                                    href={ind.systemSourceData.href}
+                                    className="inline-flex items-center gap-1 text-[11px] font-black text-sky-700 hover:text-sky-950 hover:underline shrink-0 bg-white px-2.5 py-1 rounded-lg border border-sky-200/60 shadow-2xs"
+                                  >
+                                    <span>{ind.systemSourceData.actionLabel}</span>
+                                    <ExternalLink className="w-3 h-3 text-sky-600" />
+                                  </Link>
+                                </div>
+                              )}
 
                               {ind.verified && ind.fileUrl && (
                                 <div className="flex items-center gap-3 pt-1 text-[11px] text-emerald-800">

@@ -4,12 +4,24 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import connectToDatabase from '@/lib/db';
 import { LamembaCriteria, AccreditationProfile, AccreditationEvidence } from '@/models/Accreditation';
 import { SpmiDocument } from '@/models/SpmiDocument';
+import { SpmiVaultFile } from '@/models/SpmiVaultFile';
 import { AmiPeriod, AmiFinding } from '@/models/Ami';
 import Achievement from '@/models/Achievement';
 import IKUMetadata from '@/models/IKUMetadata';
-import { TracerStudyResponse, EmployerSurveyResponse } from '@/models/Evaluation';
+import {
+  TracerStudyResponse,
+  EmployerSurveyResponse,
+  EdoLecturerEvaluation,
+  EkaServiceEvaluation,
+} from '@/models/Evaluation';
 import Profile from '@/models/Profile';
-import { evaluateLamembaDl09, IDl09UnggulSummary } from '@/lib/accreditation/lamemba-dl09';
+import {
+  evaluateLamembaDl09,
+  IDl09UnggulSummary,
+  ISystemSourceData,
+} from '@/lib/accreditation/lamemba-dl09';
+
+export type { ISystemSourceData } from '@/lib/accreditation/lamemba-dl09';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +37,7 @@ export interface IAssessorVerificationCheckItem {
   fileName?: string;
   uploadedAt?: string;
   requiredForUnggul?: boolean;
+  systemSourceData?: ISystemSourceData;
 }
 
 export interface ISmartEvidenceCriteria {
@@ -143,10 +156,30 @@ export async function GET() {
       accreditationProfiles,
       campusProfile,
       uploadedEvidences,
+      spmiDocs,
+      spmiVaultFiles,
+      amiPeriods,
+      amiFindings,
+      achievements,
+      ikuMetadataList,
+      tracerCount,
+      employerSurveyCount,
+      ekaEvaluations,
+      edoEvaluations,
     ] = await Promise.all([
       AccreditationProfile.find().lean(),
       Profile.findOne().lean(),
       AccreditationEvidence.find({ targetType: 'PRODI' }).lean(),
+      SpmiDocument.find().lean(),
+      SpmiVaultFile.find().lean(),
+      AmiPeriod.find().lean(),
+      AmiFinding.find().lean(),
+      Achievement.find().lean(),
+      IKUMetadata.find().lean(),
+      TracerStudyResponse.countDocuments(),
+      EmployerSurveyResponse.countDocuments(),
+      EkaServiceEvaluation.find().lean(),
+      EdoLecturerEvaluation.find().lean(),
     ]);
 
     // Build Evidence Map by itemKey
@@ -154,6 +187,107 @@ export async function GET() {
     uploadedEvidences.forEach((ev) => {
       evidenceMap.set(ev.itemKey, ev);
     });
+
+    // Build Hybrid Insights dari Modul-Modul MANTAUIKU (Opsi B)
+    const validSpmiBooks = spmiDocs.filter((d) => d.status === 'DITETAPKAN_BERLAKU');
+    const validVaultFiles = spmiVaultFiles.filter((f) => f.statusDocument !== 'KADALUARSA');
+    const totalEffectiveSpmiCount = validSpmiBooks.length + validVaultFiles.length;
+    const activeAmiPeriod = amiPeriods.find((p) => p.status === 'ACTIVE' || p.status === 'COMPLETED');
+
+    const ikuCodeToIdMap = new Map<string, string>();
+    ikuMetadataList.forEach((meta) => {
+      ikuCodeToIdMap.set(meta.code, meta._id.toString());
+    });
+
+    const getAchievementForIku = (code: string) => {
+      const id = ikuCodeToIdMap.get(code);
+      if (!id) return null;
+      return achievements.find((a) => a.ikuId?.toString() === id);
+    };
+
+    const iku4Ach = getAchievementForIku('IKU 4');
+    const iku5Ach = getAchievementForIku('IKU 5');
+    const iku6Ach = getAchievementForIku('IKU 6');
+
+    // 1. Insight SPMI & AMI
+    const spmiSourceData: ISystemSourceData = {
+      title: 'Sistem Penjaminan Mutu Internal',
+      countText: `${totalEffectiveSpmiCount > 0 ? totalEffectiveSpmiCount + ' Dokumen SPMI Tersedia' : 'Pangkalan Dokumen SPMI'} • ${activeAmiPeriod ? 'Siklus AMI (' + activeAmiPeriod.academicYear + ')' : 'Siklus PPEPP Aktif'}`,
+      href: '/dashboard/spmi',
+      actionLabel: 'Buka Dokumen SPMI & AMI',
+      badge: 'Modul SPMI/AMI',
+    };
+
+    // 2. Insight Dosen & SDM (IKU 4)
+    const dosenIkuSourceData: ISystemSourceData = {
+      title: 'Kualifikasi Dosen & SDM',
+      countText: iku4Ach
+        ? `Capaian IKU 4: ${iku4Ach.achievedValue}${iku4Ach.unit || '%'} Dosen S3/Praktisi (Target: ${iku4Ach.targetValue}${iku4Ach.unit || '%'})`
+        : 'Terhubung ke Modul Capaian IKU 4 (Kualifikasi Dosen)',
+      href: '/dashboard/achievements',
+      actionLabel: 'Buka Capaian IKU 4',
+      badge: 'Modul IKU',
+    };
+
+    // 3. Insight Evaluasi Dosen (EDO)
+    const edoSourceData: ISystemSourceData = {
+      title: 'Evaluasi Dosen oleh Mahasiswa (EDO)',
+      countText: `${edoEvaluations.length} Data Penilaian Mengajar Dosen (EDO) Terdata`,
+      href: '/dashboard/evaluations',
+      actionLabel: 'Buka Hasil EDO',
+      badge: 'Modul Evaluasi',
+    };
+
+    // 4. Insight Layanan Tendik & Sarpras (EKA)
+    const ekaSourceData: ISystemSourceData = {
+      title: 'Evaluasi Kinerja Layanan Akademik & Tendik (EKA)',
+      countText: `${ekaEvaluations.length} Responden Survei Kepuasan Layanan & Tendik (EKA)`,
+      href: '/dashboard/evaluations',
+      actionLabel: 'Buka Hasil EKA',
+      badge: 'Modul Evaluasi',
+    };
+
+    // 5. Insight Tracer Study & Kepuasan Pengguna
+    const tracerSourceData: ISystemSourceData = {
+      title: 'Tracer Study & Pengguna Lulusan',
+      countText: `${tracerCount} Responden Alumni • ${employerSurveyCount} Responden Mitra Pengguna`,
+      href: '/dashboard/evaluations',
+      actionLabel: 'Buka Tracer Study',
+      badge: 'Modul Evaluasi',
+    };
+
+    // 6. Insight Riset & Publikasi Dosen (IKU 5)
+    const risetIkuSourceData: ISystemSourceData = {
+      title: 'Luaran Riset & Publikasi Ilmiah',
+      countText: iku5Ach
+        ? `Capaian IKU 5: ${iku5Ach.achievedValue} Luaran Riset/HKI Terverifikasi`
+        : 'Terhubung ke Modul IKU 5 (Publikasi & Riset Dosen)',
+      href: '/dashboard/achievements',
+      actionLabel: 'Buka Capaian IKU 5',
+      badge: 'Modul IKU',
+    };
+
+    // 7. Insight Kemitraan Kerjasama (IKU 6)
+    const kemitraanIkuSourceData: ISystemSourceData = {
+      title: 'Kemitraan & Kerjasama EMBA',
+      countText: iku6Ach
+        ? `Capaian IKU 6: ${iku6Ach.achievedValue} Mitra Kerjasama Aktif`
+        : 'Terhubung ke Modul IKU 6 (Kemitraan)',
+      href: '/dashboard/achievements',
+      actionLabel: 'Buka Capaian IKU 6',
+      badge: 'Modul IKU',
+    };
+
+    // System Sources Map untuk DL-09
+    const systemSourcesMap = new Map<string, ISystemSourceData>();
+    systemSourcesMap.set('LAM-U21', spmiSourceData);
+    systemSourcesMap.set('LAM-U31', dosenIkuSourceData);
+    systemSourcesMap.set('LAM-U36', edoSourceData);
+    systemSourcesMap.set('LAM-U37', ekaSourceData);
+    systemSourcesMap.set('LAM-U39', ekaSourceData);
+    systemSourcesMap.set('LAM-U51', tracerSourceData);
+    systemSourcesMap.set('LAM-U53', risetIkuSourceData);
+    systemSourcesMap.set('LAM-U54', kemitraanIkuSourceData);
 
     // Evaluasi 4 Syarat Perlu (Knockout Criteria) Status UNGGUL LAMEMBA:
     // STRICT REALISM: HANYA LOLOS JIKA BENAR-BENAR TELAH DIUNGGAH BERKAS BUKTI FISIK DIGITAL
@@ -175,7 +309,8 @@ export async function GET() {
       itemTitle: string,
       defaultDocName: string,
       isSyaratPerlu: boolean,
-      requiredForUnggul = false
+      requiredForUnggul = false,
+      systemSourceData?: ISystemSourceData
     ): IAssessorVerificationCheckItem => {
       const uploaded = evidenceMap.get(itemKey);
       if (uploaded && uploaded.fileUrl) {
@@ -191,6 +326,7 @@ export async function GET() {
           fileName: uploaded.originalName || uploaded.fileName,
           uploadedAt: uploaded.updatedAt?.toISOString() || uploaded.createdAt?.toISOString(),
           requiredForUnggul,
+          systemSourceData,
         };
       }
 
@@ -204,6 +340,7 @@ export async function GET() {
         isSyaratPerlu,
         evidenceDoc: defaultDocName,
         requiredForUnggul,
+        systemSourceData,
       };
     };
 
@@ -271,7 +408,8 @@ export async function GET() {
               'UPPS/PS menjalankan sistem manajemen mutu internal yang diimplementasikan secara konsisten, efektif dan efisien serta melaporkan hasil penjaminan mutu secara berkala untuk tindak lanjut peningkatan mutu UPPS dan PS dalam menjalankan Tridharma.',
               'Dokumen SPMI Siklus PPEPP (Kebijakan, Manual, Standar, Formulir, & Laporan RTM/AMI)',
               true,  // (*) Syarat Perlu
-              true   // Syarat Perlu Unggul
+              true,  // Syarat Perlu Unggul
+              spmiSourceData
             ),
           ];
           break;
@@ -291,7 +429,8 @@ export async function GET() {
               'UPPS/PS menunjukkan bukti penetapan dan penggunaan kriteria dalam menentukan kualifikasi dosen untuk mendukung fokus Tridharma dengan memerhatikan SN Dikti, SAN-Dikti, misi, visi, tujuan dan sasaran, serta strategi UPPS/PS yang berkaitan dengan tingkat pendidikan, jenjang jabatan akademik, bidang keilmuan, kepakaran, dan rekognisi dosen dengan jumlah yang cukup (minimal lima dosen tetap) sesuai fokus Tridharma Perguruan Tinggi.',
               'DKPS Tabel 1 & 2: Profil DTPS (Minimal 5 Dosen Tetap Linier, Ijazah S2/S3 & Jafung)',
               true,  // (*) Syarat Perlu
-              true   // Syarat Perlu Unggul
+              true,  // Syarat Perlu Unggul
+              dosenIkuSourceData
             ),
             makeCheckItem(
               'lam-07-matriks-penugasan-dosen',
@@ -328,7 +467,8 @@ export async function GET() {
               'UPPS menunjukkan bukti telah memberi dukungan dan fasilitas secara terstruktur dan berkelanjutan kepada dosen untuk memajukan pendidikan, ilmu pengetahuan, praktik profesional, kerjasama/keterlibatan dan rekognisi di bidang EMBA.',
               'Bukti Dukungan Finansial & Fasilitas Riset, Sertifikasi Profesi BNSP/Industri, & Konferensi EMBA',
               false,
-              false
+              false,
+              kemitraanIkuSourceData
             ),
             makeCheckItem(
               'lam-11-evaluasi-kinerja-dosen',
@@ -337,7 +477,8 @@ export async function GET() {
               'UPPS/PS menunjukkan bukti telah melakukan evaluasi proses secara sistematik, terstruktur, dan berkelanjutan terhadap rekrutmen, pengembangan dosen, dan bukti pengukuran kinerja dosen dalam bidang pendidikan, penelitian, dan PKM.',
               'Dokumen Hasil Evaluasi Kinerja Dosen Berkala (EDO, Peer Review Tridharma, & SK Reward/Punishment)',
               false,
-              false
+              false,
+              edoSourceData
             ),
             // Dimensi 5: Kecukupan dan Kualifikasi Tenaga Kependidikan
             makeCheckItem(
@@ -347,7 +488,8 @@ export async function GET() {
               'UPPS/PS menunjukkan bukti telah memiliki dan menggunakan kriteria untuk menentukan kualifikasi dan jumlah tenaga kependidikan (minimal dua orang untuk layanan dan satu orang untuk perpustakaan) dengan memerhatikan SN Dikti untuk mendukung kegiatan UPPS/PS dalam mencapai misi, visi, tujuan dan sasaran, serta strategi.',
               'DKPS Tabel 5: Profil Tendik (Min. 2 Staf Layanan Akademik/IT & 1 Pustakawan Berkelayakan)',
               true,  // (*) Syarat Perlu
-              false
+              false,
+              ekaSourceData
             ),
             makeCheckItem(
               'lam-13-sertifikat-kompetensi-tendik',
@@ -366,7 +508,8 @@ export async function GET() {
               'UPPS/PS menunjukkan bukti memiliki dan melaksanakan rencana rekrutmen dan pengembangan tenaga kependidikan secara sistematik, terstruktur, dan berkelanjutan.',
               'Rencana & Laporan Pelaksanaan Rekrutmen serta Pelatihan/Upskilling Tenaga Kependidikan',
               true,  // (*) Syarat Perlu
-              false
+              false,
+              ekaSourceData
             ),
             makeCheckItem(
               'lam-15-formasi-abk-tendik',
@@ -477,7 +620,8 @@ export async function GET() {
               'UPPS/PS menunjukkan bukti analisis dan evaluasi hasil pembelajaran.',
               'Laporan Hasil Pengukuran Ketercapaian CPL Mahasiswa & Rubrik Penilaian Portofolio Lulusan',
               true,  // (*) Syarat Perlu
-              true   // Syarat Perlu Unggul
+              true,  // Syarat Perlu Unggul
+              tracerSourceData
             ),
             makeCheckItem(
               'lam-25-tindak-lanjut-intervensi-pembelajaran',
@@ -503,7 +647,8 @@ export async function GET() {
               'UPPS/PS menunjukkan bukti bahwa kegiatan dan hasil penelitiannya mampu berkontribusi dalam meningkatkan kompetensi dosen.',
               'DKPS Tabel 3b & 8: Laporan Publikasi Ilmiah Dosen pada Jurnal Terakreditasi Sinta/Scopus & HKI',
               true,  // (*) Syarat Perlu
-              false
+              false, // requiredForUnggul
+              risetIkuSourceData
             ),
             makeCheckItem(
               'lam-27-integrasi-riset-dalam-pbm',
@@ -690,7 +835,7 @@ export async function GET() {
       },
     };
 
-    const dl09Summary: IDl09UnggulSummary = evaluateLamembaDl09(evidenceMap);
+    const dl09Summary: IDl09UnggulSummary = evaluateLamembaDl09(evidenceMap, systemSourcesMap);
 
     return NextResponse.json({
       success: true,

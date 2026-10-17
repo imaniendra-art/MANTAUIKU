@@ -24,11 +24,20 @@ export interface IDl09IndicatorItem {
   cluster: 'INPUT' | 'PROSES' | 'OUTPUT_OUTCOME';
 }
 
+export interface ISystemSourceData {
+  title: string;
+  countText: string;
+  href: string;
+  actionLabel: string;
+  badge?: string;
+}
+
 export interface IDl09EvaluatedIndicator extends IDl09IndicatorItem {
   verified: boolean;
   fileUrl?: string;
   fileName?: string;
   uploadedAt?: string;
+  systemSourceData?: ISystemSourceData;
 }
 
 export interface IDl09CriterionEnriched {
@@ -996,11 +1005,15 @@ export const DL09_CRITERIA_METADATA = [
 /**
  * Evaluasi Lengkap Instrumen Akreditasi Unggul (DL-09) Berdasarkan Berkas Riil (Strict Realism)
  */
-export function evaluateLamembaDl09(evidenceMap: Map<string, any>): IDl09UnggulSummary {
+export function evaluateLamembaDl09(
+  evidenceMap: Map<string, any>,
+  systemSourcesMap?: Map<string, ISystemSourceData>
+): IDl09UnggulSummary {
   // 1. Evaluasi 58 Indikator
   const evaluatedIndicators: IDl09EvaluatedIndicator[] = DL09_58_INDIKATORS.map((ind) => {
     const uploaded = evidenceMap.get(ind.itemKey);
     const isVerified = Boolean(uploaded && uploaded.fileUrl);
+    const systemSourceData = systemSourcesMap?.get(ind.code) || systemSourcesMap?.get(ind.itemKey);
 
     return {
       ...ind,
@@ -1008,6 +1021,7 @@ export function evaluateLamembaDl09(evidenceMap: Map<string, any>): IDl09UnggulS
       fileUrl: uploaded?.fileUrl,
       fileName: uploaded?.originalName || uploaded?.fileName,
       uploadedAt: uploaded?.updatedAt?.toISOString() || uploaded?.createdAt?.toISOString(),
+      systemSourceData,
     };
   });
 

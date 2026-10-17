@@ -27,9 +27,14 @@ import {
   FileText,
   FileUp,
   ExternalLink,
-  AlertCircle
+  AlertCircle,
+  FileSpreadsheet,
+  ChevronDown,
+  ChevronUp,
+  Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Iapt41LedDocumentBuilder from "./Iapt41LedDocumentBuilder";
 
 export const getEvidenceLinks = (nomor: number) => {
   if (nomor === 1 || nomor === 2 || nomor === 3) {
@@ -43,15 +48,22 @@ export const getEvidenceLinks = (nomor: number) => {
       { label: "Berkas SK & Sertifikat Prodi", href: "/dashboard/accreditation", icon: Award },
     ];
   }
+  if (nomor === 5) {
+    return [
+      { label: "Standar Kurikulum OBE SPMI", href: "/dashboard/spmi", icon: BookOpen },
+      { label: "Evaluasi Dosen oleh Mhs (EDO)", href: "/dashboard/evaluations", icon: FileCheck2 },
+    ];
+  }
+  if (nomor >= 6 && nomor <= 13) {
+    return [
+      { label: "Data Dosen & Profil Kampus", href: "/dashboard/profile", icon: Building2 },
+      { label: "Capaian Dosen (IKU 9 / Rasio)", href: "/dashboard/achievements", icon: Sparkles },
+    ];
+  }
   if (nomor === 14 || nomor === 15) {
     return [
       { label: "Rekap Tracer Study CDC Alumni", href: "/dashboard/evaluations", icon: FileCheck2 },
       { label: "Capaian IKU 2 (Serapan Kerja)", href: "/dashboard/achievements", icon: Sparkles },
-    ];
-  }
-  if (nomor === 34) {
-    return [
-      { label: "Survei Kepuasan Sivitas", href: "/dashboard/evaluations", icon: FileCheck2 },
     ];
   }
   if (nomor >= 16 && nomor <= 19) {
@@ -70,6 +82,29 @@ export const getEvidenceLinks = (nomor: number) => {
     return [
       { label: "Profil Tata Pamong & Statuta", href: "/dashboard/profile", icon: Building2 },
       { label: "Laporan Keuangan & KAP WTP", href: "/dashboard/reports", icon: FileCheck2 },
+    ];
+  }
+  if (nomor === 26 || nomor === 27) {
+    return [
+      { label: "Evaluasi Layanan Sivitas (EKA)", href: "/dashboard/evaluations", icon: FileCheck2 },
+      { label: "Standar Kemahasiswaan SPMI", href: "/dashboard/spmi", icon: BookOpen },
+    ];
+  }
+  if (nomor === 32 || nomor === 33) {
+    return [
+      { label: "Capaian Kerjasama Mitra (IKU 6)", href: "/dashboard/achievements", icon: Sparkles },
+      { label: "Sistem Informasi & Profil", href: "/dashboard/profile", icon: Building2 },
+    ];
+  }
+  if (nomor === 34) {
+    return [
+      { label: "Survei Kepuasan Sivitas (EKA/EDO)", href: "/dashboard/evaluations", icon: FileCheck2 },
+    ];
+  }
+  if (nomor >= 36 && nomor <= 39) {
+    return [
+      { label: "Capaian IKU Khas STIM LPI", href: "/dashboard/achievements", icon: Sparkles },
+      { label: "Laporan Evaluasi Diri (LED)", href: "/dashboard/reports", icon: FileCheck2 },
     ];
   }
   return [
@@ -159,20 +194,26 @@ interface Iapt41DashboardWidgetProps {
   data: IIapt41Summary;
   isLpm: boolean;
   onRefresh: () => Promise<void>;
+  onSwitchTab?: (tab: "profiles" | "iapt41" | "criteria" | "dl05") => void;
 }
 
 export default function Iapt41DashboardWidget({
   data,
   isLpm,
   onRefresh,
+  onSwitchTab,
 }: Iapt41DashboardWidgetProps) {
   // Dual Mode Target: "TERAKREDITASI" (Default Hijau/Aman) vs "UNGGUL" (Eskalasi)
   const [targetMode, setTargetMode] = useState<"TERAKREDITASI" | "UNGGUL">("TERAKREDITASI");
+  // Sub-Tab Navigation: "matriks" vs "led_builder"
+  const [activeIaptSubTab, setActiveIaptSubTab] = useState<"matriks" | "led_builder">("matriks");
+  // Toggle Pusat Unduh Regulasi & Template (Hemat ruang)
+  const [showDownloadCenter, setShowDownloadCenter] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCram, setSelectedCram] = useState<"ALL" | "C" | "R" | "A" | "M">("ALL");
   const [filterSpecial, setFilterSpecial] = useState<
-    "ALL" | "CRITICAL_ALERT" | "SYARAT_UNGGUL" | "SYARAT_TERAKREDITASI" | "BUKTI_KOSONG" | "BUKTI_TERSEDIA"
+    "ALL" | "CRITICAL_ALERT" | "SYARAT_UNGGUL" | "SYARAT_TERAKREDITASI" | "BUKTI_KOSONG" | "BUKTI_TERSEDIA" | "BUKTI_PERLU_TINDAKAN"
   >("ALL");
 
   // Evidence Upload Modal State
@@ -319,6 +360,8 @@ export default function Iapt41DashboardWidget({
       matchesSpecial = item.smartEvidence?.digitalEvidenceStatus === "KOSONG";
     } else if (filterSpecial === "BUKTI_TERSEDIA") {
       matchesSpecial = item.smartEvidence?.digitalEvidenceStatus === "TERSEDIA";
+    } else if (filterSpecial === "BUKTI_PERLU_TINDAKAN") {
+      matchesSpecial = item.smartEvidence?.digitalEvidenceStatus === "PERLU_TINDAKAN";
     }
 
     return matchesSearch && matchesCram && matchesSpecial;
@@ -460,433 +503,442 @@ export default function Iapt41DashboardWidget({
         </div>
       </div>
 
-      {/* PUSAT UNDUH DOKUMEN REGULASI RESMI BAN-PT (IAPT 4.1) */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 text-white border border-sky-800/50 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 shrink-0">
-              <Download className="w-6 h-6 text-cyan-300" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">
-                  Regulasi Resmi BAN-PT 2025/2026
-                </span>
-                <span className="text-xs font-bold text-sky-200">Peraturan BAN-PT No. 35 Tahun 2025</span>
-              </div>
-              <h3 className="text-base font-black text-white mt-1">
-                Pusat Unduh Dokumen Instrumen IAPT 4.1 & Template Evaluasi Mandiri
-              </h3>
-              <p className="text-xs text-sky-200/80">
-                Gunakan berkas regulasi resmi dan instrumen excel di bawah ini untuk persiapan audit dan pengunggahan berkas bukti akreditasi institusi.
-              </p>
-            </div>
-          </div>
+      {/* SUB-TAB NAVIGATOR: MATRIKS 39 BUTIR vs DOKUMEN LED RESMI BAN-PT */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2 rounded-2xl bg-slate-100 border border-slate-200">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveIaptSubTab("matriks")}
+            className={`px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-2 cursor-pointer ${
+              activeIaptSubTab === "matriks"
+                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+            }`}
+          >
+            <FileSpreadsheet className={`w-4 h-4 ${activeIaptSubTab === "matriks" ? "text-sky-600" : "text-slate-400"}`} />
+            <span>Matriks 39 Indikator & Smart Audit CRAM</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800">
+              39 Butir
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveIaptSubTab("led_builder")}
+            className={`px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-2 cursor-pointer ${
+              activeIaptSubTab === "led_builder"
+                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+            }`}
+          >
+            <FileText className={`w-4 h-4 ${activeIaptSubTab === "led_builder" ? "text-emerald-600" : "text-slate-400"}`} />
+            <span>Dokumen LED BAN-PT (Penyusunan & Cetak 1:1)</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              Format Baku
+            </span>
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-xs">
-          {/* 1. Salinan PerBAN-PT 35/2025 */}
-          <a
-            href="/uploads/accreditation/templates/Peraturan_BAN_PT_No_35_Tahun_2025_IAPT_4_1.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 transition-all flex flex-col justify-between gap-3 group"
+        {/* Action Button: Toggle Download Center (Ringkas & Hemat Tempat) */}
+        {activeIaptSubTab === "matriks" && (
+          <button
+            type="button"
+            onClick={() => setShowDownloadCenter(!showDownloadCenter)}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              showDownloadCenter
+                ? "bg-sky-900 text-white shadow-sm"
+                : "bg-white text-slate-700 hover:text-sky-900 hover:bg-sky-50 border border-slate-200"
+            }`}
           >
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-cyan-300 font-bold text-[11px]">
-                <FileText className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span>Regulasi Resmi (PDF)</span>
-              </div>
-              <strong className="block text-white font-extrabold text-xs group-hover:text-cyan-200 transition-colors">
-                Peraturan BAN-PT No. 35 Tahun 2025 tentang Instrumen IAPT 4.1
-              </strong>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Salinan resmi instrumen akreditasi perguruan tinggi akademik (CRAM), 39 butir indikator, dan rubrik penilaian.
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-1.5 text-cyan-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-cyan-200">
-              <Download className="w-3.5 h-3.5" />
-              <span>Buka / Unduh Salinan PDF (1.0 MB)</span>
-            </div>
-          </a>
-
-          {/* 2. Template Evaluasi Mandiri IAPT 4.1 */}
-          <a
-            href="/uploads/accreditation/templates/Instrumen_Evaluasi_Mandiri_IAPT_4_1_BAN_PT.xlsx"
-            download
-            className="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-400/50 transition-all flex flex-col justify-between gap-3 group"
-          >
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-emerald-300 font-bold text-[11px]">
-                <FileCheck2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Matriks Evaluasi Mandiri (Excel)</span>
-              </div>
-              <strong className="block text-white font-extrabold text-xs group-hover:text-emerald-200 transition-colors">
-                Template Evaluasi Mandiri 39 Butir IAPT 4.1 BAN-PT
-              </strong>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Format spreadsheet resmi matriks 39 butir indikator PTS Akademik kategori Masukan, Proses, Luaran, dan Dampak.
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-1.5 text-emerald-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-emerald-200">
-              <Download className="w-3.5 h-3.5" />
-              <span>Unduh Template Excel (220 KB)</span>
-            </div>
-          </a>
-        </div>
+            <Download className="w-3.5 h-3.5 text-sky-600" />
+            <span>Unduh Regulasi & Template</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showDownloadCenter ? "rotate-180" : ""}`} />
+          </button>
+        )}
       </div>
 
-      {/* 2. Banner Status Kepatuhan: Hijau Reassuring di Mode Terakreditasi, atau Peringatan Kritis di Mode Unggul */}
-      {targetMode === "TERAKREDITASI" ? (
-        activeCriticalCount === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-5 rounded-3xl bg-gradient-to-r from-emerald-950/90 via-teal-950/90 to-slate-900 border-2 border-emerald-500/60 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-          >
-            <div className="flex items-start gap-3.5">
-              <div className="p-3 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 shrink-0">
-                <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500 text-slate-950">
-                    Zona Kepatuhan Hijau
-                  </span>
-                  <span className="text-xs font-bold text-emerald-200">
-                    Seluruh 5 Syarat Perlu Kelayakan Terakreditasi Terverifikasi Sah
-                  </span>
-                </div>
-                <p className="text-xs text-emerald-100/90 leading-relaxed max-w-3xl">
-                  STIMI YAPMI Makassar memenuhi ambang kelayakan Standar Nasional Pendidikan Tinggi (SN-Dikti) sesuai Permendiktisaintek No. 39/2025 jo. No. 10/2026. Institusi berada pada status legal terakreditasi aman.
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setTargetMode("UNGGUL")}
-              className="px-4 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-all shadow-md shrink-0 flex items-center gap-2"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Cek Gap Menuju Unggul</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-5 rounded-3xl bg-red-950/90 border-2 border-red-500/60 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-          >
-            <div className="flex items-start gap-3.5">
-              <div className="p-3 rounded-2xl bg-red-600/30 border border-red-400/40 text-red-200 shrink-0">
-                <ShieldAlert className="w-6 h-6 text-red-300 animate-bounce" />
-              </div>
-              <div className="space-y-1">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-600 text-white">
-                  Peringatan Syarat Terakreditasi
-                </span>
-                <p className="text-xs text-red-100 leading-relaxed max-w-3xl">
-                  Terdapat {activeCriticalCount} butir Syarat Perlu Terakreditasi yang belum lengkap dokumen buktinya.
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setFilterSpecial("CRITICAL_ALERT")}
-              className="px-4 py-2 rounded-xl bg-white text-red-950 font-black text-xs shrink-0"
-            >
-              Lihat Butir Kritis
-            </button>
-          </motion.div>
-        )
-      ) : (
-        /* Target Mode === UNGGUL */
-        activeCriticalCount > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-5 rounded-3xl bg-gradient-to-r from-red-950/90 via-red-900/90 to-amber-950/90 border-2 border-red-500/60 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-          >
-            <div className="flex items-start gap-3.5">
-              <div className="p-3 rounded-2xl bg-red-600/30 border border-red-400/40 text-red-200 shrink-0">
-                <ShieldAlert className="w-6 h-6 text-red-300 animate-bounce" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-600 text-white">
-                    Peringatan Kepatuhan Mutu UNGGUL
-                  </span>
-                  <span className="text-xs font-bold text-red-200">
-                    {activeCriticalCount} Butir Syarat Perlu UNGGUL Membutuhkan Pemenuhan Dokumen
-                  </span>
-                </div>
-                <p className="text-xs text-red-100/90 leading-relaxed max-w-3xl">
-                  Pencapaian <strong>Terakreditasi UNGGUL</strong> bagi STIMI YAPMI Makassar masih tertahan karena membutuhkan reakreditasi prodi S1 Manajemen menuju Unggul, laporan audit eksternal KAP WTP, atau pengakuan Tridharma 5 tahun.
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setFilterSpecial("CRITICAL_ALERT")}
-              className="px-4 py-2.5 rounded-2xl bg-white text-red-950 hover:bg-red-50 font-black text-xs transition-all shadow-md shrink-0 flex items-center gap-2"
-            >
-              <span>Tampilkan {activeCriticalCount} Butir Kritis Unggul</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </motion.div>
-        )
+      {activeIaptSubTab === "led_builder" && (
+        <Iapt41LedDocumentBuilder
+          isLpm={isLpm}
+          indicators={data.indicators}
+          summary={data}
+        />
       )}
 
-      {/* 3. Ringkasan Kesiapan Digital (Digital Evidence Readiness) */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 text-slate-700 font-bold">
-          <Database className="w-4 h-4 text-sky-600" />
-          <span>Status Bukti Digital Sistem (Pangkalan Data Terintegrasi):</span>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Tersedia: {data.digitalReadiness?.availableCount ?? 0} Butir</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 font-bold">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-            <span>Perlu Tindakan: {data.digitalReadiness?.actionRequiredCount ?? 0} Butir</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-red-50 border border-red-200 text-red-800 font-bold">
-            <XCircle className="w-3.5 h-3.5 text-red-600" />
-            <span>Belum Terisi: {data.digitalReadiness?.missingCount ?? 0} Butir</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Empat Pilar CRAM Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Culture */}
-        <div 
-          onClick={() => setSelectedCram("C")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            selectedCram === "C"
-              ? "bg-sky-50 border-sky-400 shadow-md ring-2 ring-sky-300"
-              : "bg-white border-slate-200/80 hover:border-sky-300"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-sky-100 text-sky-800">
-              C • CULTURE
-            </span>
-            <span className="text-xs font-bold text-slate-500">
-              {data.cramScores.C.fulfilled}/{data.cramScores.C.total} Butir
-            </span>
-          </div>
-          <h4 className="text-sm font-black text-slate-900">Budaya Mutu</h4>
-          <p className="text-xs text-slate-500 mt-1">
-            SPMI Siklus PPEPP, kepatuhan AMI, pelaporan PDDIKTI, dan akreditasi prodi.
-          </p>
-          <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div 
-              className="bg-sky-600 h-full rounded-full transition-all"
-              style={{ width: `${(data.cramScores.C.fulfilled / data.cramScores.C.total) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Relevance */}
-        <div 
-          onClick={() => setSelectedCram("R")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            selectedCram === "R"
-              ? "bg-cyan-50 border-cyan-400 shadow-md ring-2 ring-cyan-300"
-              : "bg-white border-slate-200/80 hover:border-cyan-300"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-cyan-100 text-cyan-800">
-              R • RELEVANCE
-            </span>
-            <span className="text-xs font-bold text-slate-500">
-              {data.cramScores.R.fulfilled}/{data.cramScores.R.total} Butir
-            </span>
-          </div>
-          <h4 className="text-sm font-black text-slate-900">Relevansi Tridharma</h4>
-          <p className="text-xs text-slate-500 mt-1">
-            Kurikulum OBE, rasio DTPS & S3 Doktor, riset LPPM Sinta/Scopus, PkM, & Tracer Study.
-          </p>
-          <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div 
-              className="bg-cyan-600 h-full rounded-full transition-all"
-              style={{ width: `${(data.cramScores.R.fulfilled / data.cramScores.R.total) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Accountability */}
-        <div 
-          onClick={() => setSelectedCram("A")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            selectedCram === "A"
-              ? "bg-indigo-50 border-indigo-400 shadow-md ring-2 ring-indigo-300"
-              : "bg-white border-slate-200/80 hover:border-indigo-300"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-800">
-              A • ACCOUNTABILITY
-            </span>
-            <span className="text-xs font-bold text-slate-500">
-              {data.cramScores.A.fulfilled}/{data.cramScores.A.total} Butir
-            </span>
-          </div>
-          <h4 className="text-sm font-black text-slate-900">Akuntabilitas</h4>
-          <p className="text-xs text-slate-500 mt-1">
-            Good University Governance, Satgas PPKS, manajemen POAC, kepuasan sivitas, & audit KAP WTP.
-          </p>
-          <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div 
-              className="bg-indigo-600 h-full rounded-full transition-all"
-              style={{ width: `${(data.cramScores.A.fulfilled / data.cramScores.A.total) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Mission */}
-        <div 
-          onClick={() => setSelectedCram("M")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            selectedCram === "M"
-              ? "bg-emerald-50 border-emerald-400 shadow-md ring-2 ring-emerald-300"
-              : "bg-white border-slate-200/80 hover:border-emerald-300"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-black px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800">
-              M • MISSION
-            </span>
-            <span className="text-xs font-bold text-slate-500">
-              {data.cramScores.M.fulfilled}/{data.cramScores.M.total} Butir
-            </span>
-          </div>
-          <h4 className="text-sm font-black text-slate-900">Diferensiasi Misi</h4>
-          <p className="text-xs text-slate-500 mt-1">
-            Keunggulan khas Sekolah Tinggi Ilmu Manajemen & apresiasi eksternal berkelanjutan.
-          </p>
-          <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div 
-              className="bg-emerald-600 h-full rounded-full transition-all"
-              style={{ width: `${(data.cramScores.M.fulfilled / data.cramScores.M.total) * 100}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 5. Filter Bar & Search */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Cari indikator, aspek penilaian, atau kata kunci..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500"
-          />
-          {searchTerm && (
-            <button 
-              onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* CRAM Filter */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
-            {(["ALL", "C", "R", "A", "M"] as const).map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCram(cat)}
-                className={`px-3 py-1 rounded-lg font-bold transition-all ${
-                  selectedCram === cat
-                    ? "bg-white text-sky-900 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
+      {activeIaptSubTab === "matriks" && (
+        <>
+          {/* Pusat Unduh Dokumen (Collapsible Drawer - Muncul saat tombol di klik) */}
+          <AnimatePresence>
+            {showDownloadCenter && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
               >
-                {cat === "ALL" ? "Semua CRAM" : cat}
-              </button>
-            ))}
-          </div>
+                <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 text-white border border-sky-800/50 shadow-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500/20 text-cyan-200 border border-cyan-400/30">
+                        Regulasi Resmi BAN-PT 2025/2026
+                      </span>
+                      <span className="text-xs font-bold text-sky-200">Peraturan BAN-PT No. 35 Tahun 2025</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowDownloadCenter(false)}
+                      className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 cursor-pointer"
+                      title="Tutup"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
 
-          {/* Special Condition Filter */}
-          <div className="flex flex-wrap items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
-            <button
-              onClick={() => setFilterSpecial("ALL")}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
-                filterSpecial === "ALL"
-                  ? "bg-white text-sky-900 shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Semua ({data.totalIndicators})
-            </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-xs">
+                    {/* 1. Salinan PerBAN-PT 35/2025 */}
+                    <a
+                      href="/uploads/accreditation/templates/Peraturan_BAN_PT_No_35_Tahun_2025_IAPT_4_1.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 transition-all flex flex-col justify-between gap-2.5 group"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-cyan-300 font-bold text-[11px]">
+                          <FileText className="w-4 h-4 text-cyan-400 shrink-0" />
+                          <span>Salinan Regulasi Resmi (PDF)</span>
+                        </div>
+                        <strong className="block text-white font-extrabold text-xs group-hover:text-cyan-200 transition-colors">
+                          Peraturan BAN-PT No. 35 Tahun 2025 tentang IAPT 4.1
+                        </strong>
+                        <p className="text-[11px] text-slate-300 leading-relaxed">
+                          Salinan resmi instrumen akreditasi perguruan tinggi akademik (CRAM), 39 butir indikator, dan rubrik penilaian.
+                        </p>
+                      </div>
+                      <div className="inline-flex items-center gap-1.5 text-cyan-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-cyan-200">
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Buka / Unduh Salinan PDF (1.0 MB)</span>
+                      </div>
+                    </a>
 
-            {activeCriticalCount > 0 && (
-              <button
-                onClick={() => setFilterSpecial("CRITICAL_ALERT")}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
-                  filterSpecial === "CRITICAL_ALERT"
-                    ? "bg-red-600 text-white shadow-xs"
-                    : "text-red-700 hover:bg-red-50"
-                }`}
-              >
-                <ShieldAlert className="w-3 h-3 text-red-500" />
-                <span>Alert Kritis ({activeCriticalCount})</span>
-              </button>
+                    {/* 2. Template Evaluasi Mandiri IAPT 4.1 */}
+                    <a
+                      href="/uploads/accreditation/templates/Instrumen_Evaluasi_Mandiri_IAPT_4_1_BAN_PT.xlsx"
+                      download
+                      className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-400/50 transition-all flex flex-col justify-between gap-2.5 group"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-emerald-300 font-bold text-[11px]">
+                          <FileCheck2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>Matriks Evaluasi Mandiri (Excel)</span>
+                        </div>
+                        <strong className="block text-white font-extrabold text-xs group-hover:text-emerald-200 transition-colors">
+                          Template Evaluasi Mandiri 39 Butir IAPT 4.1 BAN-PT
+                        </strong>
+                        <p className="text-[11px] text-slate-300 leading-relaxed">
+                          Format spreadsheet resmi matriks 39 butir indikator PTS Akademik kategori Masukan, Proses, Luaran, dan Dampak.
+                        </p>
+                      </div>
+                      <div className="inline-flex items-center gap-1.5 text-emerald-300 font-bold text-[11px] pt-2 border-t border-white/10 group-hover:text-emerald-200">
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Unduh Template Excel (220 KB)</span>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
             )}
+          </AnimatePresence>
 
-            <button
-              onClick={() => setFilterSpecial("SYARAT_TERAKREDITASI")}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
-                filterSpecial === "SYARAT_TERAKREDITASI"
-                  ? "bg-emerald-100 text-emerald-900 shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
+          {/* 4 Pilar C-R-A-M (Sekaligus Tombol Filter Interaktif Kategori) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {/* Culture */}
+            <div 
+              onClick={() => setSelectedCram(selectedCram === "C" ? "ALL" : "C")}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group select-none ${
+                selectedCram === "C"
+                  ? "bg-sky-50 border-sky-500 shadow-md ring-2 ring-sky-400"
+                  : "bg-white border-slate-200/90 hover:border-sky-300 hover:shadow-xs"
               }`}
             >
-              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-              <span>Syarat Terakreditasi (5)</span>
-            </button>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className={`text-xs font-black px-2.5 py-0.5 rounded-lg transition-colors ${
+                  selectedCram === "C" ? "bg-sky-600 text-white" : "bg-sky-100 text-sky-800"
+                }`}>
+                  C • CULTURE
+                </span>
+                <span className="text-xs font-bold text-slate-600">
+                  {data.cramScores.C.fulfilled}/{data.cramScores.C.total} Butir
+                </span>
+              </div>
+              <h4 className="text-sm font-black text-slate-900 group-hover:text-sky-700 transition-colors">
+                Budaya Mutu
+              </h4>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug line-clamp-2">
+                SPMI Siklus PPEPP, kepatuhan AMI, pelaporan PDDIKTI, & akreditasi prodi.
+              </p>
+              <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2.5 overflow-hidden">
+                <div 
+                  className="bg-sky-600 h-full rounded-full transition-all"
+                  style={{ width: `${(data.cramScores.C.fulfilled / data.cramScores.C.total) * 100}%` }}
+                />
+              </div>
+              {selectedCram === "C" && (
+                <div className="mt-2 text-[10px] font-black text-sky-700 flex items-center justify-between">
+                  <span>✓ Filter Aktif</span>
+                  <span className="text-slate-400 font-normal">Klik untuk reset</span>
+                </div>
+              )}
+            </div>
 
-            <button
-              onClick={() => setFilterSpecial("SYARAT_UNGGUL")}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
-                filterSpecial === "SYARAT_UNGGUL"
-                  ? "bg-amber-100 text-amber-900 shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
+            {/* Relevance */}
+            <div 
+              onClick={() => setSelectedCram(selectedCram === "R" ? "ALL" : "R")}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group select-none ${
+                selectedCram === "R"
+                  ? "bg-cyan-50 border-cyan-500 shadow-md ring-2 ring-cyan-400"
+                  : "bg-white border-slate-200/90 hover:border-cyan-300 hover:shadow-xs"
               }`}
             >
-              <Sparkles className="w-3 h-3 text-amber-600" />
-              <span>Syarat Unggul (8)</span>
-            </button>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className={`text-xs font-black px-2.5 py-0.5 rounded-lg transition-colors ${
+                  selectedCram === "R" ? "bg-cyan-600 text-white" : "bg-cyan-100 text-cyan-800"
+                }`}>
+                  R • RELEVANCE
+                </span>
+                <span className="text-xs font-bold text-slate-600">
+                  {data.cramScores.R.fulfilled}/{data.cramScores.R.total} Butir
+                </span>
+              </div>
+              <h4 className="text-sm font-black text-slate-900 group-hover:text-cyan-700 transition-colors">
+                Relevansi Tridharma
+              </h4>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug line-clamp-2">
+                Kurikulum OBE, rasio DTPS & S3, riset LPPM Sinta/Scopus, PkM, & Tracer Study.
+              </p>
+              <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2.5 overflow-hidden">
+                <div 
+                  className="bg-cyan-600 h-full rounded-full transition-all"
+                  style={{ width: `${(data.cramScores.R.fulfilled / data.cramScores.R.total) * 100}%` }}
+                />
+              </div>
+              {selectedCram === "R" && (
+                <div className="mt-2 text-[10px] font-black text-cyan-700 flex items-center justify-between">
+                  <span>✓ Filter Aktif</span>
+                  <span className="text-slate-400 font-normal">Klik untuk reset</span>
+                </div>
+              )}
+            </div>
 
-            <button
-              onClick={() => setFilterSpecial("BUKTI_KOSONG")}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
-                filterSpecial === "BUKTI_KOSONG"
-                  ? "bg-red-100 text-red-900 shadow-xs"
-                  : "text-slate-600 hover:text-slate-900"
+            {/* Accountability */}
+            <div 
+              onClick={() => setSelectedCram(selectedCram === "A" ? "ALL" : "A")}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group select-none ${
+                selectedCram === "A"
+                  ? "bg-indigo-50 border-indigo-500 shadow-md ring-2 ring-indigo-400"
+                  : "bg-white border-slate-200/90 hover:border-indigo-300 hover:shadow-xs"
               }`}
             >
-              <XCircle className="w-3 h-3 text-red-600" />
-              <span>Bukti Kosong ({data.digitalReadiness?.missingCount ?? 0})</span>
-            </button>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className={`text-xs font-black px-2.5 py-0.5 rounded-lg transition-colors ${
+                  selectedCram === "A" ? "bg-indigo-600 text-white" : "bg-indigo-100 text-indigo-800"
+                }`}>
+                  A • ACCOUNTABILITY
+                </span>
+                <span className="text-xs font-bold text-slate-600">
+                  {data.cramScores.A.fulfilled}/{data.cramScores.A.total} Butir
+                </span>
+              </div>
+              <h4 className="text-sm font-black text-slate-900 group-hover:text-indigo-700 transition-colors">
+                Akuntabilitas
+              </h4>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug line-clamp-2">
+                Tata kelola GUG, Satgas PPKS, manajemen POAC, kepuasan sivitas, & KAP WTP.
+              </p>
+              <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2.5 overflow-hidden">
+                <div 
+                  className="bg-indigo-600 h-full rounded-full transition-all"
+                  style={{ width: `${(data.cramScores.A.fulfilled / data.cramScores.A.total) * 100}%` }}
+                />
+              </div>
+              {selectedCram === "A" && (
+                <div className="mt-2 text-[10px] font-black text-indigo-700 flex items-center justify-between">
+                  <span>✓ Filter Aktif</span>
+                  <span className="text-slate-400 font-normal">Klik untuk reset</span>
+                </div>
+              )}
+            </div>
+
+            {/* Mission */}
+            <div 
+              onClick={() => setSelectedCram(selectedCram === "M" ? "ALL" : "M")}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group select-none ${
+                selectedCram === "M"
+                  ? "bg-emerald-50 border-emerald-500 shadow-md ring-2 ring-emerald-400"
+                  : "bg-white border-slate-200/90 hover:border-emerald-300 hover:shadow-xs"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-1.5">
+                <span className={`text-xs font-black px-2.5 py-0.5 rounded-lg transition-colors ${
+                  selectedCram === "M" ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-800"
+                }`}>
+                  M • MISSION
+                </span>
+                <span className="text-xs font-bold text-slate-600">
+                  {data.cramScores.M.fulfilled}/{data.cramScores.M.total} Butir
+                </span>
+              </div>
+              <h4 className="text-sm font-black text-slate-900 group-hover:text-emerald-700 transition-colors">
+                Diferensiasi Misi
+              </h4>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug line-clamp-2">
+                Keunggulan khas Sekolah Tinggi Ilmu Manajemen & rekognisi institusi.
+              </p>
+              <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2.5 overflow-hidden">
+                <div 
+                  className="bg-emerald-600 h-full rounded-full transition-all"
+                  style={{ width: `${(data.cramScores.M.fulfilled / data.cramScores.M.total) * 100}%` }}
+                />
+              </div>
+              {selectedCram === "M" && (
+                <div className="mt-2 text-[10px] font-black text-emerald-700 flex items-center justify-between">
+                  <span>✓ Filter Aktif</span>
+                  <span className="text-slate-400 font-normal">Klik untuk reset</span>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+
+          {/* 5. Bar Pencarian & Filter Cepat (Single Streamlined Row) */}
+          <div className="bg-white p-3 sm:p-3.5 rounded-2xl border border-slate-200/90 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-xs">
+            {/* Search */}
+            <div className="relative flex-1 max-w-md">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Cari indikator, aspek penilaian, atau kata kunci..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-8 py-2 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500 font-medium"
+              />
+              {searchTerm && (
+                <button 
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Filter Pills (Status & Kategori) */}
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+              {selectedCram !== "ALL" && (
+                <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-sky-100 text-sky-900 font-bold border border-sky-300">
+                  <span>Pilar: {selectedCram === "C" ? "Culture" : selectedCram === "R" ? "Relevance" : selectedCram === "A" ? "Accountability" : "Mission"}</span>
+                  <button 
+                    type="button"
+                    onClick={() => setSelectedCram("ALL")} 
+                    className="hover:bg-sky-200 rounded p-0.5 cursor-pointer"
+                    title="Hapus filter pilar"
+                  >
+                    <X className="w-3 h-3 text-sky-800" />
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setFilterSpecial("ALL")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                  filterSpecial === "ALL"
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+                }`}
+              >
+                Semua ({data.totalIndicators})
+              </button>
+
+              {activeCriticalCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setFilterSpecial(filterSpecial === "CRITICAL_ALERT" ? "ALL" : "CRITICAL_ALERT")}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                    filterSpecial === "CRITICAL_ALERT"
+                      ? "bg-red-600 text-white shadow-xs"
+                      : "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
+                  }`}
+                >
+                  <ShieldAlert className="w-3.5 h-3.5 text-red-500" />
+                  <span>Butir Kritis ({activeCriticalCount})</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setFilterSpecial(filterSpecial === "BUKTI_TERSEDIA" ? "ALL" : "BUKTI_TERSEDIA")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                  filterSpecial === "BUKTI_TERSEDIA"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200"
+                }`}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Lengkap ({data.digitalReadiness?.availableCount ?? 0})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterSpecial(filterSpecial === "BUKTI_PERLU_TINDAKAN" ? "ALL" : "BUKTI_PERLU_TINDAKAN")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                  filterSpecial === "BUKTI_PERLU_TINDAKAN"
+                    ? "bg-amber-500 text-slate-950 shadow-xs"
+                    : "bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200"
+                }`}
+              >
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                <span>Perlu Tindakan ({data.digitalReadiness?.actionRequiredCount ?? 0})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterSpecial(filterSpecial === "BUKTI_KOSONG" ? "ALL" : "BUKTI_KOSONG")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                  filterSpecial === "BUKTI_KOSONG"
+                    ? "bg-rose-600 text-white shadow-xs"
+                    : "bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-200"
+                }`}
+              >
+                <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                <span>Belum Terisi ({data.digitalReadiness?.missingCount ?? 0})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterSpecial(filterSpecial === "SYARAT_TERAKREDITASI" ? "ALL" : "SYARAT_TERAKREDITASI")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                  filterSpecial === "SYARAT_TERAKREDITASI"
+                    ? "bg-sky-700 text-white shadow-xs"
+                    : "bg-sky-50 text-sky-800 hover:bg-sky-100 border border-sky-200"
+                }`}
+              >
+                <span>Syarat Terakreditasi (5)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterSpecial(filterSpecial === "SYARAT_UNGGUL" ? "ALL" : "SYARAT_UNGGUL")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                  filterSpecial === "SYARAT_UNGGUL"
+                    ? "bg-amber-500 text-slate-950 shadow-xs"
+                    : "bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200"
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>Syarat Unggul (8)</span>
+              </button>
+            </div>
+          </div>
 
       {/* 6. Daftar 39 Butir Indikator */}
       <div className="space-y-4">
@@ -1085,42 +1137,110 @@ export default function Iapt41DashboardWidget({
                   </div>
                 </div>
 
-                {/* Smart Audit Compliance & Action Box */}
+                {/* Kotak Hibrida Sinkronisasi Sistem & Bukti Digital (Opsi B) */}
                 {smart && (
-                  <div className={`p-4 rounded-2xl border text-xs space-y-2.5 ${
-                    smart.digitalEvidenceStatus === "TERSEDIA"
-                      ? "bg-slate-50 border-slate-200"
-                      : "bg-red-50/40 border-red-200"
-                  }`}>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div className="flex items-start gap-2">
-                        <Info className="w-4 h-4 text-sky-700 shrink-0 mt-0.5" />
+                  <div
+                    className={`p-4 rounded-2xl border text-xs space-y-3.5 transition-all ${
+                      smart.digitalEvidenceStatus === "TERSEDIA"
+                        ? "bg-slate-50/90 border-slate-200/90 shadow-2xs"
+                        : smart.digitalEvidenceStatus === "PERLU_TINDAKAN"
+                        ? "bg-amber-50/50 border-amber-200/90"
+                        : "bg-red-50/40 border-red-200/90"
+                    }`}
+                  >
+                    {/* Header Kotak Hibrida: Status Sinkronisasi Pangkalan Data & Tombol Menu Terhubung */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-200/70">
+                      <div className="flex items-start gap-2.5">
+                        <div
+                          className={`p-2 rounded-xl shrink-0 ${
+                            smart.digitalEvidenceStatus === "TERSEDIA"
+                              ? "bg-emerald-600/10 text-emerald-700"
+                              : smart.digitalEvidenceStatus === "PERLU_TINDAKAN"
+                              ? "bg-amber-600/10 text-amber-700"
+                              : "bg-red-600/10 text-red-700"
+                          }`}
+                        >
+                          <Database className="w-4 h-4" />
+                        </div>
                         <div>
-                          <strong className="text-slate-800">Hasil Audit Digital Sistem: </strong>
-                          <span className="text-slate-700">{smart.evidenceSummary}</span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-extrabold text-slate-900 text-xs">
+                              Sinkronisasi Pangkalan Data & Audit Digital
+                            </span>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 border ${
+                                smart.digitalEvidenceStatus === "TERSEDIA"
+                                  ? "bg-emerald-100 text-emerald-900 border-emerald-300"
+                                  : smart.digitalEvidenceStatus === "PERLU_TINDAKAN"
+                                  ? "bg-amber-100 text-amber-900 border-amber-300"
+                                  : "bg-red-100 text-red-900 border-red-300"
+                              }`}
+                            >
+                              {smart.digitalEvidenceStatus === "TERSEDIA" ? (
+                                <>
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                  <span>Pangkalan Data Terhubung Aktif</span>
+                                </>
+                              ) : smart.digitalEvidenceStatus === "PERLU_TINDAKAN" ? (
+                                <>
+                                  <AlertTriangle className="w-3 h-3 text-amber-600" />
+                                  <span>Perlu Berkas / Tindakan</span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="w-3 h-3 text-red-600" />
+                                  <span>Belum Ada Bukti Digital</span>
+                                </>
+                              )}
+                            </span>
+                          </div>
+                          <p className="text-slate-600 text-[11px] mt-0.5 leading-relaxed">
+                            {smart.evidenceSummary}
+                          </p>
                         </div>
                       </div>
 
-                      {/* Quick Shortcut to Upload/Verify */}
-                      {smart.evidenceHref && (
-                        <Link
-                          href={smart.evidenceHref}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-900 hover:bg-sky-800 text-white font-bold text-[11px] transition-colors shrink-0 shadow-xs"
-                        >
-                          <span>{smart.evidenceActionLabel}</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </Link>
-                      )}
+                      {/* Tombol Akses Cepat Langsung ke Modul Terhubung */}
+                      <div className="flex flex-wrap items-center gap-1.5 shrink-0 self-start md:self-center">
+                        {getEvidenceLinks(item.nomor).map((ev, i) => {
+                          const IconComp = ev.icon;
+                          if (ev.href === "/dashboard/accreditation" && onSwitchTab) {
+                            return (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => onSwitchTab("profiles")}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-900 hover:bg-sky-800 text-white text-[11px] font-bold transition-all shadow-xs hover:scale-[1.02] cursor-pointer"
+                              >
+                                <IconComp className="w-3.5 h-3.5 text-amber-300" />
+                                <span>{ev.label} (Buka Tab 1)</span>
+                                <ArrowRight className="w-3 h-3 text-sky-200" />
+                              </button>
+                            );
+                          }
+                          return (
+                            <Link
+                              key={i}
+                              href={ev.href}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-900 hover:bg-sky-800 text-white text-[11px] font-bold transition-all shadow-xs hover:scale-[1.02]"
+                            >
+                              <IconComp className="w-3.5 h-3.5 text-sky-300" />
+                              <span>{ev.label}</span>
+                              <ExternalLink className="w-3 h-3 text-sky-200" />
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     {/* Missing requirements tags if any */}
                     {smart.missingRequirements && smart.missingRequirements.length > 0 && (
-                      <div className="pt-2 border-t border-red-200/60 flex flex-wrap items-center gap-1.5 text-[11px]">
-                        <span className="font-bold text-red-900">Dokumen Belum Terpenuhi:</span>
+                      <div className="p-2.5 rounded-xl bg-red-100/50 border border-red-200/80 flex flex-wrap items-center gap-1.5 text-[11px]">
+                        <span className="font-black text-red-900">Perlu Dilengkapi:</span>
                         {smart.missingRequirements.map((req, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded-lg bg-red-100 text-red-800 font-semibold"
+                            className="px-2 py-0.5 rounded-lg bg-red-100 text-red-800 font-bold border border-red-200"
                           >
                             ✕ {req}
                           </span>
@@ -1130,14 +1250,14 @@ export default function Iapt41DashboardWidget({
 
                     {/* Rubrik Uji Petik Asesor BAN-PT (AK / AL) */}
                     {smart.assessorVerificationChecklist && smart.assessorVerificationChecklist.length > 0 && (
-                      <div className="pt-3 border-t border-slate-200/80 space-y-2">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                      <div className="pt-2 space-y-2.5">
+                        <div className="flex items-center justify-between text-[11px] font-extrabold text-slate-700">
                           <span className="flex items-center gap-1.5">
                             <FileCheck2 className="w-3.5 h-3.5 text-sky-700" />
                             <span>Rubrik Uji Petik Asesor BAN-PT (AK / AL):</span>
                           </span>
-                          <span className="text-[10px] text-slate-400">
-                            PerBAN-PT No. 35/2025
+                          <span className="text-[10px] text-slate-400 font-semibold">
+                            Rujukan: PerBAN-PT No. 35/2025
                           </span>
                         </div>
 
@@ -1147,8 +1267,8 @@ export default function Iapt41DashboardWidget({
                               key={cIdx}
                               className={`p-3 rounded-2xl border transition-all flex flex-col justify-between gap-2.5 ${
                                 chk.verified
-                                  ? "bg-emerald-50/70 border-emerald-300 text-emerald-950"
-                                  : "bg-red-50/70 border-red-300 text-red-950"
+                                  ? "bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs"
+                                  : "bg-red-50/80 border-red-300 text-red-950 shadow-2xs"
                               }`}
                             >
                               <div className="flex items-start gap-2">
@@ -1165,43 +1285,45 @@ export default function Iapt41DashboardWidget({
                                 </div>
                               </div>
 
-                              {/* Action Row per Butir Checklist */}
-                              <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between gap-2 text-[10px]">
+                              {/* Action Row per Butir Checklist: Hybrid Pangkalan Data + Manual File */}
+                              <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between gap-2 text-[10px] flex-wrap">
                                 {chk.verified ? (
                                   <div className="flex items-center gap-2 flex-wrap">
                                     {chk.fileUrl ? (
-                                      <a
-                                        href={chk.fileUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all shadow-xs"
-                                      >
-                                        <ExternalLink className="w-3 h-3" />
-                                        <span>Lihat / Unduh Dokumen</span>
-                                      </a>
+                                      <div className="flex items-center gap-1.5">
+                                        <a
+                                          href={chk.fileUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all shadow-xs"
+                                        >
+                                          <ExternalLink className="w-3 h-3" />
+                                          <span>{chk.fileName ? `Lihat Berkas (${chk.fileName})` : "Lihat / Unduh Dokumen"}</span>
+                                        </a>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteEvidence(chk.itemKey || `apt-${item.nomor}-${cIdx + 1}`)}
+                                          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                                          title="Hapus berkas fisik"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
                                     ) : (
-                                      <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold">
-                                        ✓ Pangkalan Data Aktif
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold border border-emerald-200">
+                                        <Database className="w-3 h-3 text-emerald-700" />
+                                        <span>Pangkalan Data Terhubung Aktif</span>
                                       </span>
                                     )}
 
                                     <button
                                       type="button"
                                       onClick={() => openUploadModal(item.nomor, item.indikator, chk)}
-                                      className="text-slate-500 hover:text-slate-800 font-semibold hover:underline cursor-pointer"
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-semibold transition-colors cursor-pointer"
                                     >
-                                      Ganti File
+                                      <Upload className="w-2.5 h-2.5 text-slate-500" />
+                                      <span>{chk.fileUrl ? "Ganti Berkas" : "+ Upload SK / File Fisik"}</span>
                                     </button>
-
-                                    {chk.fileUrl && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleDeleteEvidence(chk.itemKey || `apt-${item.nomor}-${cIdx + 1}`)}
-                                        className="text-red-500 hover:text-red-700 font-semibold hover:underline cursor-pointer"
-                                      >
-                                        Hapus
-                                      </button>
-                                    )}
                                   </div>
                                 ) : (
                                   <button
@@ -1251,35 +1373,130 @@ export default function Iapt41DashboardWidget({
                     )}
                   </div>
                 </div>
-
-                {/* Smart Evidence Connector (Akses Modul Terkait di MANTAUIKU) */}
-                <div className="pt-2.5 border-t border-dashed border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                  <div className="flex items-center gap-1.5 text-slate-500 text-[11px]">
-                    <Link2 className="w-3.5 h-3.5 text-sky-600" />
-                    <span className="font-semibold">Modul Bukti Terhubung:</span>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {getEvidenceLinks(item.nomor).map((ev, i) => {
-                      const IconComp = ev.icon;
-                      return (
-                        <Link
-                          key={i}
-                          href={ev.href}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-800 text-[11px] font-bold border border-sky-200/80 transition-colors shadow-2xs"
-                        >
-                          <IconComp className="w-3 h-3 text-sky-600" />
-                          <span>{ev.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
               </motion.div>
             );
           })}
         </div>
       </div>
+        </>
+      )}
+
+      {/* Modal Upload Berkas Dokumen Fisik Indikator IAPT 4.1 */}
+      <AnimatePresence>
+        {uploadModalItem && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-200 space-y-4 relative max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="space-y-0.5">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-100 text-sky-800 font-black text-xs">
+                    <FileUp className="w-3.5 h-3.5" />
+                    <span>Upload Bukti Digital • Butir #{uploadModalItem.nomor}</span>
+                  </div>
+                  <h3 className="text-base font-black text-slate-900">
+                    Unggah Dokumen Bukti Fisik Indikator
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setUploadModalItem(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Box Item Context */}
+              <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-100 text-xs space-y-2">
+                <div className="font-extrabold text-slate-900">{uploadModalItem.itemTitle}</div>
+                <div className="text-[11px] text-sky-900 font-semibold flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-sky-700 shrink-0" />
+                  <span>Dokumen yang diminta: <strong>{uploadModalItem.evidenceDocName}</strong></span>
+                </div>
+                {uploadModalItem.existingFileUrl && (
+                  <div className="text-[11px] text-emerald-800 font-semibold pt-1 border-t border-sky-200/50 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Saat ini telah ada: {uploadModalItem.existingFileName || "Dokumen tersimpan"}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Feedback Alert */}
+              {uploadFeedback && (
+                <div
+                  className={`p-3 rounded-2xl text-xs font-bold border ${
+                    uploadFeedback.type === "success"
+                      ? "bg-emerald-50 text-emerald-900 border-emerald-200"
+                      : "bg-red-50 text-red-900 border-red-200"
+                  }`}
+                >
+                  {uploadFeedback.text}
+                </div>
+              )}
+
+              {/* Upload Form */}
+              <form onSubmit={handleUploadEvidence} className="space-y-4 text-xs">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 block">
+                    Pilih Berkas Dokumen (PDF, DOCX, XLSX - Maksimal 30 MB)
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf,.docx,.xlsx,.xls,.doc,.zip"
+                    onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
+                    required
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white hover:file:bg-sky-700 cursor-pointer"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 block">
+                    Keterangan Dokumen / Catatan Bukti (Opsional)
+                  </label>
+                  <textarea
+                    value={evidenceNotes}
+                    onChange={(e) => setEvidenceNotes(e.target.value)}
+                    placeholder="Contoh: SK Ketua Nomor ... tentang penetapan standar / pedoman..."
+                    rows={2}
+                    className="w-full p-3 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setUploadModalItem(null)}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isUploadingEvidence || !evidenceFile}
+                    className="px-5 py-2.5 rounded-xl bg-sky-900 hover:bg-sky-800 disabled:bg-slate-300 text-white font-black text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    {isUploadingEvidence ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Mengunggah...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Simpan & Verifikasi Berkas</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* 7. Modal Reviu & Pembaruan Status Indikator (Khusus LPM) */}
       <AnimatePresence>

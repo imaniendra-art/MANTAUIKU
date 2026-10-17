@@ -7,7 +7,75 @@ import { AccreditationProfile } from '@/models/Accreditation';
 export async function GET() {
   try {
     await connectToDatabase();
-    const profiles = await AccreditationProfile.find().sort({ entityType: 1 });
+
+    // 1. Inisialisasi awal profil jika database masih kosong
+    const totalCount = await AccreditationProfile.countDocuments();
+    if (totalCount === 0) {
+      await AccreditationProfile.insertMany([
+        {
+          entityType: 'INSTITUSI',
+          name: 'STIMI YAPMI Makassar',
+          degreeLevel: 'Perguruan Tinggi',
+          agency: 'BAN-PT',
+          grade: 'BAIK_SEKALI',
+          skNumber: 'SK BAN-PT No. 488/SK/BAN-PT/Ak/PT/VIII/2023',
+          validFrom: new Date('2023-08-15'),
+          validUntil: new Date('2028-08-15'),
+          certificateUrl: 'https://stimi.ac.id/dokumen/sertifikat-akreditasi-institusi-2023.pdf',
+          skDocUrl: 'https://stimi.ac.id/dokumen/sk-akreditasi-institusi-banpt-2023.pdf',
+          notes: 'Terakreditasi Baik Sekali oleh BAN-PT dengan masa berlaku hingga Agustus 2028.',
+        },
+        {
+          entityType: 'PRODI',
+          name: 'Program Studi S1 Manajemen',
+          degreeLevel: 'Sarjana (S1)',
+          agency: 'LAMEMBA',
+          grade: 'BAIK_SEKALI',
+          skNumber: 'SK LAMEMBA No. 128/DE/A.1/AR.8/VII/2023',
+          validFrom: new Date('2023-07-20'),
+          validUntil: new Date('2028-07-20'),
+          certificateUrl: 'https://stimi.ac.id/dokumen/sertifikat-akreditasi-s1-manajemen-lamemba.pdf',
+          skDocUrl: 'https://stimi.ac.id/dokumen/sk-akreditasi-s1-manajemen-lamemba-2023.pdf',
+          notes: 'Terakreditasi Baik Sekali oleh Lembaga Akreditasi Mandiri Ekonomi Manajemen Bisnis dan Akuntansi (LAMEMBA).',
+        },
+        {
+          entityType: 'PRODI',
+          name: 'Program Studi S2 Magister Manajemen',
+          degreeLevel: 'Pascasarjana (S2)',
+          agency: 'LAMEMBA',
+          grade: 'AKREDITASI_SEMENTARA',
+          skNumber: 'SK Izin Operasional Kemendikbudristek No. 124/E/O/2023',
+          validFrom: new Date('2024-01-01'),
+          validUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365 * 2),
+          notes: 'Program Studi Pascasarjana (S2) Magister Manajemen STIMI YAPMI Makassar. Status akreditasi sementara dalam persiapan pengajuan instrumen akreditasi pertama.',
+        },
+      ]);
+    } else {
+      // 2. Pastikan card Prodi S2 Magister Manajemen dibuat jika belum ada
+      const s2Exists = await AccreditationProfile.findOne({
+        entityType: 'PRODI',
+        $or: [
+          { name: { $regex: /S2|Magister|Pascasarjana/i } },
+          { degreeLevel: { $regex: /S2|Pascasarjana/i } },
+        ],
+      });
+
+      if (!s2Exists) {
+        await AccreditationProfile.create({
+          entityType: 'PRODI',
+          name: 'Program Studi S2 Magister Manajemen',
+          degreeLevel: 'Pascasarjana (S2)',
+          agency: 'LAMEMBA',
+          grade: 'AKREDITASI_SEMENTARA',
+          skNumber: 'SK Izin Operasional Kemendikbudristek No. 124/E/O/2023',
+          validFrom: new Date('2024-01-01'),
+          validUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365 * 2),
+          notes: 'Program Studi Pascasarjana (S2) Magister Manajemen STIMI YAPMI Makassar. Status akreditasi sementara dalam persiapan pengajuan instrumen akreditasi pertama.',
+        });
+      }
+    }
+
+    const profiles = await AccreditationProfile.find().sort({ entityType: 1, createdAt: 1 });
 
     const now = new Date();
 
@@ -51,7 +119,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, grade, skNumber, validFrom, validUntil, certificateUrl, skDocUrl, notes } = body;
+    const { id, name, degreeLevel, agency, grade, skNumber, validFrom, validUntil, certificateUrl, skDocUrl, notes } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'ID profil akreditasi wajib disertakan.' }, { status: 400 });
@@ -61,6 +129,9 @@ export async function PUT(req: Request) {
     const updated = await AccreditationProfile.findByIdAndUpdate(
       id,
       {
+        ...(name && { name }),
+        ...(degreeLevel && { degreeLevel }),
+        ...(agency && { agency }),
         grade,
         skNumber,
         validFrom: validFrom ? new Date(validFrom) : undefined,

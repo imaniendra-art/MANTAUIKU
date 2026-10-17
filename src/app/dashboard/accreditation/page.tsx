@@ -42,7 +42,7 @@ interface IProfile {
   name: string;
   degreeLevel?: string;
   agency: "BAN-PT" | "LAMEMBA";
-  grade: "UNGGUL" | "BAIK_SEKALI" | "BAIK" | "TERAKREDITASI";
+  grade: "UNGGUL" | "BAIK_SEKALI" | "BAIK" | "TERAKREDITASI" | "AKREDITASI_SEMENTARA" | "BELUM_TERAKREDITASI";
   skNumber: string;
   validFrom: string;
   validUntil: string;
@@ -479,7 +479,10 @@ export default function AccreditationDashboardPage() {
   
   // Edit & Upload Form State
   const [editFormData, setEditFormData] = useState({
-    grade: "BAIK_SEKALI" as "UNGGUL" | "BAIK_SEKALI" | "BAIK" | "TERAKREDITASI",
+    name: "",
+    degreeLevel: "Sarjana (S1)",
+    agency: "LAMEMBA" as "BAN-PT" | "LAMEMBA",
+    grade: "BAIK_SEKALI" as "UNGGUL" | "BAIK_SEKALI" | "BAIK" | "TERAKREDITASI" | "AKREDITASI_SEMENTARA" | "BELUM_TERAKREDITASI",
     skNumber: "",
     validFrom: "",
     validUntil: "",
@@ -535,6 +538,9 @@ export default function AccreditationDashboardPage() {
   const openEditModal = (profile: IProfile) => {
     setSelectedProfile(profile);
     setEditFormData({
+      name: profile.name,
+      degreeLevel: profile.degreeLevel || (profile.entityType === "PRODI" ? "Sarjana (S1)" : "Perguruan Tinggi"),
+      agency: profile.agency,
       grade: profile.grade,
       skNumber: profile.skNumber,
       validFrom: profile.validFrom ? new Date(profile.validFrom).toISOString().split("T")[0] : "",
@@ -616,6 +622,9 @@ export default function AccreditationDashboardPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: selectedProfile._id,
+          name: editFormData.name,
+          degreeLevel: editFormData.degreeLevel,
+          agency: editFormData.agency,
           grade: editFormData.grade,
           skNumber: editFormData.skNumber,
           validFrom: editFormData.validFrom,
@@ -2040,86 +2049,111 @@ export default function AccreditationDashboardPage() {
           {/* TAB 1: STATUS & COUNTDOWN REAKREDITASI PEPA */}
           {activeTab === "profiles" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {profiles.map((p) => {
               const isProdi = p.entityType === "PRODI";
               const isAman = p.pepaStatus === "AMAN";
               const isWaspada = p.pepaStatus === "WASPADA";
+              const isAkreditasiSementara = p.grade === "AKREDITASI_SEMENTARA";
+              const isBelumTerakreditasi = p.grade === "BELUM_TERAKREDITASI";
 
               return (
                 <motion.div
                   key={p._id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6 relative overflow-hidden"
+                  className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6 relative overflow-hidden flex flex-col justify-between"
                 >
-                  {/* Watermark Logo/Text */}
-                  <div className="absolute top-0 right-0 p-8 opacity-5 text-slate-900 font-black text-7xl select-none pointer-events-none">
-                    {p.agency}
-                  </div>
-
-                  {/* Header Pill */}
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-700">
-                      {isProdi ? "Program Studi" : "Institusi Perguruan Tinggi"}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      Peringkat: {p.grade.replace("_", " ")}
-                    </span>
-                  </div>
-
-                  {/* Title & Agency */}
-                  <div className="space-y-1">
-                    <h3 className="text-xl font-black text-slate-950">
-                      {p.name}
-                    </h3>
-                    <p className="text-xs font-bold text-sky-700">
-                      Lembaga Akreditasi: {p.agency} ({p.degreeLevel || "S1"})
-                    </p>
-                  </div>
-
-                  {/* Legal Details */}
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 text-xs space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 font-semibold">Nomor SK Resmi:</span>
-                      <strong className="text-slate-900 font-bold">{p.skNumber}</strong>
+                  <div className="space-y-6">
+                    {/* Watermark Logo/Text */}
+                    <div className="absolute top-0 right-0 p-8 opacity-5 text-slate-900 font-black text-7xl select-none pointer-events-none">
+                      {p.agency}
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 font-semibold">Berlaku Sampai:</span>
-                      <strong className="text-slate-900 font-bold">
-                        {new Date(p.validUntil).toLocaleDateString("id-ID", { dateStyle: "long" })}
-                      </strong>
-                    </div>
-                  </div>
 
-                  {/* Countdown Timer PEPA */}
-                  <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-50 to-cyan-50 border border-sky-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold">
-                        <Clock className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">
-                          Sisa Masa Berlaku
+                    {/* Header Pill */}
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-700">
+                        {isProdi ? (p.degreeLevel || "Program Studi") : "Institusi Perguruan Tinggi"}
+                      </span>
+                      {isAkreditasiSementara ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
+                          <Clock className="w-3.5 h-3.5 text-amber-700" />
+                          Akreditasi Sementara
                         </span>
-                        <h4 className="text-sm font-black text-slate-900">
-                          {p.daysRemaining} Hari ({p.monthsRemaining} Bulan)
-                        </h4>
+                      ) : isBelumTerakreditasi ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-slate-100 text-slate-800 border border-slate-300">
+                          <AlertCircle className="w-3.5 h-3.5 text-slate-600" />
+                          Belum Terakreditasi
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          Peringkat: {p.grade.replace("_", " ")}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Title & Agency */}
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-black text-slate-950">
+                        {p.name}
+                      </h3>
+                      <p className="text-xs font-bold text-sky-700">
+                        Lembaga Akreditasi: {p.agency} ({p.degreeLevel || "S1"})
+                      </p>
+                    </div>
+
+                    {/* Legal Details */}
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 text-xs space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-slate-500 font-semibold shrink-0">Nomor SK Resmi:</span>
+                        <strong className="text-slate-900 font-bold truncate text-right">{p.skNumber}</strong>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-slate-500 font-semibold shrink-0">Berlaku Sampai:</span>
+                        <strong className="text-slate-900 font-bold">
+                          {p.validUntil ? new Date(p.validUntil).toLocaleDateString("id-ID", { dateStyle: "long" }) : "-"}
+                        </strong>
                       </div>
                     </div>
 
-                    <span
-                      className={`px-3 py-1 rounded-full text-[11px] font-black uppercase ${
-                        isAman
-                          ? "bg-emerald-100 text-emerald-800"
-                          : isWaspada
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      Status PEPA: {p.pepaStatus}
-                    </span>
+                    {/* Countdown Timer PEPA */}
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-50 to-cyan-50 border border-sky-100 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold shrink-0">
+                          <Clock className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block">
+                            {isAkreditasiSementara ? "Masa Transisi / Izin" : "Sisa Masa Berlaku"}
+                          </span>
+                          <h4 className="text-sm font-black text-slate-900">
+                            {p.daysRemaining} Hari ({p.monthsRemaining} Bulan)
+                          </h4>
+                        </div>
+                      </div>
+
+                      <span
+                        className={`px-3 py-1 rounded-full text-[11px] font-black uppercase shrink-0 ${
+                          isAkreditasiSementara || isBelumTerakreditasi
+                            ? "bg-amber-100 text-amber-900 border border-amber-300"
+                            : isAman
+                            ? "bg-emerald-100 text-emerald-800"
+                            : isWaspada
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {isAkreditasiSementara ? "STATUS: TRANSISI" : `Status PEPA: ${p.pepaStatus}`}
+                      </span>
+                    </div>
+
+                    {/* Notes if available */}
+                    {p.notes && (
+                      <p className="text-xs text-slate-500 italic bg-slate-50/70 p-3 rounded-xl border border-slate-100">
+                        &ldquo;{p.notes}&rdquo;
+                      </p>
+                    )}
                   </div>
 
                   {/* Action Row: Berkas SK, Sertifikat & Kelola LPM */}
@@ -2214,6 +2248,7 @@ export default function AccreditationDashboardPage() {
             data={iapt41Summary}
             isLpm={isLpm}
             onRefresh={loadData}
+            onSwitchTab={(tab) => setActiveTab(tab)}
           />
         ) : (
           <div className="py-16 text-center bg-white rounded-3xl border border-slate-200">
@@ -2230,6 +2265,7 @@ export default function AccreditationDashboardPage() {
             data={lamembaSummary}
             isLpm={isLpm}
             onRefresh={loadData}
+            onSwitchTab={(tab) => setActiveTab(tab)}
           />
         ) : (
           <div className="py-16 text-center bg-white rounded-3xl border border-slate-200">
@@ -7897,12 +7933,57 @@ export default function AccreditationDashboardPage() {
               )}
 
               {/* Form Body */}
-              <form onSubmit={handleSaveProfile} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form onSubmit={handleSaveProfile} noValidate className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">
+                    Nama Program Studi / Institusi
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                    placeholder="Contoh: Program Studi S2 Magister Manajemen"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Jenjang */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">
+                      Jenjang Pendidikan
+                    </label>
+                    <select
+                      value={editFormData.degreeLevel}
+                      onChange={(e) => setEditFormData({ ...editFormData, degreeLevel: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                    >
+                      <option value="Sarjana (S1)">Sarjana (S1)</option>
+                      <option value="Pascasarjana (S2)">Pascasarjana (S2)</option>
+                      <option value="Perguruan Tinggi">Perguruan Tinggi</option>
+                    </select>
+                  </div>
+
+                  {/* Lembaga Akreditasi */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-700">
+                      Badan Akreditasi
+                    </label>
+                    <select
+                      value={editFormData.agency}
+                      onChange={(e) => setEditFormData({ ...editFormData, agency: e.target.value as any })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                    >
+                      <option value="LAMEMBA">LAMEMBA</option>
+                      <option value="BAN-PT">BAN-PT</option>
+                    </select>
+                  </div>
+
                   {/* Peringkat */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-700">
-                      Peringkat Akreditasi
+                      Peringkat / Status
                     </label>
                     <select
                       value={editFormData.grade}
@@ -7916,20 +7997,9 @@ export default function AccreditationDashboardPage() {
                       <option value="BAIK_SEKALI">BAIK SEKALI</option>
                       <option value="BAIK">BAIK</option>
                       <option value="TERAKREDITASI">TERAKREDITASI</option>
+                      <option value="AKREDITASI_SEMENTARA">AKREDITASI SEMENTARA</option>
+                      <option value="BELUM_TERAKREDITASI">BELUM TERAKREDITASI</option>
                     </select>
-                  </div>
-
-                  {/* Lembaga Akreditasi (Readonly) */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700">
-                      Badan Akreditasi
-                    </label>
-                    <input
-                      type="text"
-                      value={`${selectedProfile.agency} (${selectedProfile.entityType})`}
-                      disabled
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-100 text-slate-500 cursor-not-allowed"
-                    />
                   </div>
                 </div>
 
@@ -7984,6 +8054,37 @@ export default function AccreditationDashboardPage() {
                     <span className="text-[11px] text-slate-400 font-normal">Maks. 25 MB</span>
                   </label>
 
+                  {/* Status Berkas Sertifikat Aktif */}
+                  {editFormData.certificateUrl && !selectedCertFile && (
+                    <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <div className="truncate">
+                          <span className="font-bold text-emerald-950 block">Sertifikat Tersimpan:</span>
+                          <a
+                            href={editFormData.certificateUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline font-mono text-[11px] text-emerald-700 hover:text-emerald-900 truncate block"
+                            title={editFormData.certificateUrl}
+                          >
+                            {editFormData.certificateUrl.startsWith("/uploads/")
+                              ? editFormData.certificateUrl.split("/").pop()
+                              : editFormData.certificateUrl}
+                          </a>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditFormData({ ...editFormData, certificateUrl: "" })}
+                        className="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] font-bold transition-colors shrink-0 ml-2 cursor-pointer"
+                        title="Hapus tautan/berkas sertifikat ini"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  )}
+
                   <div className="p-4 rounded-2xl border-2 border-dashed border-sky-200 bg-sky-50/50 hover:bg-sky-50 transition-colors text-center space-y-2">
                     <input
                       type="file"
@@ -8004,7 +8105,11 @@ export default function AccreditationDashboardPage() {
                         <Upload className="w-5 h-5" />
                       </div>
                       <span className="text-xs font-bold text-sky-800">
-                        {selectedCertFile ? selectedCertFile.name : "Klik untuk Pilih File PDF Sertifikat"}
+                        {selectedCertFile
+                          ? selectedCertFile.name
+                          : editFormData.certificateUrl
+                          ? "Klik untuk Ganti / Unggah Ulang File PDF Sertifikat"
+                          : "Klik untuk Pilih File PDF Sertifikat"}
                       </span>
                       <span className="text-[11px] text-slate-500">
                         {selectedCertFile
@@ -8016,32 +8121,18 @@ export default function AccreditationDashboardPage() {
 
                   {/* Manual / Existing URL alternative for Certificate */}
                   <div className="space-y-1 pt-1">
-                    <span className="text-[11px] font-semibold text-slate-500">
-                      Atau Tautan File Sertifikat (Google Drive / Cloud Institusi):
+                    <span className="text-[11px] font-semibold text-slate-500 flex items-center justify-between">
+                      <span>Atau Tautan Cloud/Google Drive (Opsional jika sudah upload PDF):</span>
                     </span>
                     <input
-                      type="url"
+                      type="text"
                       value={editFormData.certificateUrl}
                       onChange={(e) =>
                         setEditFormData({ ...editFormData, certificateUrl: e.target.value })
                       }
-                      placeholder="https://drive.google.com/... atau /uploads/certificates/..."
+                      placeholder="https://drive.google.com/... (Kosongkan jika upload file langsung)"
                       className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
                     />
-                    {editFormData.certificateUrl && (
-                      <p className="text-[11px] text-emerald-700 flex items-center gap-1 font-medium">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Sertifikat terpasang:</span>
-                        <a
-                          href={editFormData.certificateUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline truncate max-w-xs"
-                        >
-                          {editFormData.certificateUrl}
-                        </a>
-                      </p>
-                    )}
                   </div>
                 </div>
 
@@ -8051,6 +8142,37 @@ export default function AccreditationDashboardPage() {
                     <span>File Dokumen Salinan SK Akreditasi (.PDF)</span>
                     <span className="text-[11px] text-slate-400 font-normal">Maks. 25 MB</span>
                   </label>
+
+                  {/* Status Berkas SK Aktif */}
+                  {editFormData.skDocUrl && !selectedSkFile && (
+                    <div className="flex items-center justify-between p-3 rounded-2xl bg-indigo-50 border border-indigo-200 text-xs text-indigo-900">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                        <div className="truncate">
+                          <span className="font-bold text-indigo-950 block">Dokumen SK Tersimpan:</span>
+                          <a
+                            href={editFormData.skDocUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline font-mono text-[11px] text-indigo-700 hover:text-indigo-900 truncate block"
+                            title={editFormData.skDocUrl}
+                          >
+                            {editFormData.skDocUrl.startsWith("/uploads/")
+                              ? editFormData.skDocUrl.split("/").pop()
+                              : editFormData.skDocUrl}
+                          </a>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditFormData({ ...editFormData, skDocUrl: "" })}
+                        className="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-[11px] font-bold transition-colors shrink-0 ml-2 cursor-pointer"
+                        title="Hapus tautan/berkas SK ini"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  )}
 
                   <div className="p-4 rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 hover:bg-indigo-50/70 transition-colors text-center space-y-2">
                     <input
@@ -8072,7 +8194,11 @@ export default function AccreditationDashboardPage() {
                         <FileCheck2 className="w-5 h-5" />
                       </div>
                       <span className="text-xs font-bold text-indigo-900">
-                        {selectedSkFile ? selectedSkFile.name : "Klik untuk Pilih File PDF SK Akreditasi"}
+                        {selectedSkFile
+                          ? selectedSkFile.name
+                          : editFormData.skDocUrl
+                          ? "Klik untuk Ganti / Unggah Ulang File PDF SK"
+                          : "Klik untuk Pilih File PDF SK Akreditasi"}
                       </span>
                       <span className="text-[11px] text-slate-500">
                         {selectedSkFile
@@ -8084,32 +8210,18 @@ export default function AccreditationDashboardPage() {
 
                   {/* Manual / Existing URL alternative for SK */}
                   <div className="space-y-1 pt-1">
-                    <span className="text-[11px] font-semibold text-slate-500">
-                      Atau Tautan File SK Akreditasi (Google Drive / Cloud Institusi):
+                    <span className="text-[11px] font-semibold text-slate-500 flex items-center justify-between">
+                      <span>Atau Tautan Cloud/Google Drive (Opsional jika sudah upload PDF):</span>
                     </span>
                     <input
-                      type="url"
+                      type="text"
                       value={editFormData.skDocUrl}
                       onChange={(e) =>
                         setEditFormData({ ...editFormData, skDocUrl: e.target.value })
                       }
-                      placeholder="https://drive.google.com/... atau /uploads/sk/..."
+                      placeholder="https://drive.google.com/... (Kosongkan jika upload file langsung)"
                       className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
-                    {editFormData.skDocUrl && (
-                      <p className="text-[11px] text-indigo-700 flex items-center gap-1 font-medium">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Dokumen SK terpasang:</span>
-                        <a
-                          href={editFormData.skDocUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline truncate max-w-xs"
-                        >
-                          {editFormData.skDocUrl}
-                        </a>
-                      </p>
-                    )}
                   </div>
                 </div>
 

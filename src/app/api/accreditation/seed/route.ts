@@ -40,6 +40,17 @@ export async function POST() {
           skDocUrl: 'https://stimi.ac.id/dokumen/sk-akreditasi-s1-manajemen-lamemba-2023.pdf',
           notes: 'Terakreditasi Baik Sekali oleh Lembaga Akreditasi Mandiri Ekonomi Manajemen Bisnis dan Akuntansi (LAMEMBA).',
         },
+        {
+          entityType: 'PRODI',
+          name: 'Program Studi S2 Magister Manajemen',
+          degreeLevel: 'Pascasarjana (S2)',
+          agency: 'LAMEMBA',
+          grade: 'AKREDITASI_SEMENTARA',
+          skNumber: 'SK Izin Operasional Kemendikbudristek No. 124/E/O/2023',
+          validFrom: new Date('2024-01-01'),
+          validUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365 * 2),
+          notes: 'Program Studi Pascasarjana (S2) Magister Manajemen STIMI YAPMI Makassar. Status akreditasi sementara dalam persiapan pengajuan instrumen akreditasi pertama.',
+        },
       ]);
     }
 

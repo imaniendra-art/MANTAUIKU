@@ -3,10 +3,10 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 // 1. Profil Akreditasi (Institusi & Program Studi)
 export interface IAccreditationProfile extends Document {
   entityType: 'INSTITUSI' | 'PRODI';
-  name: string;               // e.g. "STIMI YAPMI Makassar" atau "Program Studi S1 Manajemen"
-  degreeLevel?: string;       // "S1", "Institusi"
+  name: string;               // e.g. "STIMI YAPMI Makassar", "Program Studi S1 Manajemen", "Program Studi S2 Manajemen"
+  degreeLevel?: string;       // "S1", "S2", "Institusi"
   agency: 'BAN-PT' | 'LAMEMBA';
-  grade: 'UNGGUL' | 'BAIK_SEKALI' | 'BAIK' | 'TERAKREDITASI';
+  grade: 'UNGGUL' | 'BAIK_SEKALI' | 'BAIK' | 'TERAKREDITASI' | 'AKREDITASI_SEMENTARA' | 'BELUM_TERAKREDITASI';
   skNumber: string;           // e.g. "SK LAMEMBA No. 128/DE/A.1/AR.8/VII/2023"
   validFrom: Date;
   validUntil: Date;
@@ -318,7 +318,7 @@ const AccreditationProfileSchema = new Schema<IAccreditationProfile>(
     agency: { type: String, enum: ['BAN-PT', 'LAMEMBA'], required: true },
     grade: {
       type: String,
-      enum: ['UNGGUL', 'BAIK_SEKALI', 'BAIK', 'TERAKREDITASI'],
+      enum: ['UNGGUL', 'BAIK_SEKALI', 'BAIK', 'TERAKREDITASI', 'AKREDITASI_SEMENTARA', 'BELUM_TERAKREDITASI'],
       required: true,
     },
     skNumber: { type: String, required: true },
@@ -671,6 +671,131 @@ export const LamembaDl05: Model<ILamembaDl05> =
 export const Iapt41Evaluation: Model<IIapt41Evaluation> =
   mongoose.models.Iapt41Evaluation ||
   mongoose.model<IIapt41Evaluation>('Iapt41Evaluation', Iapt41EvaluationSchema);
+
+// 5. Dokumen Resmi Laporan Evaluasi Diri (LED) IAPT 4.1 BAN-PT (Peraturan No. 35 Tahun 2025)
+export interface IIapt41LedIdentitasPt {
+  perguruanTinggi: string;
+  badanPenyelenggara: string;
+  nomorSkPendirianPt: string;
+  tanggalSkPendirianPt: string;
+  pejabatSkPendirianPt: string;
+  alamat: string;
+  kota: string;
+  telepon: string;
+  emailWeb: string;
+  peringkatAkreditasiTerbaru: string;
+  nomorSkBanPt: string;
+  tanggalKadaluarsa: string;
+  namaPimpinan: string;
+  nidnPimpinan: string;
+  tahunDokumen: string;
+  logoUrl: string;
+}
+
+export interface IIapt41LedTimPenyusunItem {
+  nama: string;
+  nikNidn: string;
+  jabatan: string;
+  peran: string;
+}
+
+export interface IIapt41LedPengesahanPihak {
+  jabatan: string;
+  nama: string;
+  nikNidn: string;
+}
+
+export interface IIapt41LedPengesahan {
+  kota: string;
+  tanggal: string;
+  ketuaPt: IIapt41LedPengesahanPihak;
+  ketuaYayasan: IIapt41LedPengesahanPihak;
+}
+
+export interface IIapt41LedDocument extends Document {
+  academicYear: string;
+  institutionName: string;
+  status: 'DRAFT' | 'SUBMITTED' | 'APPROVED';
+  submissionDate: Date;
+  identitasPt: IIapt41LedIdentitasPt;
+  timPenyusun: IIapt41LedTimPenyusunItem[];
+  kataPengantar: string;
+  ringkasanEksekutif: string;
+  narasiKriteriaC: string;
+  narasiKriteriaR: string;
+  narasiKriteriaA: string;
+  narasiKriteriaM: string;
+  penutup: string;
+  lembarPengesahan: IIapt41LedPengesahan;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const Iapt41LedDocumentSchema = new Schema<IIapt41LedDocument>(
+  {
+    academicYear: { type: String, required: true, default: '2025/2026' },
+    institutionName: { type: String, required: true, default: 'STIMI YAPMI Makassar' },
+    status: { type: String, enum: ['DRAFT', 'SUBMITTED', 'APPROVED'], default: 'SUBMITTED' },
+    submissionDate: { type: Date, default: Date.now },
+    identitasPt: {
+      perguruanTinggi: { type: String, default: 'Sekolah Tinggi Ilmu Manajemen Indonesia (STIMI) YAPMI Makassar' },
+      badanPenyelenggara: { type: String, default: 'Yayasan Pembangunan Manajemen Indonesia (YAPMI) Makassar' },
+      nomorSkPendirianPt: { type: String, default: 'SK Mendikbud RI No. 042/D/O/1997' },
+      tanggalSkPendirianPt: { type: String, default: '1997-07-25' },
+      pejabatSkPendirianPt: { type: String, default: 'Menteri Pendidikan dan Kebudayaan RI' },
+      alamat: { type: String, default: 'Jl. Perintis Kemerdekaan KM. 9, Tamalanrea, Kota Makassar, Sulawesi Selatan 90245' },
+      kota: { type: String, default: 'Makassar' },
+      telepon: { type: String, default: '(0411) 588123' },
+      emailWeb: { type: String, default: 'info@stimiyapmi.ac.id / https://stimiyapmi.ac.id' },
+      peringkatAkreditasiTerbaru: { type: String, default: 'Baik' },
+      nomorSkBanPt: { type: String, default: 'SK BAN-PT No. 1024/SK/BAN-PT/Ak-PPJ/PT/XII/2021' },
+      tanggalKadaluarsa: { type: String, default: '2026-12-22' },
+      namaPimpinan: { type: String, default: 'Dr. Ibrahim Syah, S.E., M.M.' },
+      nidnPimpinan: { type: String, default: 'NIDN. 0920037601' },
+      tahunDokumen: { type: String, default: '2025' },
+      logoUrl: { type: String, default: '/logo_stimi.png' },
+    },
+    timPenyusun: [
+      {
+        nama: { type: String, default: '' },
+        nikNidn: { type: String, default: '' },
+        jabatan: { type: String, default: '' },
+        peran: { type: String, default: '' },
+      },
+    ],
+    kataPengantar: { type: String, default: '' },
+    ringkasanEksekutif: { type: String, default: '' },
+    narasiKriteriaC: { type: String, default: '' },
+    narasiKriteriaR: { type: String, default: '' },
+    narasiKriteriaA: { type: String, default: '' },
+    narasiKriteriaM: { type: String, default: '' },
+    penutup: { type: String, default: '' },
+    lembarPengesahan: {
+      kota: { type: String, default: 'Makassar' },
+      tanggal: { type: String, default: '15 Januari 2026' },
+      ketuaPt: {
+        jabatan: { type: String, default: 'Ketua STIMI YAPMI Makassar' },
+        nama: { type: String, default: 'Dr. Ibrahim Syah, S.E., M.M.' },
+        nikNidn: { type: String, default: 'NIDN. 0920037601' },
+      },
+      ketuaYayasan: {
+        jabatan: { type: String, default: 'Ketua Yayasan Pembangunan Manajemen Indonesia (YAPMI)' },
+        nama: { type: String, default: 'H. M. Yasin Limpo, SE' },
+        nikNidn: { type: String, default: 'Ketua Pengurus Yayasan' },
+      },
+    },
+  },
+  { timestamps: true }
+);
+
+if (mongoose.models.Iapt41LedDocument) {
+  delete (mongoose.models as any).Iapt41LedDocument;
+}
+
+export const Iapt41LedDocument: Model<IIapt41LedDocument> =
+  (mongoose.models.Iapt41LedDocument as Model<IIapt41LedDocument>) ||
+  mongoose.model<IIapt41LedDocument>('Iapt41LedDocument', Iapt41LedDocumentSchema);
+
 
 // 5. Bukti Fisik Digital Mandiri per Kriteria Akreditasi (Renstra, SK, SOTK, MoU, dsb.)
 export interface IAccreditationEvidence extends Document {

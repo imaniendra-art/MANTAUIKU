@@ -79,10 +79,12 @@ export default function AccreditationWidget() {
 
   return (
     <div className="space-y-8">
-      {/* 1. Dua Kartu Akreditasi Resmi (Institusi & Program Studi) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* 1. Tiga Kartu Akreditasi Resmi (Institusi & Program Studi) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {data?.profiles?.map((p, idx) => {
           const isProdi = p.entityType === "PRODI";
+          const isAkreditasiSementara = p.grade === "AKREDITASI_SEMENTARA";
+          const isBelumTerakreditasi = p.grade === "BELUM_TERAKREDITASI";
 
           return (
             <motion.div
@@ -90,32 +92,44 @@ export default function AccreditationWidget() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6 relative overflow-hidden group"
+              className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6 relative overflow-hidden group flex flex-col justify-between"
             >
               {/* Glow Accent */}
               <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-sky-400/10 to-cyan-400/10 rounded-full blur-2xl pointer-events-none" />
 
-              {/* Header Badges */}
-              <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-700">
-                  {isProdi ? "Akreditasi Program Studi" : "Akreditasi Institusi"}
-                </span>
+              <div className="space-y-6">
+                {/* Header Badges */}
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-700">
+                    {isProdi ? (p.degreeLevel || "Akreditasi Prodi") : "Akreditasi Institusi"}
+                  </span>
 
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Peringkat: {p.grade.replace("_", " ")}</span>
-                </span>
-              </div>
+                  {isAkreditasiSementara ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">
+                      <Clock className="w-3.5 h-3.5 text-amber-700" />
+                      <span>Akreditasi Sementara</span>
+                    </span>
+                  ) : isBelumTerakreditasi ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-slate-100 text-slate-800 border border-slate-300">
+                      <span>Belum Terakreditasi</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Peringkat: {p.grade.replace("_", " ")}</span>
+                    </span>
+                  )}
+                </div>
 
-              {/* Title & Agency */}
-              <div className="space-y-1">
-                <h4 className="text-xl font-black text-slate-900 tracking-tight">
-                  {p.name}
-                </h4>
-                <p className="text-xs font-bold text-sky-700">
-                  Lembaga Akreditasi: <strong>{p.agency}</strong> ({p.degreeLevel || "S1"})
-                </p>
-              </div>
+                {/* Title & Agency */}
+                <div className="space-y-1">
+                  <h4 className="text-xl font-black text-slate-900 tracking-tight">
+                    {p.name}
+                  </h4>
+                  <p className="text-xs font-bold text-sky-700">
+                    Lembaga Akreditasi: <strong>{p.agency}</strong> ({p.degreeLevel || "S1"})
+                  </p>
+                </div>
 
               {/* Legal & Countdown Details */}
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs space-y-2.5">
@@ -139,8 +153,9 @@ export default function AccreditationWidget() {
                   </span>
                 </div>
               </div>
+            </div>
 
-              {/* Certificate & SK Download Links */}
+            {/* Certificate & SK Download Links */}
               {(p.certificateUrl || p.skDocUrl) && (
                 <div className="pt-2 border-t border-slate-200/40 flex flex-wrap items-center justify-between gap-2 text-xs">
                   <span className="text-slate-400">Verifikasi Dokumen:</span>

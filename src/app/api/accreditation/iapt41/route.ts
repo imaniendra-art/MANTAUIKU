@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import connectToDatabase from '@/lib/db';
 import { Iapt41Evaluation, AccreditationProfile, AccreditationEvidence } from '@/models/Accreditation';
 import { SpmiDocument } from '@/models/SpmiDocument';
+import { SpmiVaultFile } from '@/models/SpmiVaultFile';
 import { AmiPeriod, AmiFinding } from '@/models/Ami';
 import Achievement from '@/models/Achievement';
 import IKUMetadata from '@/models/IKUMetadata';
@@ -45,6 +46,7 @@ export async function GET() {
     const [
       storedEvaluations,
       spmiDocs,
+      spmiVaultFiles,
       amiPeriods,
       amiFindings,
       accreditationProfiles,
@@ -59,6 +61,7 @@ export async function GET() {
     ] = await Promise.all([
       Iapt41Evaluation.find().lean(),
       SpmiDocument.find().lean(),
+      SpmiVaultFile.find().lean(),
       AmiPeriod.find().lean(),
       AmiFinding.find().lean(),
       AccreditationProfile.find().lean(),
@@ -78,20 +81,33 @@ export async function GET() {
       evidenceMap.set(ev.itemKey, ev);
     });
 
-    // Build SPMI Insights
+    // Build SPMI Insights (Dual-Verification: Studio Books OR Vault Uploaded Documents)
     const validSpmiBooks = spmiDocs.filter((d) => d.status === 'DITETAPKAN_BERLAKU');
     const kebijakanDoc = spmiDocs.find((d) => d.bookType === 'KEBIJAKAN');
     const manualDoc = spmiDocs.find((d) => d.bookType === 'MANUAL');
     const standarDoc = spmiDocs.find((d) => d.bookType === 'STANDAR');
     const formulirDoc = spmiDocs.find((d) => d.bookType === 'FORMULIR');
     const allStandards = standarDoc?.standards || [];
+
+    const hasVaultKebijakan = spmiVaultFiles.some((f) => f.folderCategory === '01_Kebijakan' && f.statusDocument !== 'KADALUARSA');
+    const hasVaultManual = spmiVaultFiles.some((f) => f.folderCategory === '02_Pedoman' && f.statusDocument !== 'KADALUARSA');
+    const hasVaultStandar = spmiVaultFiles.some((f) => f.folderCategory === '03_Standar' && f.statusDocument !== 'KADALUARSA');
+    const hasVaultFormulir = spmiVaultFiles.some((f) => f.folderCategory === '04_SOP_Formulir' && f.statusDocument !== 'KADALUARSA');
+
+    const hasEffectiveKebijakan = (kebijakanDoc && kebijakanDoc.status === 'DITETAPKAN_BERLAKU') || hasVaultKebijakan;
+    const hasEffectiveManual = (manualDoc && manualDoc.status === 'DITETAPKAN_BERLAKU') || hasVaultManual;
+    const hasEffectiveStandar = (standarDoc && standarDoc.status === 'DITETAPKAN_BERLAKU' && allStandards.length > 0) || hasVaultStandar;
+    const hasEffectiveFormulir = (formulirDoc && formulirDoc.status === 'DITETAPKAN_BERLAKU') || hasVaultFormulir;
+    const totalEffectiveBooks = [hasEffectiveKebijakan, hasEffectiveManual, hasEffectiveStandar, hasEffectiveFormulir].filter(Boolean).length;
+
+    const hasSkResmi = validSpmiBooks.some((d) => !!d.skNumber) || spmiVaultFiles.some((f) => !!f.skNumber);
+    const hasPpeppCycle = allStandards.some((s) => s.ppeppCycle && s.ppeppCycle.penetapanDate) || spmiVaultFiles.some((f) => ['05_Penetapan', '06_Pelaksanaan', '07_Evaluasi_AMI_Survei', '08_Pengendalian_RTL_RTM', '09_Peningkatan'].includes(f.folderCategory));
     const hasObeStandard = allStandards.some(
       (s) =>
         s.code.includes('DIK') ||
         s.name.toLowerCase().includes('kurikulum') ||
         s.name.toLowerCase().includes('obe')
-    );
-    const hasPpeppCycle = allStandards.some((s) => s.ppeppCycle && s.ppeppCycle.penetapanDate);
+    ) || hasVaultStandar;
 
     // Build AMI Insights
     const activeAmiPeriod = amiPeriods.find((p) => p.status === 'ACTIVE' || p.status === 'COMPLETED');
@@ -143,17 +159,16 @@ export async function GET() {
       switch (base.nomor) {
         case 1: {
           // SPMI 4 Aspek (BAN-PT PerBAN-PT 35/2025: Standar, Tata Kelola/SOP, Evaluasi/AMI, Peningkatan Mutu/RTM)
-          const hasKebijakan = validSpmiBooks.some((d) => d.bookType === 'KEBIJAKAN');
-          const hasManual = validSpmiBooks.some((d) => d.bookType === 'MANUAL');
-          const hasStandar = validSpmiBooks.some((d) => d.bookType === 'STANDAR');
-          const hasFormulir = validSpmiBooks.some((d) => d.bookType === 'FORMULIR');
-          const hasSkResmi = validSpmiBooks.some((d) => !!d.skNumber);
+          const hasKebijakan = hasEffectiveKebijakan;
+          const hasManual = hasEffectiveManual;
+          const hasStandar = hasEffectiveStandar;
+          const hasFormulir = hasEffectiveFormulir;
 
           const checklist: IAssessorVerificationCheckItem[] = [
             {
-              item: 'Aspek 1: Standar Dikti Akademik & Non-Akademik (Buku III Standar SPMI)',
+              item: 'Aspek 1: Standar Dikti Akademik & Non-Akademik (Buku III Standar SPMI / Vault 03_Standar)',
               verified: hasStandar,
-              evidenceDoc: hasStandar ? 'Buku III Standar SPMI (STD-DIK, STD-RES, STD-PKM, STD-TP)' : 'Belum diinput',
+              evidenceDoc: hasStandar ? (hasVaultStandar ? 'Berkas Unggahan Vault 03_Standar & Studio SPMI' : 'Buku III Standar SPMI') : 'Belum diinput / diunggah',
             },
             {
               item: 'Aspek 2: Tata Kelola SPMI dengan SOP Lengkap (Buku I Kebijakan & Buku II Manual Mutu)',
@@ -163,7 +178,7 @@ export async function GET() {
             {
               item: 'Aspek 3: Sistem Evaluasi Pemenuhan Standar yang Mapan (Buku IV Formulir & Modul AMI)',
               verified: hasFormulir && amiPeriods.length > 0,
-              evidenceDoc: hasFormulir ? 'Buku IV Formulir SPMI & Instrumen AMI Siklus IX' : 'Formulir / AMI belum aktif',
+              evidenceDoc: hasFormulir ? 'Buku IV Formulir SPMI & Instrumen AMI' : 'Formulir / AMI belum aktif',
             },
             {
               item: 'Aspek 4: Sistem Peningkatan Mutu Berkelanjutan minimal 3 Tahun (Siklus PPEPP & RTM)',
@@ -171,44 +186,44 @@ export async function GET() {
               evidenceDoc: hasPpeppCycle ? 'Rekam Siklus PPEPP & Risalah Rapat Tinjauan Manajemen (RTM)' : 'Rekam 3 tahun belum lengkap',
             },
             {
-              item: 'Legalitas SK Penetapan Resmi oleh Pemimpin Perguruan Tinggi (Ketua STIMI YAPMI)',
+              item: 'Legalitas SK Penetapan Resmi oleh Pemimpin Perguruan Tinggi',
               verified: hasSkResmi,
-              evidenceDoc: hasSkResmi ? (validSpmiBooks[0]?.skNumber || 'SK Ketua STIMI YAPMI') : 'SK belum diterbitkan',
+              evidenceDoc: hasSkResmi ? (validSpmiBooks[0]?.skNumber || spmiVaultFiles.find(f => !!f.skNumber)?.skNumber || 'SK Ketua Institusi') : 'SK belum diterbitkan',
             },
             {
               item: 'Kesesuaian Portal Pelaporan SPMI Kemdiktisaintek (spmi.kemdiktisaintek.go.id)',
-              verified: validSpmiBooks.length >= 4,
-              evidenceDoc: 'Akun Institusi spmi.kemdiktisaintek.go.id (4 Buku Terunggah)',
+              verified: totalEffectiveBooks >= 4,
+              evidenceDoc: 'Akun Institusi spmi.kemdiktisaintek.go.id (4 Buku Terunggah/Tersedia)',
             },
           ];
 
-          if (validSpmiBooks.length >= 4 && hasPpeppCycle) {
+          if (totalEffectiveBooks >= 4 && hasPpeppCycle) {
             smart = {
               digitalEvidenceStatus: 'TERSEDIA',
-              evidenceSummary: `4 Buku SPMI telah ditetapkan berlaku oleh Ketua STIMI YAPMI (${validSpmiBooks[0]?.skNumber || 'SK No. 042/SK/YAPMI/IX/2025'}) mencakup 4 aspek baku evaluasi BAN-PT.`,
+              evidenceSummary: `4 Buku SPMI telah tersedia dan ditetapkan berlaku (${validSpmiBooks[0]?.skNumber || spmiVaultFiles[0]?.skNumber || 'SK Ketua Institusi'}) mencakup 4 aspek baku evaluasi BAN-PT.`,
               evidenceHref: '/dashboard/spmi',
               evidenceActionLabel: 'Buka Modul SPMI',
               hasAlert: false,
               assessorVerificationChecklist: checklist,
             };
-          } else if (spmiDocs.length > 0) {
+          } else if (spmiDocs.length > 0 || spmiVaultFiles.length > 0) {
             smart = {
               digitalEvidenceStatus: 'PERLU_TINDAKAN',
-              evidenceSummary: `Baru ${validSpmiBooks.length} dari 4 Buku SPMI yang berstatus Ditetapkan Berlaku. 4 Aspek evaluasi asesor belum terpenuhi menyeluruh.`,
+              evidenceSummary: `Baru ${totalEffectiveBooks} dari 4 Buku SPMI yang berstatus Ditetapkan Berlaku atau terunggah di Vault. 4 Aspek evaluasi asesor belum terpenuhi menyeluruh.`,
               evidenceHref: '/dashboard/spmi',
               evidenceActionLabel: 'Lengkapi & Tetapkan 4 Buku SPMI',
               hasAlert: true,
-              missingRequirements: ['Penetapan resmi 4 Buku SPMI oleh Ketua STIMI', 'Kelengkapan 4 Aspek Penilaian BAN-PT'],
+              missingRequirements: ['Penetapan resmi 4 Buku SPMI oleh Pimpinan Institusi', 'Kelengkapan 4 Aspek Penilaian BAN-PT'],
               assessorVerificationChecklist: checklist,
             };
           } else {
             smart = {
               digitalEvidenceStatus: 'KOSONG',
-              evidenceSummary: 'Pangkalan data SPMI kosong. Asesor BAN-PT mensyaratkan 4 Buku SPMI resmi ber-SK pimpinan institusi untuk meloloskan Syarat Perlu.',
+              evidenceSummary: 'Pangkalan data SPMI kosong. Asesor BAN-PT mensyaratkan 4 Buku SPMI resmi (dibuat di Studio atau diunggah ke Vault) untuk meloloskan Syarat Perlu.',
               evidenceHref: '/dashboard/spmi',
-              evidenceActionLabel: 'Inisialisasi 4 Buku SPMI',
+              evidenceActionLabel: 'Kelola Dokumen SPMI',
               hasAlert: true,
-              missingRequirements: ['Buku I Kebijakan SPMI', 'Buku II Manual SPMI PPEPP', 'Buku III Standar SPMI (24+ Standar)', 'Buku IV Formulir Mutu'],
+              missingRequirements: ['Buku I Kebijakan SPMI', 'Buku II Manual SPMI PPEPP', 'Buku III Standar SPMI (14 Standar SN-Dikti)', 'Buku IV Formulir Mutu'],
               assessorVerificationChecklist: checklist,
             };
           }
@@ -223,12 +238,12 @@ export async function GET() {
           const checklist: IAssessorVerificationCheckItem[] = [
             {
               item: 'Tahap Penetapan (P): SK Penetapan Standar Mutu Akademik & Non-Akademik',
-              verified: validSpmiBooks.some((d) => d.bookType === 'STANDAR'),
+              verified: hasEffectiveStandar,
               evidenceDoc: 'Buku III Standar SPMI & SK Penetapan Standar',
             },
             {
               item: 'Tahap Pelaksanaan (P): Dokumen Pelaksanaan Tridharma & Manajemen',
-              verified: validSpmiBooks.length >= 4,
+              verified: totalEffectiveBooks >= 4,
               evidenceDoc: 'Pedoman Operasional Akademik, Riset, PkM, & Layanan',
             },
             {
@@ -320,23 +335,38 @@ export async function GET() {
         }
 
         case 4: {
-          // Akreditasi Program Studi (Syarat Perlu Unggul: >= 20% Prodi Unggul)
+          // Akreditasi Program Studi (Syarat Perlu Terakreditasi: 100% prodi terakreditasi; Syarat Perlu Unggul: >= 20% Prodi Unggul)
+          const checklist: IAssessorVerificationCheckItem[] = [
+            {
+              item: 'SK & Sertifikat Akreditasi Program Studi Aktif (S1 Manajemen)',
+              verified: isProdiAccredited,
+              evidenceDoc: isProdiAccredited ? `SK LAMEMBA: ${prodiAccreditation?.skNumber || 'Terverifikasi Sah'}` : 'Belum diunggah di Tab Akreditasi',
+            },
+            {
+              item: 'Status Akreditasi Prodi Terakreditasi UNGGUL (Syarat Perlu Unggul)',
+              verified: isProdiUnggul,
+              evidenceDoc: isProdiUnggul ? 'Peringkat UNGGUL LAMEMBA' : 'Peringkat Saat Ini: Baik Sekali (Perlu Reakreditasi Unggul)',
+            },
+          ];
+
           if (isProdiUnggul) {
             smart = {
               digitalEvidenceStatus: 'TERSEDIA',
-              evidenceSummary: `Prodi S1 Manajemen telah Terakreditasi UNGGUL (${prodiAccreditation?.skNumber}).`,
+              evidenceSummary: `Prodi S1 Manajemen telah Terakreditasi UNGGUL (${prodiAccreditation?.skNumber}). Memenuhi syarat Terakreditasi & Syarat Perlu UNGGUL.`,
               evidenceHref: '/dashboard/accreditation',
-              evidenceActionLabel: 'Buka Berkas Akreditasi',
+              evidenceActionLabel: 'Buka Tab Status & Berkas SK',
               hasAlert: false,
+              assessorVerificationChecklist: checklist,
             };
           } else if (isProdiAccredited) {
             smart = {
-              digitalEvidenceStatus: 'PERLU_TINDAKAN',
-              evidenceSummary: `Prodi S1 Manajemen berstatus ${prodiAccreditation?.grade.replace('_', ' ')} (${prodiAccreditation?.skNumber}). Memenuhi ambang Terakreditasi, namun BELUM memenuhi Syarat Perlu UNGGUL (minimal 1 prodi Unggul).`,
+              digitalEvidenceStatus: 'TERSEDIA',
+              evidenceSummary: `Prodi S1 Manajemen telah Terakreditasi Baik Sekali (${prodiAccreditation?.skNumber}). Berkas SK & Sertifikat sah terverifikasi di Pangkalan Data. Memenuhi ambang Terakreditasi SN-Dikti.`,
               evidenceHref: '/dashboard/accreditation',
-              evidenceActionLabel: 'Persiapkan Reakreditasi Unggul',
-              hasAlert: true,
-              missingRequirements: ['Reakreditasi Prodi S1 Manajemen menuju peringkat UNGGUL LAMEMBA'],
+              evidenceActionLabel: 'Buka Tab Status & Berkas SK',
+              hasAlert: false,
+              missingRequirements: ['(Khusus Target Unggul): Reakreditasi Prodi S1 Manajemen menuju peringkat UNGGUL LAMEMBA'],
+              assessorVerificationChecklist: checklist,
             };
           } else {
             smart = {
@@ -346,6 +376,7 @@ export async function GET() {
               evidenceActionLabel: 'Input SK Akreditasi Prodi',
               hasAlert: true,
               missingRequirements: ['SK Akreditasi Prodi LAMEMBA', 'Sertifikat Akreditasi Digital'],
+              assessorVerificationChecklist: checklist,
             };
           }
           break;
@@ -1251,6 +1282,17 @@ export async function GET() {
         }
 
         resolvedNotes = smart.evidenceSummary;
+      }
+
+      // Pastikan setiap butir memiliki rubrik checklist verifikasi asesor
+      if (!smart.assessorVerificationChecklist || smart.assessorVerificationChecklist.length === 0) {
+        smart.assessorVerificationChecklist = [
+          {
+            item: `Standar & Dokumen Bukti: ${base.indikator}`,
+            verified: smart.digitalEvidenceStatus === 'TERSEDIA',
+            evidenceDoc: base.sumberData,
+          },
+        ];
       }
 
       // Hubungkan berkas bukti digital fisik mandiri jika ada unggahan
